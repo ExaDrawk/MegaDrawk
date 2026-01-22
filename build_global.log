@@ -1,0 +1,60 @@
+
+┌─────────────────────────────┐
+│ OpenNext — Cloudflare build │
+└─────────────────────────────┘
+
+WARN OpenNext is not fully compatible with Windows.
+WARN For optimal performance, it is recommended to use Windows Subsystem for Linux (WSL).
+WARN While OpenNext may function on Windows, it could encounter unpredictable failures during runtime.
+opennextjs-cloudflare build
+
+Build an OpenNext Cloudflare worker
+
+オプション:
+      --help                        ヘルプを表示                          [真偽]
+      --version                     バージョンを表示                      [真偽]
+  -c, --config                      Path to Wrangler configuration file [文字列]
+      --configPath                  Path to Wrangler configuration file
+                                                               [非推奨] [文字列]
+  -e, --env                         Wrangler environment to use for operations
+                                                                        [文字列]
+  -s, --skipNextBuild, --skipBuild  Skip building the Next.js app
+                                                      [真偽] [デフォルト: false]
+      --noMinify                    Disable worker minification
+                                                      [真偽] [デフォルト: false]
+      --skipWranglerConfigCheck     Skip checking for a Wrangler config
+                                                      [真偽] [デフォルト: false]
+      --openNextConfigPath          Path to the OpenNext configuration file
+                                                                        [文字列]
+
+Error: The `open-next.config.ts` should have a default export like this:
+
+{
+  default: {
+    override: {
+      wrapper: "cloudflare-node",
+      converter: "edge",
+      proxyExternalRequest: "fetch",
+      incrementalCache: "dummy" | function,
+      tagCache: "dummy" | function,
+      queue: "dummy" | "direct" | function,
+    },
+  },
+  edgeExternals: ["node:crypto"],
+  middleware: {
+    external: true,
+    override: {
+      wrapper: "cloudflare-edge",
+      converter: "edge",
+      proxyExternalRequest: "fetch",
+      incrementalCache: "dummy" | function,
+      tagCache: "dummy" | function,
+      queue: "dummy" | "direct" | function,
+    },
+  },
+}
+
+
+    at ensureCloudflareConfig (file:///C:/My%20Program%20Files/MegaDrawk/main/node_modules/@opennextjs/cloudflare/dist/cli/build/utils/ensure-cf-config.js:62:15)
+    at compileConfig (file:///C:/My%20Program%20Files/MegaDrawk/main/node_modules/@opennextjs/cloudflare/dist/cli/commands/utils.js:40:5)
+    at async buildCommand (file:///C:/My%20Program%20Files/MegaDrawk/main/node_modules/@opennextjs/cloudflare/dist/cli/commands/build.js:11:34)
