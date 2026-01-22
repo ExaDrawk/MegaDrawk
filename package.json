@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "open-next build",
-    "build:next": "NODE_OPTIONS=--max-old-space-size=2048 next build --no-lint",
+    "build:next": "NODE_OPTIONS=--max-old-space-size=2048 next build",
     "start": "next start",
     "lint": "eslint"
   },
