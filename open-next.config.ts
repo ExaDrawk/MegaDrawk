@@ -21,4 +21,5 @@ export default {
             queue: "dummy",
         },
     },
+    buildCommand: "npm run build:next",
 };
