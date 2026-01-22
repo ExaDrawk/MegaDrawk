@@ -21,5 +21,5 @@ export default {
             queue: "dummy",
         },
     },
-    buildCommand: "npm run build:next",
+    buildCommand: "npx next build --webpack",
 };
