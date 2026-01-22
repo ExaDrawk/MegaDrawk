@@ -2,13 +2,37 @@
 
 import { motion } from 'framer-motion';
 
+// カレンダーアイコン（SVG）
+function CalendarIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="40"
+      height="40"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="text-accent"
+    >
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+      <line x1="16" y1="2" x2="16" y2="6" />
+      <line x1="8" y1="2" x2="8" y2="6" />
+      <line x1="3" y1="10" x2="21" y2="10" />
+      <rect x="7" y="14" width="3" height="3" fill="currentColor" />
+    </svg>
+  );
+}
+
 // megadrawk.comのサブドメインにあるサービス一覧
 const SUBDOMAIN_SERVICES = [
   {
     name: 'MeetPicks',
     subdomain: 'meetpicks',
-    description: '効率的なミーティング管理ツール',
-    icon: '📅',
+    description: 'ミーティング管理ツール',
+    IconComponent: CalendarIcon,
   },
   // 今後追加されるサービスはここに追加
 ];
@@ -17,14 +41,15 @@ interface ServiceCardProps {
   name: string;
   subdomain: string;
   description: string;
-  icon: string;
+  IconComponent: React.ComponentType;
   index: number;
 }
 
-function ServiceCard({ name, subdomain, description, icon, index }: ServiceCardProps) {
-  const host = typeof window !== 'undefined' ? window.location.hostname : 'megadrawk.com';
-  const baseDomain = host.includes('localhost') ? 'megadrawk.com' : host.replace(/^[^.]+\./, '').replace(/^www\./, '') || 'megadrawk.com';
-  const serviceUrl = `https://${subdomain}.${baseDomain}`;
+// ベースドメイン（固定）
+const BASE_DOMAIN = 'megadrawk.com';
+
+function ServiceCard({ name, subdomain, description, IconComponent, index }: ServiceCardProps) {
+  const serviceUrl = `https://${subdomain}.${BASE_DOMAIN}`;
 
   return (
     <motion.a
@@ -41,7 +66,7 @@ function ServiceCard({ name, subdomain, description, icon, index }: ServiceCardP
 
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center text-center gap-3">
-        <span className="text-4xl">{icon}</span>
+        <IconComponent />
         <h3 className="text-xl font-bold text-white group-hover:text-accent transition-colors">
           {name}
         </h3>
@@ -49,7 +74,7 @@ function ServiceCard({ name, subdomain, description, icon, index }: ServiceCardP
           {description}
         </p>
         <span className="text-xs text-neutral-600 font-mono">
-          {subdomain}.megadrawk.com
+          {subdomain}.{BASE_DOMAIN}
         </span>
       </div>
 
@@ -115,7 +140,7 @@ export default function Home() {
               name={service.name}
               subdomain={service.subdomain}
               description={service.description}
-              icon={service.icon}
+              IconComponent={service.IconComponent}
               index={index}
             />
           ))}
