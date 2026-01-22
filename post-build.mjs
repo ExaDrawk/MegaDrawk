@@ -35,11 +35,29 @@ if (fs.existsSync(assetsDir)) {
     fs.rmdirSync(assetsDir);
 }
 
+// Rename worker.js to _worker.js
 const workerPath = path.join(openNextDir, 'worker.js');
 const pagesWorkerPath = path.join(openNextDir, '_worker.js');
 if (fs.existsSync(workerPath)) {
     fs.renameSync(workerPath, pagesWorkerPath);
     console.log('Renamed worker.js to _worker.js');
 }
+
+// Create _routes.json
+const routesPath = path.join(openNextDir, '_routes.json');
+const routes = {
+    version: 1,
+    include: ["/*"],
+    exclude: [
+        "/_next/static/*",
+        "/favicon.ico",
+        "/*.svg",
+        "/*.png",
+        "/*.jpg",
+        "/*.ico"
+    ]
+};
+fs.writeFileSync(routesPath, JSON.stringify(routes, null, 2));
+console.log('Created _routes.json');
 
 console.log('Post-build fixup complete. Ready for Cloudflare Pages deployment.');
