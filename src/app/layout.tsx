@@ -1,21 +1,22 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import Script from "next/script";
+import { Inter, JetBrains_Mono } from "next/font/google";
+import { headers } from "next/headers";
+import { SITE } from "../config/site";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const interSans = Inter({
+  variable: "--font-body",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const jetBrainsMono = JetBrains_Mono({
+  variable: "--font-code",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "MegaDrawk | Refining the Future",
-  description: "The official portal of MegaDrawk Industries. Refining the future with state-of-the-art systems.",
+  title: `${SITE.name} | ${SITE.tagline}`,
+  description: SITE.description,
 };
 
 export default function RootLayout({
@@ -23,17 +24,21 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const nonce = headers().get("x-nonce") ?? undefined;
+
   return (
     <html lang="en">
       <head>
         <script
           async
+          nonce={nonce}
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4594218580257200"
           crossOrigin="anonymous"
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${interSans.variable} ${jetBrainsMono.variable} antialiased`}
+        nonce={nonce}
       >
         {children}
       </body>
