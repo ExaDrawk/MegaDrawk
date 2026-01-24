@@ -7,7 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "opennext:build": "npx @opennextjs/cloudflare build",
-    "deploy": "next build && npx @opennextjs/cloudflare build",
+    "deploy": "next build && npx @opennextjs/cloudflare build && node scripts/prepare-pages.js",
     "start": "next start",
     "lint": "next lint"
   },
