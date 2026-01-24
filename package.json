@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "opennext:build": "npx opennext build",
-    "deploy": "next build && npx opennext build",
+    "opennext:build": "npx @opennextjs/cloudflare build",
+    "deploy": "next build && npx @opennextjs/cloudflare build",
     "start": "next start",
     "lint": "next lint"
   },
