@@ -2,12 +2,17 @@ const fs = require("fs");
 const path = require("path");
 
 const outDir = path.join(process.cwd(), ".open-next");
+const assetsDir = path.join(outDir, "assets");
 const workerPath = path.join(outDir, "worker.js");
-const pagesWorkerPath = path.join(outDir, "_worker.js");
-const routesPath = path.join(outDir, "_routes.json");
+const pagesWorkerPath = path.join(assetsDir, "_worker.js");
+const routesPath = path.join(assetsDir, "_routes.json");
 
 if (!fs.existsSync(outDir)) {
   throw new Error(".open-next directory not found. Run the OpenNext build first.");
+}
+
+if (!fs.existsSync(assetsDir)) {
+  throw new Error(".open-next/assets directory not found. OpenNext assets missing.");
 }
 
 if (fs.existsSync(workerPath)) {
