@@ -61,6 +61,14 @@ function ServiceCard({ service, index }: { service: Service; index: number }) {
 }
 
 export default function Home() {
+  const scrollTo = (id: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
     <div className="min-h-screen relative overflow-x-hidden">
       <div className="bg-mesh" />
@@ -116,8 +124,8 @@ export default function Home() {
             </motion.p>
           </div>
 
-          {/* Mission Section */}
-          <section className="max-w-5xl mx-auto mb-32 grid md:grid-cols-2 gap-16 items-center">
+          {/* Mission & Governance Section */}
+          <section id="governance" className="max-w-5xl mx-auto mb-32 grid md:grid-cols-2 gap-16 items-center pt-16">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -154,23 +162,25 @@ export default function Home() {
           </section>
 
           {/* Solutions Heading */}
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-4 tracking-tight">
-              {UI_TEXT.servicesHeading}
-            </h2>
-            <p className="text-slate-500 max-w-2xl mx-auto text-lg">
-              {UI_TEXT.servicesSubheading}
-            </p>
-          </div>
+          <section id="documentation" className="pt-16">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-4 tracking-tight">
+                {UI_TEXT.servicesHeading}
+              </h2>
+              <p className="text-slate-500 max-w-2xl mx-auto text-lg hover:underline cursor-help">
+                {UI_TEXT.servicesSubheading}
+              </p>
+            </div>
 
-          <div className="grid md:grid-cols-2 gap-10 max-w-6xl mx-auto mb-32">
-            {SERVICES.map((service, index) => (
-              <ServiceCard key={service.subdomain} service={service} index={index} />
-            ))}
-          </div>
+            <div className="grid md:grid-cols-2 gap-10 max-w-6xl mx-auto mb-32">
+              {SERVICES.map((service, index) => (
+                <ServiceCard key={service.subdomain} service={service} index={index} />
+              ))}
+            </div>
+          </section>
 
           {/* Technology Section */}
-          <section className="max-w-6xl mx-auto mb-32 py-20 bg-slate-50 rounded-[3rem] border border-slate-100 px-8 md:px-16 text-center">
+          <section id="technology" className="max-w-6xl mx-auto mb-32 py-20 bg-slate-50 rounded-[3rem] border border-slate-100 px-8 md:px-16 text-center">
             <h2 className="text-3xl font-black text-slate-900 mb-4 uppercase tracking-tighter">
               {UI_TEXT.techHeading}
             </h2>
@@ -207,7 +217,7 @@ export default function Home() {
           </section>
 
           {/* Compliance & Privacy Section */}
-          <section className="max-w-4xl mx-auto mt-20 text-left border-t border-slate-100 pt-16">
+          <section id="compliance" className="max-w-4xl mx-auto mt-20 text-left border-t border-slate-100 pt-16 scroll-mt-20">
             <h3 className="text-2xl font-black text-slate-900 mb-2">{UI_TEXT.privacyHeading}</h3>
             <p className="text-slate-500 mb-10 font-medium">{UI_TEXT.privacySubheading}</p>
 
@@ -253,9 +263,9 @@ export default function Home() {
             </span>
           </div>
           <div className="flex items-center gap-8 text-xs font-bold text-slate-400 uppercase tracking-widest">
-            <a href="#" className="hover:text-blue-600 transition-colors">Documentation</a>
-            <a href="#" className="hover:text-blue-600 transition-colors">Governance</a>
-            <a href="#" className="hover:text-blue-600 transition-colors">Compliance</a>
+            <a href="#documentation" onClick={scrollTo('documentation')} className="hover:text-blue-600 transition-colors">Documentation</a>
+            <a href="#governance" onClick={scrollTo('governance')} className="hover:text-blue-600 transition-colors">Governance</a>
+            <a href="#compliance" onClick={scrollTo('compliance')} className="hover:text-blue-600 transition-colors">Compliance</a>
           </div>
           <span className="text-xs font-bold text-slate-400 font-mono">
             © {new Date().getFullYear()} {SITE.legalName} | {UI_TEXT.footerSuffix}
