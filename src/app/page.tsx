@@ -163,44 +163,37 @@ export default function Home() {
 
                 <div className="space-y-6">
                   <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter italic uppercase">
-                    LOGIC<span className="text-[#00f2ff]">FLUX</span>
+                    LOGIC<span className="text-[#00f2ff]">ASCENT</span>
                   </h2>
                   <p className="text-slate-400 text-xl md:text-2xl font-medium leading-relaxed max-w-3xl mx-auto">
-                    直感と同期が加速する、ニューロ・シンクロナイザー。
-                    多次元的なデータストリームを形状・周波数で同期し、巨大な知性網（ネットワーク）を構築せよ。
-                    AuraRefiner を超越した、MegaDrawk の次世代フラッグシップ・シミュレーター。
+                    マウスを動かすだけ、感覚を同期する。
+                    飛来するデータを直感的に収集し、ノイズを排除せよ。
+                    究極のシンプルさと爽快感を追求した、MegaDrawk の新機軸ニューロ・アクション。
                   </p>
                 </div>
 
                 {/* How to Play Section */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-4xl mx-auto py-8">
-                  <div className="p-6 bg-slate-800/50 rounded-3xl border border-slate-700 text-left space-y-3">
-                    <div className="w-10 h-10 bg-[#00f2ff]/20 rounded-xl flex items-center justify-center text-[#00f2ff]">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2v20M2 12h20" /></svg>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto py-8">
+                  <div className="p-8 bg-slate-800/50 rounded-3xl border border-slate-700 text-left space-y-4">
+                    <div className="w-12 h-12 bg-[#00f2ff]/20 rounded-2xl flex items-center justify-center text-[#00f2ff]">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" /></svg>
                     </div>
-                    <h4 className="text-white font-bold text-sm">1. 形状を同期</h4>
-                    <p className="text-slate-400 text-xs leading-relaxed">[↑→↓] キーで形状を切り替え、SPACEで粒子を「同期」状態にせよ。</p>
+                    <h4 className="text-white font-bold text-lg">1. 直感的に回避・収集</h4>
+                    <p className="text-slate-400 text-sm leading-relaxed">マウスでコアを操作。青・緑のデータを集め、赤のノイズを巧みに回避せly。</p>
                   </div>
-                  <div className="p-6 bg-slate-800/50 rounded-3xl border border-slate-800 text-left space-y-3">
-                    <div className="w-10 h-10 bg-[#00ff88]/20 rounded-xl flex items-center justify-center text-[#00ff88]">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>
+                  <div className="p-8 bg-slate-800/50 rounded-3xl border border-slate-800 text-left space-y-4">
+                    <div className="w-12 h-12 bg-[#00ff88]/20 rounded-2xl flex items-center justify-center text-[#00ff88]">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>
                     </div>
-                    <h4 className="text-white font-bold text-sm">2. テザーで回収</h4>
-                    <p className="text-slate-400 text-xs leading-relaxed">マウスで「ニューラル・テザー」を操作し、同期した粒子をコアへ導け。</p>
+                    <h4 className="text-white font-bold text-lg">2. シンクロ・バースト</h4>
+                    <p className="text-slate-400 text-sm leading-relaxed">クリックまたはスペースでバースト発動。周囲のデータを一括回収し、危機を脱せよ。</p>
                   </div>
-                  <div className="p-6 bg-slate-800/50 rounded-3xl border border-slate-800 text-left space-y-3">
-                    <div className="w-10 h-10 bg-[#fff200]/20 rounded-xl flex items-center justify-center text-[#fff200]">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707" /></svg>
+                  <div className="p-8 bg-slate-800/50 rounded-3xl border border-slate-800 text-left space-y-4">
+                    <div className="w-12 h-12 bg-[#fff200]/20 rounded-2xl flex items-center justify-center text-[#fff200]">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
                     </div>
-                    <h4 className="text-white font-bold text-sm">3. 覚醒 (OVERLOAD)</h4>
-                    <p className="text-slate-400 text-xs leading-relaxed">連鎖（コンボ）を重畳し、ニューロリンクを極限（シンギュラリティ）へ。</p>
-                  </div>
-                  <div className="p-6 bg-slate-800/50 rounded-3xl border border-slate-800 text-left space-y-3">
-                    <div className="w-10 h-10 bg-[#ff4d00]/20 rounded-xl flex items-center justify-center text-[#ff4d00]">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM12 8v4m0 4h.01" /></svg>
-                    </div>
-                    <h4 className="text-white font-bold text-sm">4. 整合性を維持</h4>
-                    <p className="text-slate-400 text-xs leading-relaxed">コア被弾は致命的エラー。高度な判断力でシステムの安定を守り抜け。</p>
+                    <h4 className="text-white font-bold text-lg">3. ハイスコアを目指せ</h4>
+                    <p className="text-slate-400 text-sm leading-relaxed">コンボを繋ぎ、シンクロ率を高めてレベルアップ。極限のデータ処理能力を証明せよ。</p>
                   </div>
                 </div>
 
@@ -211,7 +204,7 @@ export default function Home() {
                     whileTap={{ scale: 0.98 }}
                     className="group relative inline-flex items-center gap-4 bg-white text-slate-950 px-12 py-6 rounded-3xl text-2xl font-black transition-all hover:bg-[#00f2ff] hover:text-white shadow-[0_20px_50px_rgba(255,255,255,0.1)] hover:shadow-[#00f2ff]/40"
                   >
-                    Logic Flux を起動する
+                    Logic Ascent を起動する
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="group-hover:translate-x-2 group-hover:rotate-12 transition-transform">
                       <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
                     </svg>
