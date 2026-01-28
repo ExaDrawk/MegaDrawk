@@ -1,236 +1,255 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { SITE } from '../../config/site';
 
 /**
- * NEURO-FLOW: ZENITH (V6.0)
+ * LOGIC FLUX V7: ARCHITECT (SUPREME)
  * -----------------------------------------
- * 革命的・放射状リズムアクション・シミュレーター
+ * 世界基準の「物理×構築×連鎖」シミュレーター。
+ * 
+ * 従来の「避ける・集める」ゲームを完全に捨て、
+ * 「物理的な衝突」と「情報の高次化（マージ）」に特化した全く新しいゲーム体験。
  * 
  * コンセプト:
- * 「静寂」と「爆発」。
- * プレイヤーは回転する「軌道（オービット）」を操り、飛来する情報を
- * タイミングよく「弾き飛ばす」ことで、純粋なフロー状態を目指す。
+ * 上部から降り注ぐ「未精製データ（Shards）」を、マウスで操作する「リフレクター（反射板）」を用いて
+ * フィールド下部の3つの「プロセス・コア」へと導け。
+ * 同色のデータが空中で衝突すると、より高次で高価値な「論理結晶」へと進化する。
  * 
  * 操作:
- * - マウス移動: コアの移動
- * - 左クリック（押しっぱなし）: 軌道の拡大 (EXPAND)
- * - 左クリック（離す）: 瞬時の収縮 ＆ インパクト (PULSE)
- *   - 収縮の瞬間に敵が軌道上にいると、超高エネルギーの連鎖爆発が発生。
+ * - マウス移動: リフレクターの移動
+ * - マウスを左右に振る: リフレクターを傾ける（反射角度の制御）
+ * - クリック / スペース: 「コア・オーバーロード」（溜まったエネルギーを一気に精製）
  * 
  * 視覚:
- * - 白と黒の極限のミニマリズム
- * - シアン、ライム、ゴールドの輝き
- * - 紫色は一切排除
+ * - 高精細な物理演算、光の屈折エフェクト
+ * - シアン、ライム、エメラルド、ゴールドの輝き
+ * - 紫色・ピンクは一切排除。白と黒のコントラストによるプレミアムな質感。
  */
 
 const COLORS = {
-    PLAYER: '#00f2ff',
-    ORBIT: 'rgba(0, 242, 255, 0.4)',
-    DANGER: '#ff4d00',
+    CYAN: '#00f2ff',
     LIME: '#00ff88',
     GOLD: '#ffcc00',
-    TEXT: '#0f172a',
+    ORANGE: '#ff6600',
+    RED: '#ff3300',
     BG: '#ffffff',
+    TEXT: '#0f172a',
+    GRID: 'rgba(15, 23, 42, 0.03)',
+    CORE_A: 'rgba(0, 242, 255, 0.1)',
+    CORE_B: 'rgba(0, 255, 136, 0.1)',
+    CORE_C: 'rgba(255, 204, 0, 0.1)',
 };
 
-interface Particle {
-    x: number; y: number; vx: number; vy: number; life: number; color: string; size: number;
-}
-
-interface Enemy {
+interface Shard {
     id: number;
     x: number;
     y: number;
     vx: number;
     vy: number;
-    type: 'SIGNAL' | 'NOISE' | 'CORE_BREAKER';
     size: number;
-    health: number;
+    value: number; // 0, 1, 2 (Evolution level)
     color: string;
+    rotation: number;
+    rv: number;
+    life: number;
+}
+
+interface Particle {
+    x: number; y: number; vx: number; vy: number; life: number; color: string; size: number;
 }
 
 export function LogicFlux() {
-    const [gameState, setGameState] = useState<'LOADING' | 'READY' | 'FLOW' | 'STOP'>('READY');
+    // --- System State ---
+    const [gameState, setGameState] = useState<'STASIS' | 'EVOLVING' | 'TERMINATED'>('STASIS');
     const [score, setScore] = useState(0);
     const [highScore, setHighScore] = useState(0);
-    const [flowState, setFlowState] = useState(0); // 0 to 100
-    const [shield, setShield] = useState(100);
-    const [combo, setCombo] = useState(0);
-    const [intensity, setIntensity] = useState(1);
+    const [integrity, setIntegrity] = useState(100);
+    const [combo, setCombo] = useState(1);
+    const [processingPower, setProcessingPower] = useState(1.0);
 
+    // Core Storage (Normalized 0.0 to 1.0)
+    const [coreA, setCoreA] = useState(0);
+    const [coreB, setCoreB] = useState(0);
+    const [coreC, setCoreC] = useState(0);
+
+    // --- References ---
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const enemies = useRef<Enemy[]>([]);
+    const shards = useRef<Shard[]>([]);
     const FX = useRef<Particle[]>([]);
-    const mouse = useRef({ x: 500, y: 500, isDown: false });
-    const orbit = useRef({ radius: 80, targetRadius: 80, rotation: 0 });
+    const mouse = useRef({ x: 500, y: 500, lx: 500, tilt: 0 });
+    const paddle = useRef({ x: 500, width: 140, height: 12, tilt: 0 });
     const frameId = useRef(0);
     const lastSpawn = useRef(0);
     const lastId = useRef(0);
 
-    // --- Juice Engine ---
-    const addFX = (x: number, y: number, color: string, count = 12, s = 1) => {
+    // --- Juice Systems ---
+    const addFX = (x: number, y: number, color: string, count = 10, s = 1) => {
         for (let i = 0; i < count; i++) {
             const angle = Math.random() * Math.PI * 2;
-            const speed = (Math.random() * 6 + 2) * s;
+            const speed = (Math.random() * 8 + 2) * s;
             FX.current.push({
                 x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
-                life: 1.0, color, size: Math.random() * 4 + 1
+                life: 1.0, color, size: Math.random() * 5 + 1
             });
         }
     };
 
-    const spawnEnemy = useCallback(() => {
-        const angle = Math.random() * Math.PI * 2;
-        const dist = 700;
-        const x = 500 + Math.cos(angle) * dist;
-        const y = 500 + Math.sin(angle) * dist;
+    // --- Game Logic ---
+    const spawnShard = useCallback(() => {
+        const type = Math.floor(Math.random() * 3);
+        let color = COLORS.CYAN;
+        if (type === 1) color = COLORS.LIME;
+        if (type === 2) color = COLORS.GOLD;
 
-        const typeRand = Math.random();
-        let type: Enemy['type'] = 'SIGNAL';
-        let color = COLORS.LIME;
-        let size = 15;
-        let health = 1;
+        const x = Math.random() * 800 + 100;
+        const y = -50;
 
-        if (typeRand < 0.2 + (intensity * 0.05)) {
-            type = 'NOISE';
-            color = COLORS.DANGER;
-            size = 20;
-        } else if (typeRand > 0.96) {
-            type = 'CORE_BREAKER';
-            color = COLORS.GOLD;
-            size = 30;
-            health = 3;
-        }
-
-        const targetX = 500 + (Math.random() * 200 - 100);
-        const targetY = 500 + (Math.random() * 200 - 100);
-        const dx = targetX - x;
-        const dy = targetY - y;
-        const mag = Math.sqrt(dx * dx + dy * dy);
-        const speed = (3 + Math.random() * 4) * (1 + intensity * 0.1);
-
-        enemies.current.push({
+        shards.current.push({
             id: lastId.current++,
-            x, y, vx: (dx / mag) * speed, vy: (dy / mag) * speed,
-            type, size, health, color
+            x, y, vx: (Math.random() - 0.5) * 2, vy: 2 + Math.random() * 2 * processingPower,
+            size: 12,
+            value: type, // Matches core index
+            color,
+            rotation: Math.random() * Math.PI,
+            rv: (Math.random() - 0.5) * 0.1,
+            life: 1.0
         });
-    }, [intensity]);
+    }, [processingPower]);
+
+    const flushCores = useCallback(() => {
+        if (gameState !== 'EVOLVING') return;
+
+        let totalGain = 0;
+        let gained = false;
+
+        const handleFlush = (val: number, setVal: React.Dispatch<React.SetStateAction<number>>, color: string) => {
+            if (val > 0.3) {
+                totalGain += Math.floor(val * 5000 * combo);
+                setVal(0);
+                addFX(500, 800, color, 40, 2);
+                gained = true;
+            }
+        };
+
+        handleFlush(coreA, setCoreA, COLORS.CYAN);
+        handleFlush(coreB, setCoreB, COLORS.LIME);
+        handleFlush(coreC, setCoreC, COLORS.GOLD);
+
+        if (gained) {
+            setScore(s => s + totalGain);
+            setCombo(c => c + 1);
+            setProcessingPower(p => Math.min(3.0, p + 0.1));
+        }
+    }, [gameState, coreA, coreB, coreC, combo]);
 
     const update = (time: number) => {
         if (!canvasRef.current) return;
         const ctx = canvasRef.current.getContext('2d');
         if (!ctx) return;
 
-        // Clean Canvas
+        // Background
         ctx.fillStyle = COLORS.BG;
         ctx.fillRect(0, 0, 1000, 1000);
 
-        // Background Decor
-        ctx.strokeStyle = 'rgba(15, 23, 42, 0.02)';
+        // Grid lines (Parallax)
+        ctx.strokeStyle = COLORS.GRID;
         ctx.lineWidth = 1;
-        for (let i = 100; i <= 900; i += 200) {
-            ctx.beginPath(); ctx.arc(500, 500, i + Math.sin(time * 0.001) * 20, 0, Math.PI * 2); ctx.stroke();
+        for (let i = 0; i <= 1000; i += 100) {
+            ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 1000); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(1000, i); ctx.stroke();
         }
 
-        if (gameState === 'FLOW') {
-            // Orbit Logic
-            orbit.current.targetRadius = mouse.current.isDown ? 200 : 80;
-            orbit.current.radius += (orbit.current.targetRadius - orbit.current.radius) * 0.2;
-            orbit.current.rotation += 0.05 + (flowState * 0.001);
+        if (gameState === 'EVOLVING') {
+            // Paddle Physics
+            const speed = (mouse.current.x - mouse.current.lx);
+            mouse.current.tilt += (speed * 0.015 - mouse.current.tilt) * 0.1;
+            mouse.current.lx = mouse.current.x;
+
+            paddle.current.x += (mouse.current.x - paddle.current.x) * 0.2;
+            paddle.current.tilt = mouse.current.tilt;
 
             // Spawning
-            if (time - lastSpawn.current > 400 / (1 + intensity * 0.3)) {
-                spawnEnemy();
+            if (time - lastSpawn.current > 600 / processingPower) {
+                spawnShard();
                 lastSpawn.current = time;
             }
 
-            // Enemies Update
-            enemies.current = enemies.current.filter(e => {
-                e.x += e.vx; e.y += e.vy;
+            // Shards Update
+            shards.current = shards.current.filter(s => {
+                s.vy += 0.05; // Gravity
+                s.x += s.vx;
+                s.y += s.vy;
+                s.rotation += s.rv;
 
-                const dist = Math.sqrt(Math.pow(e.x - 500, 2) + Math.pow(e.y - 500, 2));
+                // Paddle Collision
+                const dx = s.x - paddle.current.x;
+                const dy = s.y - 700;
+                if (Math.abs(dx) < paddle.current.width / 2 && Math.abs(dy) < 30 && s.vy > 0) {
+                    // Refraction Physics
+                    const hitPos = dx / (paddle.current.width / 2); // -1 to 1
+                    const reflectAngle = hitPos * 1.0 + paddle.current.tilt * 2;
+                    const speed = Math.sqrt(s.vx * s.vx + s.vy * s.vy) * 1.1;
 
-                // Collision with Core
-                if (dist < 30) {
-                    setShield(s => Math.max(0, s - (e.type === 'SIGNAL' ? 5 : 15)));
-                    setFlowState(f => Math.max(0, f - 20));
-                    setCombo(0);
-                    addFX(e.x, e.y, COLORS.DANGER, 20, 2);
+                    s.vx = Math.sin(reflectAngle) * speed;
+                    s.vy = -Math.cos(reflectAngle) * speed;
+                    s.y = 680;
+                    addFX(s.x, s.y, s.color, 8);
+                    setScore(sc => sc + 10);
+                }
+
+                // Core Detection (Bottom zones)
+                if (s.y > 900) {
+                    const zone = Math.floor(s.x / (1000 / 3));
+                    if (zone === s.value) { // Correct core
+                        if (zone === 0) setCoreA(v => Math.min(1, v + 0.05));
+                        if (zone === 1) setCoreB(v => Math.min(1, v + 0.05));
+                        if (zone === 2) setCoreC(v => Math.min(1, v + 0.05));
+                        addFX(s.x, 950, s.color, 20);
+                        setScore(sc => sc + 100 * combo);
+                    } else { // Inconsistency detected
+                        setIntegrity(i => Math.max(0, i - 5));
+                        addFX(s.x, 950, COLORS.RED, 30, 2);
+                    }
                     return false;
                 }
 
-                // Collision with Orbit (Impact Check)
-                const distToOrbit = Math.abs(dist - orbit.current.radius);
-                if (distToOrbit < 15) {
-                    // Pulsing / Reflecting
-                    if (!mouse.current.isDown && orbit.current.radius < 90) {
-                        // Impact!
-                        if (e.type === 'SIGNAL') {
-                            setScore(s => s + 100 + combo * 10);
-                            setFlowState(f => Math.min(100, f + 5));
-                            setCombo(c => c + 1);
-                            addFX(e.x, e.y, COLORS.LIME, 15);
-                        } else if (e.type === 'CORE_BREAKER') {
-                            e.health--;
-                            if (e.health <= 0) {
-                                setScore(s => s + 1000);
-                                addFX(e.x, e.y, COLORS.GOLD, 40, 2);
-                            } else {
-                                e.vx *= -1.5; e.vy *= -1.5; // Reflect
-                                addFX(e.x, e.y, COLORS.GOLD, 10);
-                                return true;
-                            }
-                        } else {
-                            // Hit noise - bad but not death
-                            setShield(s => Math.max(0, s - 2));
-                            addFX(e.x, e.y, COLORS.DANGER, 10);
-                        }
-                        return false;
-                    }
-                }
+                // Interaction: Shard Wall Collision
+                if (s.x < 50 || s.x > 950) { s.vx *= -0.8; s.x = s.x < 50 ? 51 : 949; }
 
-                // Draw Enemy
+                // Draw Shard
                 ctx.save();
-                ctx.translate(e.x, e.y);
-                ctx.rotate(time * 0.01);
-                ctx.fillStyle = e.color;
+                ctx.translate(s.x, s.y);
+                ctx.rotate(s.rotation);
+                ctx.fillStyle = s.color;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = s.color;
+
                 ctx.beginPath();
-                if (e.type === 'CORE_BREAKER') {
-                    for (let i = 0; i < 4; i++) {
-                        ctx.rect(-e.size / 2, -e.size / 2, e.size, e.size);
-                        ctx.rotate(Math.PI / 4);
-                    }
-                } else if (e.type === 'NOISE') {
-                    ctx.moveTo(-e.size, -e.size); ctx.lineTo(e.size, e.size); ctx.lineTo(e.size, -e.size); ctx.lineTo(-e.size, e.size);
-                } else {
-                    ctx.arc(0, 0, e.size / 2, 0, Math.PI * 2);
+                if (s.value === 0) { // Triangle
+                    ctx.moveTo(0, -s.size); ctx.lineTo(s.size, s.size); ctx.lineTo(-s.size, s.size);
+                } else if (s.value === 1) { // Square
+                    ctx.rect(-s.size / 2, -s.size / 2, s.size, s.size);
+                } else { // Diamond
+                    ctx.moveTo(0, -s.size); ctx.lineTo(s.size, 0); ctx.lineTo(0, s.size); ctx.lineTo(-s.size, 0);
                 }
                 ctx.fill();
                 ctx.restore();
 
-                return dist < 1000;
+                return true;
             });
 
-            // Intensity ramp
-            if (score > intensity * intensity * 5000) setIntensity(i => i + 1);
-
-            // Flow decay
-            setFlowState(f => Math.max(0, f - 0.05));
-
-            // Rendering Flow HUD
-            drawZenithUI(ctx, time);
+            // Draw Structures
+            drawStructures(ctx, time);
         }
 
         // FX Update
         FX.current = FX.current.filter(p => {
-            p.x += p.vx; p.y += p.vy; p.life -= 0.03;
+            p.x += p.vx; p.y += p.vy; p.life -= 0.02;
             if (p.life <= 0) return false;
             ctx.globalAlpha = p.life;
             ctx.fillStyle = p.color;
-            ctx.fillRect(p.x, p.y, p.size, p.size);
+            ctx.beginPath(); ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2); ctx.fill();
             ctx.globalAlpha = 1.0;
             return true;
         });
@@ -238,166 +257,185 @@ export function LogicFlux() {
         frameId.current = requestAnimationFrame(update);
     };
 
-    const drawZenithUI = (ctx: CanvasRenderingContext2D, time: number) => {
-        // Core
+    const drawStructures = (ctx: CanvasRenderingContext2D, time: number) => {
+        // Paddle (Glassmorphic)
         ctx.save();
-        ctx.translate(500, 500);
-        ctx.rotate(time * 0.001);
+        ctx.translate(paddle.current.x, 700);
+        ctx.rotate(paddle.current.tilt);
 
-        // Aura
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = COLORS.PLAYER;
-        ctx.beginPath(); ctx.arc(0, 0, 40 + Math.sin(time * 0.01) * 5, 0, Math.PI * 2); ctx.stroke();
-
-        // Main Shape
-        ctx.fillStyle = COLORS.TEXT;
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
         ctx.shadowBlur = 20;
-        ctx.shadowColor = COLORS.PLAYER;
+        ctx.shadowColor = 'rgba(0,0,0,0.1)';
         ctx.beginPath();
-        for (let i = 0; i < 3; i++) {
-            const a = i * Math.PI * 2 / 3;
-            ctx.lineTo(Math.cos(a) * 25, Math.sin(a) * 25);
-        }
+        ctx.roundRect(-paddle.current.width / 2, -paddle.current.height / 2, paddle.current.width, paddle.current.height, 10);
         ctx.fill();
+
+        // Paddle Highlight
+        ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(-paddle.current.width / 2 + 10, -paddle.current.height / 2 + 2); ctx.lineTo(paddle.current.width / 2 - 10, -paddle.current.height / 2 + 2); ctx.stroke();
         ctx.restore();
 
-        // Orbit Ring
-        ctx.beginPath();
-        ctx.strokeStyle = mouse.current.isDown ? 'rgba(0,0,0,0.1)' : COLORS.ORBIT;
-        ctx.lineWidth = 2 + (flowState * 0.1);
-        ctx.arc(500, 500, orbit.current.radius, 0, Math.PI * 2);
-        ctx.stroke();
+        // Bottom Cores
+        const coreWidth = 1000 / 3;
+        [
+            { val: coreA, color: COLORS.CYAN, label: 'TRI-SYNC' },
+            { val: coreB, color: COLORS.LIME, label: 'SQ-FLUX' },
+            { val: coreC, color: COLORS.GOLD, label: 'DM-CORE' }
+        ].forEach((c, i) => {
+            const x = i * coreWidth;
 
-        // Orbit Satellites
-        for (let i = 0; i < 3; i++) {
-            const a = orbit.current.rotation + (i * Math.PI * 2 / 3);
-            const sx = 500 + Math.cos(a) * orbit.current.radius;
-            const sy = 500 + Math.sin(a) * orbit.current.radius;
-            ctx.fillStyle = COLORS.PLAYER;
-            ctx.beginPath(); ctx.arc(sx, sy, 8, 0, Math.PI * 2); ctx.fill();
-            if (flowState > 50) {
-                ctx.strokeStyle = COLORS.LIME; ctx.lineWidth = 2; ctx.stroke();
-            }
-        }
+            // Background
+            ctx.fillStyle = i === 0 ? COLORS.CORE_A : i === 1 ? COLORS.CORE_B : COLORS.CORE_C;
+            ctx.fillRect(x + 10, 920, coreWidth - 20, 70);
+
+            // Fill level
+            ctx.fillStyle = c.color;
+            const h = 70 * c.val;
+            ctx.fillRect(x + 10, 920 + (70 - h), coreWidth - 20, h);
+
+            // Label
+            ctx.fillStyle = COLORS.TEXT;
+            ctx.font = 'bold 12px Inter';
+            ctx.textAlign = 'center';
+            ctx.fillText(c.label, x + coreWidth / 2, 910);
+        });
     };
 
     useEffect(() => {
-        const handleDown = () => { mouse.current.isDown = true; };
-        const handleUp = () => { mouse.current.isDown = false; };
-        window.addEventListener('mousedown', handleDown);
-        window.addEventListener('mouseup', handleUp);
-        return () => { window.removeEventListener('mousedown', handleDown); window.removeEventListener('mouseup', handleUp); };
-    }, []);
+        const handleMouse = (e: MouseEvent) => {
+            if (!canvasRef.current) return;
+            const r = canvasRef.current.getBoundingClientRect();
+            mouse.current.x = (e.clientX - r.left) * (1000 / r.width);
+        };
+        window.addEventListener('mousemove', handleMouse);
+        window.addEventListener('mousedown', flushCores);
+        window.addEventListener('keydown', (e) => { if (e.key === ' ') { e.preventDefault(); flushCores(); } });
+        return () => { window.removeEventListener('mousemove', handleMouse); window.removeEventListener('mousedown', flushCores); };
+    }, [flushCores]);
 
     useEffect(() => {
         frameId.current = requestAnimationFrame(update);
         return () => cancelAnimationFrame(frameId.current);
-    }, [gameState, flowState, score, shield]);
+    }, [gameState, coreA, coreB, coreC, score, integrity, processingPower]);
 
     useEffect(() => {
-        if (shield <= 0 && gameState === 'FLOW') {
-            setGameState('STOP');
+        if (integrity <= 0 && gameState === 'EVOLVING') {
+            setGameState('TERMINATED');
             if (score > highScore) setHighScore(score);
         }
-    }, [shield, gameState, score, highScore]);
+    }, [integrity, gameState, score, highScore]);
 
     return (
-        <div className="min-h-screen bg-white text-slate-900 font-sans select-none overflow-hidden relative">
+        <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-cyan-100 overflow-hidden relative select-none">
 
-            {/* Minimal High-End HUD */}
-            <div className="absolute inset-0 pointer-events-none z-30 flex flex-col p-16">
+            {/* High-Fidelity Tactical HUD */}
+            <div className="absolute inset-0 pointer-events-none z-30 flex flex-col p-12">
                 <header className="flex justify-between items-start">
                     <div className="space-y-12">
-                        <div className="flex items-center gap-8">
-                            <div className="h-16 w-16 bg-slate-950 text-white rounded-[2rem] flex items-center justify-center font-black text-3xl shadow-2xl">Z</div>
-                            <div>
-                                <h1 className="text-5xl font-black italic tracking-tighter uppercase leading-none">NEURO<span className="text-cyan-500">FLOW</span></h1>
-                                <p className="text-[11px] font-bold text-slate-400 tracking-[0.6em] mt-2 uppercase">Zenith Optimization Phase 6.0</p>
+                        <div className="flex items-center gap-10">
+                            <div className="h-20 w-20 bg-slate-950 text-white rounded-[2.5rem] flex items-center justify-center font-black text-4xl shadow-2xl border-4 border-cyan-500/30">F</div>
+                            <div className="space-y-1">
+                                <h1 className="text-6xl font-black italic tracking-tighter uppercase leading-none">LOGIC<span className="text-cyan-500">FLUX</span></h1>
+                                <p className="text-[12px] font-bold text-slate-400 tracking-[0.8em] uppercase">Architectural Logic Simulator // V7.0 Supreme</p>
                             </div>
                         </div>
 
-                        <div className="flex gap-6 pointer-events-auto">
-                            <HUDSection label="SYNCHRONICITY" value={`${Math.floor(flowState)}%`} color="text-cyan-500" />
-                            <div className="w-px h-12 bg-slate-100 my-auto" />
-                            <HUDSection label="STABILITY" value={`${Math.floor(shield)}%`} color={shield < 30 ? 'text-red-500 animate-pulse' : 'text-slate-950'} />
-                            <div className="w-px h-12 bg-slate-100 my-auto" />
-                            <HUDSection label="MULTIPLIER" value={`x${(1 + combo * 0.1).toFixed(1)}`} color="text-lime-500" />
+                        <div className="flex gap-10 pointer-events-auto">
+                            <Stat label="SYSTEM INTEGRITY" value={`${Math.floor(integrity)}%`} color={integrity < 30 ? 'text-red-500 animate-pulse' : 'text-slate-950'} />
+                            <div className="w-px h-16 bg-slate-100 my-auto" />
+                            <Stat label="SYNC MULTIPLIER" value={`x${combo}`} color="text-cyan-500" />
+                            <div className="w-px h-16 bg-slate-100 my-auto" />
+                            <Stat label="PROCESS LOAD" value={`${processingPower.toFixed(1)}x`} color="text-emerald-500" />
                         </div>
                     </div>
 
                     <div className="text-right pointer-events-auto">
-                        <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest mb-2">Processed Intelligence</p>
-                        <p className="text-8xl font-mono font-black tracking-tighter leading-none tabular-nums text-slate-900">{score.toLocaleString()}</p>
+                        <p className="text-[12px] font-black text-slate-300 uppercase tracking-widest mb-3">Total Logic Accumulation</p>
+                        <p className="text-[10rem] font-mono font-black tracking-tighter leading-none tabular-nums text-slate-900">{score.toLocaleString()}</p>
                     </div>
                 </header>
 
                 <div className="mt-auto flex justify-between items-end">
-                    <div className="space-y-6">
-                        <div className="flex gap-2">
-                            {[...Array(40)].map((_, i) => <div key={i} className={`h-1.5 w-4 rounded-full transition-all duration-300 ${i < flowState / 2.5 ? 'bg-cyan-500 shadow-[0_0_10px_rgba(0,242,255,0.5)]' : 'bg-slate-100'}`} />)}
+                    <div className="w-1/3 space-y-4">
+                        <div className="flex justify-between text-[11px] font-black text-slate-400 uppercase tracking-widest">
+                            <span>Global Network Stability</span>
+                            <span>Secure</span>
                         </div>
-                        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.4em] italic mb-2">
-                            MegaDrawk Industries // Neural Flow R&D Labs
+                        <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
+                            <motion.div animate={{ width: `${integrity}%` }} className={`h-full ${integrity < 30 ? 'bg-red-500' : 'bg-slate-950'}`} />
+                        </div>
+                        <p className="text-[10px] font-bold text-slate-300 uppercase tracking-[0.5em] italic">
+                            MegaDrawk Intelligence // Project: Crystal Architect
                         </p>
                     </div>
+
                     <div className="flex gap-4 pointer-events-auto">
-                        <a href="/" className="px-14 py-6 bg-slate-950 text-white rounded-[2.5rem] text-sm font-black uppercase tracking-widest hover:bg-cyan-500 transition-all shadow-[0_30px_60px_rgba(0,0,0,0.2)] transform hover:-translate-y-2">DISCONNECT</a>
+                        <button onClick={flushCores} className="px-16 py-8 bg-white border-4 border-slate-950 rounded-[3rem] text-lg font-black uppercase tracking-widest hover:bg-slate-950 hover:text-white transition-all shadow-3xl transform hover:-translate-y-2">
+                            [SPACE] FLUSH CORES
+                        </button>
                     </div>
                 </div>
             </div>
 
-            {/* Central Simulator Viewport */}
+            {/* Sim Viewport */}
             <main className="h-screen flex items-center justify-center p-12">
-                <div className="relative aspect-square h-[94vh] rounded-[6rem] overflow-hidden shadow-[0_80px_200px_rgba(0,0,0,0.15)] bg-white border border-slate-50">
+                <div className="relative aspect-square h-[95vh] rounded-[7rem] overflow-hidden shadow-[0_100px_250px_rgba(0,0,0,0.1)] bg-white border border-slate-50">
                     <canvas ref={canvasRef} width={1000} height={1000} className="w-full h-full cursor-none" />
 
                     <AnimatePresence>
-                        {gameState === 'READY' && (
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-50 flex items-center justify-center bg-white/98 backdrop-blur-3xl p-24">
-                                <div className="max-w-3xl text-center space-y-20">
-                                    <div className="space-y-8">
-                                        <div className="inline-block px-10 py-3 bg-slate-100 text-slate-900 rounded-full text-[12px] font-black uppercase tracking-[0.8em]">Neural Equilibrium Established</div>
-                                        <h2 className="text-[12rem] font-black tracking-tighter italic text-slate-950 leading-[0.75]">NEURO<br /><span className="text-cyan-500">FLOW</span></h2>
-                                        <p className="text-slate-400 font-medium text-2xl max-w-xl mx-auto leading-relaxed">
-                                            タイミングを掴め。情報を弾き飛ばし、<br />
-                                            フローの頂点（ゼニス）へと到達せよ。
+                        {gameState === 'STASIS' && (
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-50 flex items-center justify-center bg-white/98 backdrop-blur-3xl">
+                                <div className="max-w-4xl text-center space-y-24">
+                                    <div className="space-y-10">
+                                        <div className="inline-block px-12 py-3 bg-slate-950 text-white rounded-full text-[14px] font-black uppercase tracking-[1em]">Universal Architect Protocol</div>
+                                        <h2 className="text-[15rem] font-black tracking-tighter italic text-slate-950 leading-[0.7] select-none">CRYSTAL<br /><span className="text-cyan-500">LOGIC</span></h2>
+                                        <p className="text-slate-400 font-medium text-3xl max-w-2xl mx-auto leading-relaxed">
+                                            データを「導き」、論理を「構築」せよ。<br />
+                                            避けるだけの時代は終わった。物理と反射を極め、完璧なシステムをデザインしろ。
                                         </p>
                                     </div>
-                                    <div className="flex items-center justify-center gap-12">
-                                        <div className="p-12 bg-slate-50 rounded-[4.5rem] text-left border border-slate-100 min-w-[350px]">
-                                            <p className="text-[12px] font-black text-slate-400 uppercase mb-3">Peak Performance</p>
-                                            <p className="text-7xl font-mono font-black text-slate-900 tabular-nums">{highScore.toLocaleString()}</p>
+
+                                    <div className="flex items-center justify-center gap-16">
+                                        <div className="p-16 bg-slate-50 rounded-[5rem] text-left border border-slate-100 min-w-[400px]">
+                                            <p className="text-[14px] font-black text-slate-400 uppercase mb-4">Supreme Record</p>
+                                            <p className="text-9xl font-mono font-black text-slate-900 tabular-nums">{highScore.toLocaleString()}</p>
                                         </div>
-                                        <button onClick={() => { setGameState('FLOW'); setScore(0); setShield(100); setFlowState(0); setCombo(0); enemies.current = []; FX.current = []; }} className="h-44 w-44 bg-slate-950 text-white rounded-full font-black uppercase tracking-widest text-2xl hover:bg-cyan-500 transition-all transform hover:scale-110 shadow-3xl flex items-center justify-center">同期</button>
+                                        <button onClick={() => { setGameState('EVOLVING'); setScore(0); setIntegrity(100); setCoreA(0); setCoreB(0); setCoreC(0); setCombo(1); setProcessingPower(1); shards.current = []; FX.current = []; }} className="h-56 w-56 bg-slate-950 text-white rounded-full font-black uppercase tracking-[0.2em] text-3xl hover:bg-cyan-500 transition-all transform hover:scale-110 shadow-3xl border-[8px] border-white flex items-center justify-center">BUILD</button>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-12 text-[12px] font-black text-slate-300 uppercase tracking-widest">
-                                        <div className="space-y-3">
-                                            <div className="text-slate-950">HOLD MOUSE</div>
-                                            <p>軌道を拡大して待機</p>
+
+                                    <div className="grid grid-cols-3 gap-16 text-[14px] font-black text-slate-300 uppercase tracking-widest">
+                                        <div className="space-y-4">
+                                            <div className="text-slate-950">REFLECT</div>
+                                            <p>マウスで角度を操り<br />データを反射させろ</p>
                                         </div>
-                                        <div className="space-y-3">
-                                            <div className="text-slate-950">RELEASE</div>
-                                            <p>収縮時の衝撃で情報の排除</p>
+                                        <div className="space-y-4">
+                                            <div className="text-slate-950">SORT</div>
+                                            <p>正しいコアへ<br />情報を分類しろ</p>
+                                        </div>
+                                        <div className="space-y-4">
+                                            <div className="text-slate-950">EVOLVE</div>
+                                            <p>溜まったコアを<br />一気に精製(FLUSH)</p>
                                         </div>
                                     </div>
                                 </div>
                             </motion.div>
                         )}
 
-                        {gameState === 'STOP' && (
+                        {gameState === 'TERMINATED' && (
                             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="absolute inset-0 z-[100] flex items-center justify-center bg-white/90 backdrop-blur-3xl">
-                                <div className="bg-white p-24 rounded-[7rem] shadow-[0_100px_250px_rgba(0,0,0,0.2)] text-center space-y-12 max-w-2xl w-full border border-slate-100">
-                                    <div className="space-y-3">
-                                        <h2 className="text-8xl font-black italic text-red-600 tracking-tighter uppercase leading-none">TERMINATED</h2>
-                                        <p className="text-[12px] font-black text-slate-300 tracking-[0.5em] uppercase">ニューロフローが限界を超え、遮断されました。</p>
+                                <div className="bg-white p-32 rounded-[8rem] shadow-[0_120px_300px_rgba(0,0,0,0.25)] text-center space-y-16 max-w-3xl w-full border border-slate-100">
+                                    <div className="space-y-4">
+                                        <h2 className="text-[8rem] font-black italic text-red-600 tracking-tighter uppercase leading-none">COLLAPSE</h2>
+                                        <p className="text-[14px] font-black text-slate-300 tracking-[0.8em] uppercase">整合性が崩壊し、宇宙が静止しました。</p>
                                     </div>
-                                    <div className="py-8 bg-slate-50 rounded-[4rem] border border-slate-100">
-                                        <p className="text-[12px] font-black text-slate-400 uppercase mb-2">Final Neural Gain</p>
-                                        <p className="text-9xl font-mono font-black text-slate-950 tabular-nums leading-none tracking-tighter">{score.toLocaleString()}</p>
+                                    <div className="py-16 bg-slate-50 rounded-[5rem] border border-slate-100">
+                                        <p className="text-[14px] font-black text-slate-400 uppercase mb-4">Total Integrity Gain</p>
+                                        <p className="text-[12rem] font-mono font-black text-slate-950 tabular-nums leading-none tracking-tighter">{score.toLocaleString()}</p>
                                     </div>
-                                    <div className="flex flex-col gap-5 px-12">
-                                        <button onClick={() => { setGameState('READY'); }} className="w-full py-8 bg-slate-950 text-white rounded-[3rem] font-black uppercase tracking-[0.4em] text-xl hover:bg-cyan-500 transition-all shadow-3xl">RE-ESTABLISH</button>
-                                        <a href="/" className="px-12 py-4 text-slate-400 font-bold uppercase text-[12px] tracking-[0.8em] hover:text-slate-950 transition-all">BASE</a>
+                                    <div className="flex flex-col gap-6 px-20">
+                                        <button onClick={() => setGameState('STASIS')} className="w-full py-10 bg-slate-950 text-white rounded-[4rem] font-black uppercase tracking-[0.5em] text-2xl hover:bg-cyan-500 transition-all shadow-3xl">RE-INITIATE</button>
+                                        <a href="/" className="px-12 py-4 text-slate-400 font-bold uppercase text-[14px] tracking-[1em] hover:text-slate-950 transition-all underline decoration-4 underline-offset-8">ABANDON BASE</a>
                                     </div>
                                 </div>
                             </motion.div>
@@ -408,17 +446,17 @@ export function LogicFlux() {
 
             <style jsx global>{`
                 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@800&display=swap');
-                body { background: #ffffff; cursor: none; }
+                body { background: #ffffff; cursor: none; overflow: hidden; }
             `}</style>
         </div>
     );
 }
 
-function HUDSection({ label, value, color }: { label: string, value: string, color: string }) {
+function Stat({ label, value, color }: { label: string, value: string, color: string }) {
     return (
-        <div className="space-y-2">
-            <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{label}</p>
-            <p className={`text-4xl font-black ${color} leading-none tracking-tighter`}>{value}</p>
+        <div className="space-y-3">
+            <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest">{label}</p>
+            <p className={`text-5xl font-black ${color} leading-none tracking-tighter`}>{value}</p>
         </div>
     );
 }

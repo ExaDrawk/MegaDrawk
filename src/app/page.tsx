@@ -162,50 +162,50 @@ export default function Home() {
                 </div>
 
                 <div className="space-y-6">
-                  <h2 className="text-5xl md:text-10xl font-black text-white tracking-tighter italic uppercase leading-none">
-                    NEURO<span className="text-[#00f2ff]">FLOW</span>
+                  <h2 className="text-5xl md:text-10xl font-black text-white tracking-tighter italic uppercase leading-[0.8]">
+                    CRYSTAL<br /><span className="text-[#00f2ff]">LOGIC</span>
                   </h2>
                   <p className="text-slate-400 text-xl md:text-3xl font-medium leading-relaxed max-w-4xl mx-auto">
-                    タイミングを掴め。フローの頂点（ゼニス）へ。
-                    軌道を「拡大」して待ち構え、瞬時に「収縮」させて衝撃を叩き込め。
-                    静寂と爆発が交錯する、MegaDrawk 史上最高傑作のニューロ・アクション。
+                    避けるだけの時代は終わった、論理を「デザイン」せよ。
+                    降り注ぐ未精製データを物理的に反射・誘導し、3つのプロセス・コアへと選別。
+                    究極の「反射」と「構築」が交差する、MegaDrawk のフラッグシップ・シミュレーター。
                   </p>
                 </div>
 
                 {/* How to Play Section */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto py-12">
-                  <div className="p-10 bg-slate-900/80 backdrop-blur rounded-[3rem] border border-slate-700 text-left space-y-6">
-                    <div className="w-16 h-16 bg-[#00f2ff]/20 rounded-2xl flex items-center justify-center text-[#00f2ff]">
-                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2v20M2 12h20" /><circle cx="12" cy="12" r="10" /></svg>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto py-16">
+                  <div className="p-12 bg-slate-900/90 backdrop-blur rounded-[4rem] border border-slate-700 text-left space-y-8">
+                    <div className="w-20 h-20 bg-[#00f2ff]/20 rounded-3xl flex items-center justify-center text-[#00f2ff]">
+                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M12 2v20M2 12h20" /><path d="M7.07 16.93l9.9-9.9M7.07 7.07l9.9 9.9" /></svg>
                     </div>
-                    <h4 className="text-white font-black text-2xl">1. 軌道を拡大 (EXPAND)</h4>
-                    <p className="text-slate-400 text-lg leading-relaxed">マウス長押しで軌道を拡大し、迫りくる情報をトラップしろ。範囲が広いほどリスクと報酬は高まる。</p>
+                    <h4 className="text-white font-black text-3xl italic">1. 反射・誘導 (REFLECT)</h4>
+                    <p className="text-slate-400 text-xl leading-relaxed">マウスでリフレクターを操作し、降り注ぐデータを物理的に跳ね返せ。角度を操り、情報の流れをデザインしろ。</p>
                   </div>
-                  <div className="p-10 bg-slate-900/80 backdrop-blur rounded-[3rem] border border-slate-700 text-left space-y-6">
-                    <div className="w-16 h-16 bg-[#00ff88]/20 rounded-2xl flex items-center justify-center text-[#00ff88]">
-                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" /><path d="M22 4L12 14.01l-3-3" /></svg>
+                  <div className="p-12 bg-slate-900/90 backdrop-blur rounded-[4rem] border border-slate-700 text-left space-y-8">
+                    <div className="w-20 h-20 bg-[#00ff88]/20 rounded-3xl flex items-center justify-center text-[#00ff88]">
+                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M21 8V5a2 2 0 00-2-2H5a2 2 0 00-2 2v3m18 8v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-3m18-4H3" /></svg>
                     </div>
-                    <h4 className="text-white font-black text-2xl">2. インパクト (SLAM)</h4>
-                    <p className="text-slate-400 text-lg leading-relaxed">タイミングを合わせ、クリックを離して瞬時に収縮。重なった情報を弾き飛ばし、高純度エネルギーへと変換せよ。</p>
+                    <h4 className="text-white font-black text-3xl italic">2. 整合性の選別 (SORT)</h4>
+                    <p className="text-slate-400 text-xl leading-relaxed">形と色を合わせ、正しいコアへとデータを導け。精度の高い選別が、システムを次の次元へと進化させる。</p>
                   </div>
-                  <div className="p-10 bg-slate-900/80 backdrop-blur rounded-[3rem] border border-slate-700 text-left space-y-6">
-                    <div className="w-16 h-16 bg-[#ffcc00]/20 rounded-2xl flex items-center justify-center text-[#ffcc00]">
-                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>
+                  <div className="p-12 bg-slate-900/90 backdrop-blur rounded-[4rem] border border-slate-700 text-left space-y-8">
+                    <div className="w-20 h-20 bg-[#ffcc00]/20 rounded-3xl flex items-center justify-center text-[#ffcc00]">
+                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>
                     </div>
-                    <h4 className="text-white font-black text-2xl">3. ゼニスへの到達</h4>
-                    <p className="text-slate-400 text-lg leading-relaxed">コンボを繋ぎ「シンクロ率」を極限まで高めろ。完璧なリズムが、世界を塗り替える知性を生み出す。</p>
+                    <h4 className="text-white font-black text-3xl italic">3. 瞬時の精製 (FLUSH)</h4>
+                    <p className="text-slate-400 text-xl leading-relaxed">エネルギーが溜まったら、SPACEでコアを一気にフラッシュ。爆発的な連鎖（コンボ）で世界記録を塗り替えろ。</p>
                   </div>
                 </div>
 
                 <div className="flex flex-col items-center gap-12">
                   <motion.a
                     href="/aura-refiner"
-                    whileHover={{ scale: 1.05, y: -8 }}
+                    whileHover={{ scale: 1.05, y: -10 }}
                     whileTap={{ scale: 0.95 }}
-                    className="group relative inline-flex items-center gap-6 bg-white text-slate-950 px-16 py-8 rounded-[2.5rem] text-3xl font-black transition-all hover:bg-[#00f2ff] hover:text-white shadow-[0_30px_80px_rgba(255,255,255,0.1)] hover:shadow-[#00f2ff]/40"
+                    className="group relative inline-flex items-center gap-8 bg-white text-slate-950 px-20 py-10 rounded-[3.5rem] text-4xl font-black transition-all hover:bg-[#00f2ff] hover:text-white shadow-[0_40px_100px_rgba(255,255,255,0.15)] hover:shadow-[#00f2ff]/50 border-8 border-white"
                   >
-                    Zenith を起動する
-                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="group-hover:translate-x-3 group-hover:rotate-12 transition-transform">
+                    Architect を起動する
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" className="group-hover:translate-x-4 group-hover:rotate-12 transition-transform">
                       <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
                     </svg>
                   </motion.a>
