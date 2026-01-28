@@ -19,6 +19,7 @@ export function AdSense({ pId, nonce }: Props) {
         '/compliance',
         '/documentation',
         '/governance',
+        '/tools',
     ];
 
     // パスが許可リストに含まれているかチェック

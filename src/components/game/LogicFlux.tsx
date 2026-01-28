@@ -2,319 +2,414 @@
 
 /**
  * -----------------------------------------------------------------------------
- * MARKET REAPER: REAL-TIME VOLATILITY COMBAT (V1.0.0)
+ * CRYSTAL LOGIC: THE REFLECTION SIMULATOR (V1.0.0)
  * -----------------------------------------------------------------------------
  * 【システム概要】
- * 世界の株式・仮想通貨市場の「生データ」を武器に変える、リアルタイム連動型アクション。
- * 定義されたデータではなく、外部API（Yahoo Finance API / CoinGecko 等を想定）
- * から取得される「ボラティリティ」が、キャラクターの攻撃力とステージの運命を決定する。
+ * 降り注ぐ「未精製データ（プリズム）」を物理的に反射・誘導し、
+ * 適切な「プロセス・コア」へと選別する高密度パズルアクション。
  * 
- * 【ゲーム性】
- * - 銘柄の「ボラティリティ（変動率）」がエネルギーに変換される。
- * - チャートの「上昇/下落」がステージの重力や地形を変化させる。
- * - 「含み損（Damage）」が限界を超えると強制ロスカット（Game Over）。
+ * 【コア機能】
+ * - Physics Reflector: マウス追従＋ホイール回転で操作する物理パドル。
+ * - Data Stream: 上空から落下する3色（CYAN, MAGENTA, YELLOW）のデータ群。
+ * - Core Sorting: 左（CYAN）、右（MAGENTA）、上（YELLOW）に配置された受容コア。
+ * - Evolution: 正確なソーティングにより、システム（背景・音楽・難易度）が進化する。
  * -----------------------------------------------------------------------------
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// --- 型定義 ---
+// --- DATA TYPES & CONSTANTS ---
 
-interface MarketAsset {
-    symbol: string;
-    name: string;
-    price: number;
-    change24h: number;
-    volatility: number;
-    color: string;
-}
+type DataType = 'CYAN' | 'MAGENTA' | 'YELLOW';
 
-interface Particle {
+interface DataParticle {
     id: number;
+    type: DataType;
     x: number;
     y: number;
     vx: number;
     vy: number;
-    life: number;
-    color: string;
+    radius: number;
+    active: boolean;
 }
 
-// --- 初期アセット（API取得を想定したモックデータ） ---
-const INITIAL_ASSETS: MarketAsset[] = [
-    { symbol: 'NVDA', name: 'NVIDIA Corp.', price: 580.42, change24h: 4.5, volatility: 0.8, color: '#10b981' },
-    { symbol: 'BTC', name: 'Bitcoin', price: 64200.00, change24h: -2.1, volatility: 0.95, color: '#f59e0b' },
-    { symbol: 'TSLA', name: 'Tesla, Inc.', price: 185.20, change24h: -1.2, volatility: 0.7, color: '#ef4444' },
-    { symbol: 'AAPL', name: 'Apple Inc.', price: 192.50, change24h: 0.3, volatility: 0.3, color: '#ffffff' },
-];
+interface Core {
+    type: DataType;
+    x: number;
+    y: number;
+    radius: number;
+    pulse: number;
+}
 
-// --- メインコンポーネント ---
+interface Paddle {
+    x: number;
+    y: number;
+    angle: number; // Radian
+    length: number;
+    width: number;
+}
 
-export const MarketReaper: React.FC = () => {
-    // ゲーム状態
-    const [selectedAsset, setSelectedAsset] = useState<MarketAsset>(INITIAL_ASSETS[0]);
-    const [score, setScore] = useState(0);
-    const [stability, setStability] = useState(100);
-    const [isGameOver, setIsGameOver] = useState(false);
-    const [particles, setParticles] = useState<Particle[]>([]);
+const COLORS = {
+    CYAN: '#00f2ff',
+    MAGENTA: '#ff00ff',
+    YELLOW: '#ffcc00',
+    BG: '#050510'
+};
 
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const frameRef = useRef<number>(0);
-    const lastUpdateRef = useRef<number>(0);
-    const gameState = useRef({
-        playerY: 500,
-        playerTargetY: 500,
-        enemyPos: 1000,
-        combo: 0,
-        volatilityPulse: 0
-    });
+// --- GAME LOGIC ENGINE ---
 
-    // パーティクル生成
-    const spawnParticles = useCallback((x: number, y: number, color: string, count: number) => {
-        const newParticles: Particle[] = [];
-        for (let i = 0; i < count; i++) {
-            newParticles.push({
-                id: Math.random(),
-                x, y,
-                vx: (Math.random() - 0.5) * 15,
-                vy: (Math.random() - 0.5) * 15,
-                life: 1.0,
-                color
-            });
+class CrystalEngine {
+    public particles: DataParticle[] = [];
+    public paddle: Paddle = { x: 500, y: 800, angle: 0, length: 150, width: 20 };
+    public cores: Core[] = [
+        { type: 'CYAN', x: 100, y: 300, radius: 60, pulse: 0 },    // LEFT
+        { type: 'MAGENTA', x: 900, y: 300, radius: 60, pulse: 0 }, // RIGHT
+        { type: 'YELLOW', x: 500, y: 100, radius: 60, pulse: 0 }   // TOP
+    ];
+
+    public score: number = 0;
+    public combo: number = 0;
+    public systemLevel: number = 1;
+    public energy: number = 50; // 0-100
+    public gameOver: boolean = false;
+
+    private spawnRate = 60; // Frames per spawn
+    private frame = 0;
+
+    public update(mouseX: number, mouseY: number, wheelDelta: number) {
+        if (this.gameOver) return;
+        this.frame++;
+
+        // --- PADDLE CONTROL ---
+        // Smooth follow
+        this.paddle.x += (mouseX - this.paddle.x) * 0.2;
+        this.paddle.y += (mouseY - this.paddle.y) * 0.2;
+        // Rotation via wheel (accumulated outside or passed directly)
+        // Here we assume angle is updated via React state/event prop, but for smoother physics typicaly engine handles.
+        // Let's modify: angle is updated externally.
+
+        // --- SPAWN DATA ---
+        if (this.frame % Math.max(10, this.spawnRate - this.systemLevel * 5) === 0) {
+            this.spawnParticle();
         }
-        setParticles(prev => [...prev.slice(-100), ...newParticles]);
+
+        // --- PHYSICS LOOP ---
+        this.particles.forEach(p => {
+            if (!p.active) return;
+
+            // Gravity
+            p.vy += 0.15;
+            p.x += p.vx;
+            p.y += p.vy;
+
+            // Air Resistance
+            p.vx *= 0.995;
+            p.vy *= 0.995;
+
+            // --- PADDLE REFLECTION (Line Segment Collision) ---
+            // Coordinate transformation to Paddle space
+            const dx = p.x - this.paddle.x;
+            const dy = p.y - this.paddle.y;
+
+            // Rotate p relative to paddle center
+            const cos = Math.cos(-this.paddle.angle);
+            const sin = Math.sin(-this.paddle.angle);
+            const rx = dx * cos - dy * sin;
+            const ry = dx * sin + dy * cos;
+
+            // AABB Check in local space
+            if (
+                Math.abs(rx) < this.paddle.length / 2 + p.radius &&
+                Math.abs(ry) < this.paddle.width / 2 + p.radius
+            ) {
+                // Precise check: Previous position comparison to determine collision side? 
+                // Simplified: just reflect velocity vector based on normal
+
+                // Normal vector depends on side? assuming hitting top/bottom (flat face)
+                // Paddle Normal in World Space:
+                const nx = Math.sin(this.paddle.angle);
+                const ny = -Math.cos(this.paddle.angle);
+
+                // Velocity Reflect: V = V - 2(V.N)N
+                const dot = p.vx * nx + p.vy * ny;
+
+                // Only bounce if moving towards the face
+                if (dot < 0 || Math.abs(ry) < this.paddle.width / 2) {
+                    // Add slight "kick" from paddle movement (omitted for simplicity, but adds juice)
+                    p.vx = (p.vx - 2 * dot * nx) * 1.2; // 1.2 restitution (bouncy)
+                    p.vy = (p.vy - 2 * dot * ny) * 1.2;
+
+                    // Push out of collision
+                    p.x += nx * 5;
+                    p.y += ny * 5;
+
+                    // Add some spin/chaos
+                    p.vx += (Math.random() - 0.5) * 2;
+                }
+            }
+
+            // --- CORE COLLISION ---
+            this.cores.forEach(c => {
+                const dist = Math.sqrt((p.x - c.x) ** 2 + (p.y - c.y) ** 2);
+                if (dist < c.radius + p.radius) {
+                    // HIT CORE
+                    if (p.type === c.type) {
+                        // MATCH
+                        this.score += 100 * (1 + this.combo * 0.1);
+                        this.combo++;
+                        this.energy = Math.min(100, this.energy + 5);
+                        c.pulse = 20; // Visual Pulse
+                        p.active = false;
+
+                        // Level Up Logic
+                        if (this.combo % 10 === 0) this.systemLevel++;
+
+                    } else {
+                        // MISMATCH
+                        this.combo = 0;
+                        this.energy -= 10;
+                        p.active = false;
+                        // Punishment VFX
+                    }
+                }
+            });
+
+            // Bounds (Death)
+            if (p.y > 1100 || p.x < -100 || p.x > 1100 || p.y < -1000) {
+                if (p.active) {
+                    p.active = false;
+                    this.combo = 0;
+                    this.energy -= 5;
+                }
+            }
+        });
+
+        // Cleanup
+        this.particles = this.particles.filter(p => p.active);
+
+        // Cores Pulse Decay
+        this.cores.forEach(c => {
+            if (c.pulse > 0) c.pulse *= 0.9;
+        });
+
+        // Game Over Check
+        // if (this.energy <= 0) this.gameOver = true;
+    }
+
+    private spawnParticle() {
+        const types: DataType[] = ['CYAN', 'MAGENTA', 'YELLOW'];
+        const t = types[Math.floor(Math.random() * types.length)];
+        this.particles.push({
+            id: Math.random(),
+            type: t,
+            x: 500 + (Math.random() - 0.5) * 200,
+            y: -50,
+            vx: (Math.random() - 0.5) * 2,
+            vy: (Math.random() * 5) + 2,
+            radius: 12,
+            active: true
+        });
+    }
+
+    public setPaddleAngle(delta: number) {
+        this.paddle.angle += delta * 0.1;
+    }
+}
+
+// --- MAIN COMPONENT ---
+
+export const CrystalLogic: React.FC = () => {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const engine = useRef(new CrystalEngine());
+    const [stats, setStats] = useState({ score: 0, combo: 0, level: 1, energy: 50 });
+    const mouseRef = useRef({ x: 500, y: 800 });
+
+    const handleMouseMove = useCallback((e: React.MouseEvent) => {
+        const rect = canvasRef.current?.getBoundingClientRect();
+        if (rect) {
+            // Mapping mouse visual position to canvas logical coords (1000x1000)
+            const scaleX = 1000 / rect.width;
+            const scaleY = 1000 / rect.height;
+            mouseRef.current.x = (e.clientX - rect.left) * scaleX;
+            mouseRef.current.y = (e.clientY - rect.top) * scaleY;
+        }
     }, []);
 
-    // API擬似更新（リアルタイム市場連動のシミュレーション）
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setSelectedAsset(prev => ({
-                ...prev,
-                price: prev.price * (1 + (Math.random() - 0.5) * 0.01),
-                volatility: Math.min(1.0, prev.volatility + (Math.random() - 0.5) * 0.1)
-            }));
-        }, 3000);
-        return () => clearInterval(interval);
+    const handleWheel = useCallback((e: React.WheelEvent) => {
+        engine.current.setPaddleAngle(e.deltaY > 0 ? 1 : -1);
     }, []);
 
-    // ゲームループ
     useEffect(() => {
         const ctx = canvasRef.current?.getContext('2d');
         if (!ctx) return;
 
-        const loop = (timestamp: number) => {
-            const dt = timestamp - lastUpdateRef.current;
-            lastUpdateRef.current = timestamp;
+        let frameId: number;
 
-            if (!isGameOver) {
-                // プレイヤーの動き（ボラティリティに比例して震える）
-                const shake = (Math.random() - 0.5) * selectedAsset.volatility * 20;
-                gameState.current.playerY += (gameState.current.playerTargetY - gameState.current.playerY) * 0.1 + shake;
+        const loop = () => {
+            const eng = engine.current;
+            eng.update(mouseRef.current.x, mouseRef.current.y, 0);
 
-                // 敵の出現と衝突判定
-                gameState.current.enemyPos -= 10 + selectedAsset.volatility * 10;
-                if (gameState.current.enemyPos < -100) {
-                    gameState.current.enemyPos = 1200;
-                    setScore(s => s + Math.floor(100 * (1 + selectedAsset.volatility)));
-                    spawnParticles(1000, 500, selectedAsset.color, 10);
-                }
-
-                // 「含み損」の概念：ボラティリティが高すぎると安定性が低下
-                if (selectedAsset.volatility > 0.8) {
-                    setStability(s => Math.max(0, s - 0.1));
-                } else {
-                    setStability(s => Math.min(100, s + 0.05));
-                }
-
-                if (stability <= 0) setIsGameOver(true);
-            }
-
-            // --- レンダリング ---
-            ctx.clearRect(0, 0, 1000, 1000);
-
-            // 背景チャート（グリッド）
-            ctx.strokeStyle = '#0f172a';
-            ctx.lineWidth = 1;
-            for (let i = 0; i < 1000; i += 50) {
-                ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 1000); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(1000, i); ctx.stroke();
-            }
-
-            // プレイヤー（リーパー・コア）
-            const glow = ctx.createRadialGradient(200, gameState.current.playerY, 0, 200, gameState.current.playerY, 50 + selectedAsset.volatility * 50);
-            glow.addColorStop(0, selectedAsset.color);
-            glow.addColorStop(1, 'transparent');
-            ctx.fillStyle = glow;
-            ctx.beginPath(); ctx.arc(200, gameState.current.playerY, 100, 0, Math.PI * 2); ctx.fill();
-
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 40px Inter';
-            ctx.textAlign = 'center';
-            ctx.fillText(selectedAsset.symbol, 200, gameState.current.playerY + 15);
-
-            // 敵（マーケット・ボラティリティ・スパイク）
-            ctx.fillStyle = '#ef4444';
-            const h = 50 + Math.sin(timestamp / 100) * 100;
-            ctx.fillRect(gameState.current.enemyPos, 500 - h / 2, 20, h);
-
-            // パーティクル
-            setParticles(prev => prev.map(p => ({
-                ...p,
-                x: p.x + p.vx,
-                y: p.y + p.vy,
-                life: p.life - 0.02
-            })).filter(p => p.life > 0));
-
-            particles.forEach(p => {
-                ctx.globalAlpha = p.life;
-                ctx.fillStyle = p.color;
-                ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI * 2); ctx.fill();
+            // Sync Stats (throttle for perf usually, but simple here)
+            setStats({
+                score: Math.floor(eng.score),
+                combo: eng.combo,
+                level: eng.systemLevel,
+                energy: eng.energy
             });
-            ctx.globalAlpha = 1.0;
 
-            frameRef.current = requestAnimationFrame(loop);
+            // --- RENDER ---
+            ctx.fillStyle = COLORS.BG;
+            ctx.fillRect(0, 0, 1000, 1000);
+
+            // Grid Effects
+            ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+            ctx.lineWidth = 1;
+            const t = Date.now() / 1000;
+            const gridSize = 100;
+            const off = (t * 20) % gridSize;
+            for (let i = 0; i < 1200; i += gridSize) {
+                ctx.beginPath(); ctx.moveTo(0, i + off); ctx.lineTo(1000, i + off); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 1000); ctx.stroke();
+            }
+
+            // Draw Cores
+            eng.cores.forEach(c => {
+                ctx.shadowBlur = 20 + c.pulse;
+                ctx.shadowColor = COLORS[c.type];
+                ctx.fillStyle = COLORS[c.type];
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+
+                ctx.beginPath();
+                ctx.arc(c.x, c.y, c.radius + c.pulse * 0.5, 0, Math.PI * 2);
+                ctx.stroke();
+
+                ctx.globalAlpha = 0.2 + (c.pulse > 1 ? 0.3 : 0);
+                ctx.fill();
+                ctx.globalAlpha = 1.0;
+
+                // Label
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 12px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText('PROCESS', c.x, c.y - 15);
+                ctx.fillText('CORE', c.x, c.y + 5);
+            });
+
+            // Draw Paddle
+            const p = eng.paddle;
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.angle);
+
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = '#fff';
+            ctx.fillStyle = 'rgba(255,255,255,0.9)';
+            ctx.fillRect(-p.length / 2, -p.width / 2, p.length, p.width);
+
+            // Reflective sheen
+            ctx.fillStyle = 'rgba(0,242,255,0.5)';
+            ctx.fillRect(-p.length / 2 + 5, -p.width / 2 + 2, p.length - 10, p.width / 2);
+
+            ctx.restore();
+
+            // Draw Particles
+            eng.particles.forEach(pt => {
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = COLORS[pt.type];
+                ctx.fillStyle = COLORS[pt.type];
+
+                ctx.beginPath();
+                if (pt.type === 'CYAN') {
+                    // Circle
+                    ctx.arc(pt.x, pt.y, pt.radius, 0, Math.PI * 2);
+                } else if (pt.type === 'MAGENTA') {
+                    // Square
+                    ctx.rect(pt.x - pt.radius, pt.y - pt.radius, pt.radius * 2, pt.radius * 2);
+                } else {
+                    // Triangle
+                    ctx.moveTo(pt.x, pt.y - pt.radius);
+                    ctx.lineTo(pt.x + pt.radius, pt.y + pt.radius);
+                    ctx.lineTo(pt.x - pt.radius, pt.y + pt.radius);
+                }
+                ctx.fill();
+            });
+
+            ctx.shadowBlur = 0;
+            frameId = requestAnimationFrame(loop);
         };
+        loop();
 
-        frameRef.current = requestAnimationFrame(loop);
-        return () => cancelAnimationFrame(frameRef.current);
-    }, [isGameOver, selectedAsset, stability, particles, spawnParticles]);
-
-    const handleMouseMove = (e: React.MouseEvent) => {
-        const rect = canvasRef.current?.getBoundingClientRect();
-        if (rect) {
-            gameState.current.playerTargetY = (e.clientY - rect.top) * (1000 / rect.height);
-        }
-    };
+        return () => cancelAnimationFrame(frameId);
+    }, []);
 
     return (
-        <div className="fixed inset-0 bg-[#020617] text-white flex flex-col font-sans overflow-hidden">
-            {/* プレミアム・ヘッダー：リアルタイム・ティッカーボード */}
-            <header className="h-28 border-b border-white/10 bg-black/50 backdrop-blur-2xl flex items-center justify-between px-12 z-50">
-                <div className="flex flex-col">
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                        <span className="text-[10px] font-black tracking-[0.6em] text-emerald-500 uppercase">Live_Market_Stream</span>
+        <div className="fixed inset-0 bg-[#020205] text-white flex flex-col font-sans overflow-hidden cursor-none">
+            {/* CANVAS LAYER */}
+            <div className="absolute inset-0 flex items-center justify-center">
+                <canvas
+                    ref={canvasRef}
+                    width={1000} height={1000}
+                    className="w-full h-full object-contain"
+                    onMouseMove={handleMouseMove}
+                    onWheel={handleWheel}
+                />
+            </div>
+
+            {/* UI OVERLAY */}
+            <div className="absolute inset-0 pointer-events-none p-10 flex flex-col justify-between">
+                {/* Header */}
+                <div className="flex justify-between items-start">
+                    <div>
+                        <div className="text-[10px] font-bold text-cyan-400 tracking-[0.6em] uppercase mb-1">MegaDrawk_Labs</div>
+                        <h1 className="text-4xl font-black italic tracking-tighter text-white">CRYSTAL LOGIC <span className="text-xl text-slate-500 font-light not-italic">/ REFLECTOR</span></h1>
                     </div>
-                    <h1 className="text-4xl font-black italic tracking-tighter leading-none">MARKET_REAPER <span className="text-slate-600 text-xl font-normal tracking-normal italic ml-3">/ VOLATILITY_COMBAT</span></h1>
+                    <div className="text-right">
+                        <div className="text-[10px] uppercase tracking-widest text-slate-500">Processing_Efficiency</div>
+                        <div className="text-4xl font-mono font-bold text-cyan-400">{stats.score.toLocaleString()}</div>
+                        {stats.combo > 1 && (
+                            <motion.div initial={{ scale: 1.5 }} animate={{ scale: 1 }} className="text-xl font-bold text-yellow-400 italic mt-2">
+                                CHAIN {stats.combo}x
+                            </motion.div>
+                        )}
+                    </div>
                 </div>
 
-                <div className="flex gap-12 items-center">
-                    <div className="flex flex-col items-end">
-                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Cumulative_Yield</span>
-                        <span className="text-5xl font-black italic text-emerald-400 font-mono tracking-tighter shadow-emerald-500/50 drop-shadow-lg">{score.toLocaleString()}</span>
-                    </div>
-                </div>
-            </header>
-
-            <main className="flex-1 relative flex">
-                {/* サイドバー：アセット・セレクター */}
-                <aside className="w-96 border-r border-white/10 p-10 flex flex-col gap-6 bg-black/20 z-40">
-                    <h2 className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-600 mb-4">Select_Asset_Class</h2>
-                    <div className="space-y-4">
-                        {INITIAL_ASSETS.map((asset) => (
-                            <button
-                                key={asset.symbol}
-                                onClick={() => {
-                                    setSelectedAsset(asset);
-                                    setStability(100);
-                                }}
-                                className={`w-full p-6 rounded-[2rem] border transition-all flex items-center justify-between ${selectedAsset.symbol === asset.symbol ? 'bg-white/10 border-emerald-500/50 shadow-[0_0_40px_rgba(16,185,129,0.2)] scale-[1.02]' : 'bg-white/5 border-white/5 hover:border-white/20'}`}
-                            >
-                                <div className="flex flex-col items-start gap-1">
-                                    <span className="text-2xl font-black italic">{asset.symbol}</span>
-                                    <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{asset.name}</span>
-                                </div>
-                                <div className="text-right">
-                                    <div className={`text-lg font-black italic ${asset.change24h >= 0 ? 'text-emerald-400' : 'text-rose-500'}`}>
-                                        {asset.change24h >= 0 ? '+' : ''}{asset.change24h}%
-                                    </div>
-                                    <div className="text-[10px] font-mono text-slate-400">${asset.price.toFixed(2)}</div>
-                                </div>
-                            </button>
-                        ))}
+                {/* Footer Controls / Energy */}
+                <div className="flex justify-between items-end">
+                    <div className="text-xs font-mono text-slate-500">
+                        <div>CONTROLS:</div>
+                        <div>MOUSE: POSITION</div>
+                        <div>WHEEL: ANGLE</div>
                     </div>
 
-                    {/* ボラティリティ・インジケーター */}
-                    <div className="mt-auto p-8 bg-emerald-500/5 rounded-[3rem] border border-emerald-500/10">
-                        <div className="flex justify-between items-end mb-4">
-                            <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Active_Volatility</span>
-                            <span className="text-2xl font-black font-mono italic">{(selectedAsset.volatility * 100).toFixed(1)}%</span>
+                    <div className="w-64">
+                        <div className="flex justify-between text-xs font-bold mb-2">
+                            <span>SYSTEM_INTEGRITY</span>
+                            <span>{stats.energy.toFixed(0)}%</span>
                         </div>
-                        <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+                        <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
                             <motion.div
-                                animate={{ width: `${selectedAsset.volatility * 100}%` }}
-                                className="h-full bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.5)]"
+                                animate={{ width: `${stats.energy}%` }}
+                                className={`h-full ${stats.energy < 30 ? 'bg-red-500' : 'bg-cyan-500'}`}
                             />
                         </div>
                     </div>
-                </aside>
-
-                {/* バトル・チャンバー */}
-                <div className="flex-1 relative flex items-center justify-center p-12 overflow-hidden">
-                    <div className="relative w-full h-full max-w-[1200px] aspect-[16/9]">
-                        <canvas
-                            ref={canvasRef}
-                            width={1200} height={675}
-                            onMouseMove={handleMouseMove}
-                            className="w-full h-full bg-[#01030a] rounded-[4rem] border border-white/10 shadow-[0_0_100px_rgba(0,0,0,0.8)] cursor-none"
-                        />
-
-                        {/* 安定性ゲージ（オーバーレイ） */}
-                        <div className="absolute top-12 left-12 right-12 flex items-center gap-6">
-                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Core_Stability</span>
-                            <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
-                                <motion.div
-                                    animate={{ width: `${stability}%` }}
-                                    className={`h-full ${stability < 30 ? 'bg-rose-500 animate-pulse' : 'bg-cyan-500'}`}
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    <AnimatePresence>
-                        {isGameOver && (
-                            <motion.div
-                                initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                                className="absolute inset-0 z-[100] bg-black/90 backdrop-blur-3xl flex items-center justify-center p-20"
-                            >
-                                <div className="text-center">
-                                    <h2 className="text-9xl font-black italic text-rose-500 tracking-tighter mb-4 scale-x-110">LIQUIDATED</h2>
-                                    <p className="text-xl font-bold uppercase tracking-widest text-rose-300 mb-12">Total Core Instability. Portfolio Collapsed.</p>
-                                    <div className="bg-white/5 p-12 rounded-[3rem] border border-white/10 mb-12">
-                                        <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Session_Final_Analysis</div>
-                                        <div className="flex justify-between items-center mb-6">
-                                            <span className="text-slate-400 font-bold uppercase text-sm tracking-widest">Total_Yield:</span>
-                                            <span className="text-5xl font-black italic text-white">{score.toLocaleString()}</span>
-                                        </div>
-                                    </div>
-                                    <button
-                                        onClick={() => {
-                                            setScore(0);
-                                            setStability(100);
-                                            setIsGameOver(false);
-                                        }}
-                                        className="px-20 py-8 bg-white text-black font-black italic uppercase tracking-widest rounded-full hover:scale-105 transition active:scale-95 shadow-[0_0_50px_rgba(255,255,255,0.3)]"
-                                    >
-                                        Re_Enter_Market
-                                    </button>
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
                 </div>
-            </main>
+            </div>
 
-            {/* フッター：システムログ */}
-            <footer className="h-12 border-t border-white/10 bg-black flex items-center justify-between px-12 text-[9px] font-black uppercase tracking-[0.5em] text-slate-700">
-                <div className="flex gap-12">
-                    <div className="flex gap-4 items-center"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> API_Status: Synchronized</div>
-                    <div className="flex gap-4 items-center"><div className="w-1.5 h-1.5 rounded-full bg-cyan-500" /> Physics: Market_Elastic_Core</div>
+            {/* Instruction Overlay (First Time) */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center opacity-50 pointer-events-none">
+                <div className="text-[10px] tracking-[0.5em] uppercase text-white mb-2">Initialize Reflector</div>
+                <div className="w-16 h-16 border border-white/20 rounded-full mx-auto flex items-center justify-center animate-pulse">
+                    <div className="w-1 h-1 bg-white rounded-full" />
                 </div>
-                <div className="italic text-slate-500">Global_Market_Reaper_Protocol_Active</div>
-            </footer>
+            </div>
         </div>
     );
 };
 
-export const LogicFlux = MarketReaper;
+export const LogicFlux = CrystalLogic;
 export default LogicFlux;
