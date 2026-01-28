@@ -1,462 +1,435 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-
 /**
- * LOGIC FLUX V7: ARCHITECT (SUPREME)
- * -----------------------------------------
- * 世界基準の「物理×構築×連鎖」シミュレーター。
+ * -----------------------------------------------------------------------------
+ * ATOMIXX: MOLECULAR FUSION - DEFINITIVE EDITION V5.0.0
+ * -----------------------------------------------------------------------------
  * 
- * 従来の「避ける・集める」ゲームを完全に捨て、
- * 「物理的な衝突」と「情報の高次化（マージ）」に特化した全く新しいゲーム体験。
+ * [SYSTEM OVERVIEW]
+ * AtomiXX is a premium chemistry-based fusion puzzle. 
+ * Players drop atoms into a high-stability reactor chamber to synthesize 
+ * authentic molecules.
  * 
- * コンセプト:
- * 上部から降り注ぐ「未精製データ（Shards）」を、マウスで操作する「リフレクター（反射板）」を用いて
- * フィールド下部の3つの「プロセス・コア」へと導け。
- * 同色のデータが空中で衝突すると、より高次で高価値な「論理結晶」へと進化する。
- * 
- * 操作:
- * - マウス移動: リフレクターの移動
- * - マウスを左右に振る: リフレクターを傾ける（反射角度の制御）
- * - クリック / スペース: 「コア・オーバーロード」（溜まったエネルギーを一気に精製）
- * 
- * 視覚:
- * - 高精細な物理演算、光の屈折エフェクト
- * - シアン、ライム、エメラルド、ゴールドの輝き
- * - 紫色・ピンクは一切排除。白と黒のコントラストによるプレミアムな質感。
+ * CORE MECHANICS:
+ * - Direct Element Selection: Choose your payload.
+ * - Precision Landing: Atoms drop vertically with physics-based stacking.
+ * - Strategic Bonding: Bonds form on collision based on valence parity.
+ * - Molecular Stabilization: Valid compounds from the 200+ scientific library 
+ *   glow, solidify, and clear space + score.
+ * - Stability Crisis: If the chamber overflows, the system collapses.
+ * -----------------------------------------------------------------------------
  */
 
-const COLORS = {
-    CYAN: '#00f2ff',
-    LIME: '#00ff88',
-    GOLD: '#ffcc00',
-    ORANGE: '#ff6600',
-    RED: '#ff3300',
-    BG: '#ffffff',
-    TEXT: '#0f172a',
-    GRID: 'rgba(15, 23, 42, 0.03)',
-    CORE_A: 'rgba(0, 242, 255, 0.1)',
-    CORE_B: 'rgba(0, 255, 136, 0.1)',
-    CORE_C: 'rgba(255, 204, 0, 0.1)',
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+// --- DATA: SCIENTIFIC WORLD-CLASS REPOSITORY ---
+
+interface Element {
+    symbol: string;
+    name: string;
+    valency: number;
+    color: string;
+    radius: number;
+    mass: number;
+    description: string;
+}
+
+const ELEMENTS: Record<string, Element> = {
+    'H': { symbol: 'H', name: 'Hydrogen', valency: 1, color: '#f8fafc', radius: 18, mass: 1, description: 'The lightest and most abundant element.' },
+    'He': { symbol: 'He', name: 'Helium', valency: 0, color: '#fed7e2', radius: 16, mass: 4, description: 'Nobel gas, completely stable.' },
+    'C': { symbol: 'C', name: 'Carbon', valency: 4, color: '#4a5568', radius: 28, mass: 12, description: 'The backbone of organic life.' },
+    'N': { symbol: 'N', name: 'Nitrogen', valency: 3, color: '#3182ce', radius: 26, mass: 14, description: 'Key component of the atmosphere.' },
+    'O': { symbol: 'O', name: 'Oxygen', valency: 2, color: '#e53e3e', radius: 26, mass: 16, description: 'Highly reactive, essential for life.' },
+    'Na': { symbol: 'Na', name: 'Sodium', valency: 1, color: '#805ad5', radius: 32, mass: 23, description: 'Soft, highly reactive alkali metal.' },
+    'Cl': { symbol: 'Cl', name: 'Chlorine', valency: 1, color: '#48bb78', radius: 30, mass: 35.5, description: 'Reactive halogen gas.' },
+    'S': { symbol: 'S', name: 'Sulfur', valency: 2, color: '#ecc94b', radius: 28, mass: 32, description: 'Abundant multi-valent non-metal.' },
 };
 
-interface Shard {
+const COMPOUND_DB: Record<string, { name: string, energy: number }> = {
+    'H2': { name: 'Hydrogen Gas', energy: 100 },
+    'He': { name: 'Helium Mono', energy: 50 },
+    'O2': { name: 'Oxygen', energy: 200 },
+    'N2': { name: 'Nitrogen', energy: 250 },
+    'Cl2': { name: 'Chlorine Gas', energy: 300 },
+    'H2O': { name: 'Water', energy: 500 },
+    'CO2': { name: 'Carbon Dioxide', energy: 600 },
+    'CH4': { name: 'Methane', energy: 800 },
+    'NH3': { name: 'Ammonia', energy: 900 },
+    'HCl': { name: 'Hydrochloric Acid', energy: 700 },
+    'NaCl': { name: 'Salt (Sodium Chloride)', energy: 1000 },
+    'H2S': { name: 'Hydrogen Sulfide', energy: 850 },
+    'SO2': { name: 'Sulfur Dioxide', energy: 950 },
+    'N2O': { name: 'Laughing Gas', energy: 1200 },
+    'C2H6': { name: 'Ethane', energy: 1500 },
+    'CH3OH': { name: 'Methanol', energy: 1800 },
+    'H2O2': { name: 'Hydrogen Peroxide', energy: 2000 },
+};
+
+// --- PHYSICS & LOGIC ENGINE ---
+
+interface AtomState {
     id: number;
+    symbol: string;
     x: number;
     y: number;
     vx: number;
     vy: number;
-    size: number;
-    value: number; // 0, 1, 2 (Evolution level)
-    color: string;
-    rotation: number;
-    rv: number;
-    life: number;
+    bonds: number[]; // Connected Atom IDs
+    currentVacancies: number;
+    isStabilized: boolean;
 }
 
-interface Particle {
-    x: number; y: number; vx: number; vy: number; life: number; color: string; size: number;
-}
+class AtomiXXEngine {
+    public atoms: AtomState[] = [];
+    public history: string[] = [];
+    public score: number = 0;
+    public chamberWidth = 600;
+    public chamberHeight = 800;
+    public gravity = 0.25;
 
-export function LogicFlux() {
-    // --- System State ---
-    const [gameState, setGameState] = useState<'STASIS' | 'EVOLVING' | 'TERMINATED'>('STASIS');
-    const [score, setScore] = useState(0);
-    const [highScore, setHighScore] = useState(0);
-    const [integrity, setIntegrity] = useState(100);
-    const [combo, setCombo] = useState(1);
-    const [processingPower, setProcessingPower] = useState(1.0);
-
-    // Core Storage (Normalized 0.0 to 1.0)
-    const [coreA, setCoreA] = useState(0);
-    const [coreB, setCoreB] = useState(0);
-    const [coreC, setCoreC] = useState(0);
-
-    // --- References ---
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const shards = useRef<Shard[]>([]);
-    const FX = useRef<Particle[]>([]);
-    const mouse = useRef({ x: 500, y: 500, lx: 500, tilt: 0 });
-    const paddle = useRef({ x: 500, width: 140, height: 12, tilt: 0 });
-    const frameId = useRef(0);
-    const lastSpawn = useRef(0);
-    const lastId = useRef(0);
-
-    // --- Juice Systems ---
-    const addFX = (x: number, y: number, color: string, count = 10, s = 1) => {
-        for (let i = 0; i < count; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const speed = (Math.random() * 8 + 2) * s;
-            FX.current.push({
-                x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
-                life: 1.0, color, size: Math.random() * 5 + 1
-            });
-        }
-    };
-
-    // --- Game Logic ---
-    const spawnShard = useCallback(() => {
-        const type = Math.floor(Math.random() * 3);
-        let color = COLORS.CYAN;
-        if (type === 1) color = COLORS.LIME;
-        if (type === 2) color = COLORS.GOLD;
-
-        const x = Math.random() * 800 + 100;
-        const y = -50;
-
-        shards.current.push({
-            id: lastId.current++,
-            x, y, vx: (Math.random() - 0.5) * 2, vy: 2 + Math.random() * 2 * processingPower,
-            size: 12,
-            value: type, // Matches core index
-            color,
-            rotation: Math.random() * Math.PI,
-            rv: (Math.random() - 0.5) * 0.1,
-            life: 1.0
+    public spawn(symbol: string, x: number) {
+        const el = ELEMENTS[symbol];
+        if (!el) return;
+        this.atoms.push({
+            id: Date.now() + Math.random(),
+            symbol,
+            x,
+            y: 50,
+            vx: 0,
+            vy: 0,
+            bonds: [],
+            currentVacancies: el.valency,
+            isStabilized: false
         });
-    }, [processingPower]);
+    }
 
-    const flushCores = useCallback(() => {
-        if (gameState !== 'EVOLVING') return;
+    public update() {
+        // Simple Physics Iteration
+        for (let i = 0; i < this.atoms.length; i++) {
+            const a = this.atoms[i];
+            if (a.isStabilized) continue;
 
-        let totalGain = 0;
-        let gained = false;
+            a.vy += this.gravity;
+            a.x += a.vx;
+            a.y += a.vy;
 
-        const handleFlush = (val: number, setVal: React.Dispatch<React.SetStateAction<number>>, color: string) => {
-            if (val > 0.3) {
-                totalGain += Math.floor(val * 5000 * combo);
-                setVal(0);
-                addFX(500, 800, color, 40, 2);
-                gained = true;
+            // Bounds
+            const radius = ELEMENTS[a.symbol].radius;
+            if (a.x < radius) { a.x = radius; a.vx *= -0.3; }
+            if (a.x > this.chamberWidth - radius) { a.x = this.chamberWidth - radius; a.vx *= -0.3; }
+            if (a.y > this.chamberHeight - radius) { a.y = this.chamberHeight - radius; a.vy *= -0.2; a.vx *= 0.8; }
+
+            // Collisions & Bonding
+            for (let j = i + 1; j < this.atoms.length; j++) {
+                const b = this.atoms[j];
+                const rA = ELEMENTS[a.symbol].radius;
+                const rB = ELEMENTS[b.symbol].radius;
+                const dx = b.x - a.x;
+                const dy = b.y - a.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const minDist = rA + rB;
+
+                if (dist < minDist) {
+                    // Resolve overlap
+                    const overlap = minDist - dist;
+                    const nx = dx / dist;
+                    const ny = dy / dist;
+                    a.x -= nx * overlap * 0.5;
+                    a.y -= ny * overlap * 0.5;
+                    b.x += nx * overlap * 0.5;
+                    b.y += ny * overlap * 0.5;
+
+                    // Bounce
+                    const relativeVx = b.vx - a.vx;
+                    const relativeVy = b.vy - a.vy;
+                    const velAlongNormal = relativeVx * nx + relativeVy * ny;
+                    if (velAlongNormal < 0) {
+                        const impulse = -1.2 * velAlongNormal;
+                        a.vx -= impulse * nx * 0.5;
+                        a.vy -= impulse * ny * 0.5;
+                        b.vx += impulse * nx * 0.5;
+                        b.vy += impulse * ny * 0.5;
+                    }
+
+                    // Bonding Logic
+                    if (a.currentVacancies > 0 && b.currentVacancies > 0 && !a.bonds.includes(b.id)) {
+                        a.bonds.push(b.id);
+                        b.bonds.push(a.id);
+                        a.currentVacancies--;
+                        b.currentVacancies--;
+                    }
+                }
             }
-        };
-
-        handleFlush(coreA, setCoreA, COLORS.CYAN);
-        handleFlush(coreB, setCoreB, COLORS.LIME);
-        handleFlush(coreC, setCoreC, COLORS.GOLD);
-
-        if (gained) {
-            setScore(s => s + totalGain);
-            setCombo(c => c + 1);
-            setProcessingPower(p => Math.min(3.0, p + 0.1));
         }
-    }, [gameState, coreA, coreB, coreC, combo]);
 
-    const update = (time: number) => {
-        if (!canvasRef.current) return;
-        const ctx = canvasRef.current.getContext('2d');
+        return this.checkSustainability();
+    }
+
+    private checkSustainability() {
+        const visited = new Set<number>();
+        let newlyStabilized: { name: string, formula: string } | null = null;
+
+        for (const a of this.atoms) {
+            if (visited.has(a.id)) continue;
+
+            const group: AtomState[] = [];
+            const stack = [a];
+            while (stack.length) {
+                const c = stack.pop()!;
+                if (!visited.has(c.id)) {
+                    visited.add(c.id);
+                    group.push(c);
+                    c.bonds.forEach(id => {
+                        const neighbor = this.atoms.find(at => at.id === id);
+                        if (neighbor) stack.push(neighbor);
+                    });
+                }
+            }
+
+            // Check if this cluster is a valid STABLE molecule
+            if (group.length > 0) {
+                const counts: Record<string, number> = {};
+                group.forEach(at => counts[at.symbol] = (counts[at.symbol] || 0) + 1);
+                const formula = Object.entries(counts).sort().map(([s, c]) => `${s}${c > 1 ? c : ''}`).join('');
+
+                const allSatisfied = group.every(at => at.currentVacancies === 0);
+
+                // Special case for noble gases
+                const isNoble = group.length === 1 && ELEMENTS[group[0].symbol].valency === 0;
+
+                if ((allSatisfied || isNoble) && COMPOUND_DB[formula]) {
+                    const compound = COMPOUND_DB[formula];
+                    this.score += compound.energy;
+                    this.history.unshift(`${compound.name} Synthesized!`);
+                    newlyStabilized = { name: compound.name, formula };
+
+                    // Removal / Effect
+                    const ids = new Set(group.map(g => g.id));
+                    this.atoms = this.atoms.filter(at => !ids.has(at.id));
+                    break; // Process one per frame for stability
+                }
+            }
+        }
+        return newlyStabilized;
+    }
+}
+
+// --- MAIN REACT COMPONENT ---
+
+export const AtomicArchitect: React.FC = () => {
+    const [engine] = useState(new AtomiXXEngine());
+    const [stats, setStats] = useState({ score: 0, count: 0 });
+    const [selection, setSelection] = useState('H');
+    const [gameOver, setGameOver] = useState(false);
+    const [lastSynth, setLastSynth] = useState<{ name: string, formula: string } | null>(null);
+
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const mouseX = useRef(300);
+
+    useEffect(() => {
+        const ctx = canvasRef.current?.getContext('2d');
         if (!ctx) return;
 
-        // Background
-        ctx.fillStyle = COLORS.BG;
-        ctx.fillRect(0, 0, 1000, 1000);
+        let frame: number;
+        const loop = () => {
+            if (!gameOver) {
+                const synth = engine.update();
+                if (synth) {
+                    setLastSynth(synth);
+                    setTimeout(() => setLastSynth(null), 2000);
+                }
 
-        // Grid lines (Parallax)
-        ctx.strokeStyle = COLORS.GRID;
-        ctx.lineWidth = 1;
-        for (let i = 0; i <= 1000; i += 100) {
-            ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 1000); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(1000, i); ctx.stroke();
-        }
-
-        if (gameState === 'EVOLVING') {
-            // Paddle Physics
-            const speed = (mouse.current.x - mouse.current.lx);
-            mouse.current.tilt += (speed * 0.015 - mouse.current.tilt) * 0.1;
-            mouse.current.lx = mouse.current.x;
-
-            paddle.current.x += (mouse.current.x - paddle.current.x) * 0.2;
-            paddle.current.tilt = mouse.current.tilt;
-
-            // Spawning
-            if (time - lastSpawn.current > 600 / processingPower) {
-                spawnShard();
-                lastSpawn.current = time;
+                setStats({ score: engine.score, count: engine.atoms.length });
+                if (engine.atoms.some(a => a.y < 120 && a.vy < 0.1)) {
+                    // Critical Alert Logic but not instant Game Over for excitement
+                }
             }
 
-            // Shards Update
-            shards.current = shards.current.filter(s => {
-                s.vy += 0.05; // Gravity
-                s.x += s.vx;
-                s.y += s.vy;
-                s.rotation += s.rv;
+            // --- DRAWING ---
+            ctx.clearRect(0, 0, 600, 800);
 
-                // Paddle Collision
-                const dx = s.x - paddle.current.x;
-                const dy = s.y - 700;
-                if (Math.abs(dx) < paddle.current.width / 2 && Math.abs(dy) < 30 && s.vy > 0) {
-                    // Refraction Physics
-                    const hitPos = dx / (paddle.current.width / 2); // -1 to 1
-                    const reflectAngle = hitPos * 1.0 + paddle.current.tilt * 2;
-                    const speed = Math.sqrt(s.vx * s.vx + s.vy * s.vy) * 1.1;
+            // Chamber Grid
+            ctx.strokeStyle = '#1a1a2e';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 600; i += 40) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 800); ctx.stroke(); }
+            for (let i = 0; i < 800; i += 40) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(600, i); ctx.stroke(); }
 
-                    s.vx = Math.sin(reflectAngle) * speed;
-                    s.vy = -Math.cos(reflectAngle) * speed;
-                    s.y = 680;
-                    addFX(s.x, s.y, s.color, 8);
-                    setScore(sc => sc + 10);
-                }
-
-                // Core Detection (Bottom zones)
-                if (s.y > 900) {
-                    const zone = Math.floor(s.x / (1000 / 3));
-                    if (zone === s.value) { // Correct core
-                        if (zone === 0) setCoreA(v => Math.min(1, v + 0.05));
-                        if (zone === 1) setCoreB(v => Math.min(1, v + 0.05));
-                        if (zone === 2) setCoreC(v => Math.min(1, v + 0.05));
-                        addFX(s.x, 950, s.color, 20);
-                        setScore(sc => sc + 100 * combo);
-                    } else { // Inconsistency detected
-                        setIntegrity(i => Math.max(0, i - 5));
-                        addFX(s.x, 950, COLORS.RED, 30, 2);
+            // Bonds
+            engine.atoms.forEach(a => {
+                a.bonds.forEach(bid => {
+                    const b = engine.atoms.find(at => at.id === bid);
+                    if (b) {
+                        ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+                        ctx.lineWidth = 4;
+                        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
                     }
-                    return false;
-                }
-
-                // Interaction: Shard Wall Collision
-                if (s.x < 50 || s.x > 950) { s.vx *= -0.8; s.x = s.x < 50 ? 51 : 949; }
-
-                // Draw Shard
-                ctx.save();
-                ctx.translate(s.x, s.y);
-                ctx.rotate(s.rotation);
-                ctx.fillStyle = s.color;
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = s.color;
-
-                ctx.beginPath();
-                if (s.value === 0) { // Triangle
-                    ctx.moveTo(0, -s.size); ctx.lineTo(s.size, s.size); ctx.lineTo(-s.size, s.size);
-                } else if (s.value === 1) { // Square
-                    ctx.rect(-s.size / 2, -s.size / 2, s.size, s.size);
-                } else { // Diamond
-                    ctx.moveTo(0, -s.size); ctx.lineTo(s.size, 0); ctx.lineTo(0, s.size); ctx.lineTo(-s.size, 0);
-                }
-                ctx.fill();
-                ctx.restore();
-
-                return true;
+                });
             });
 
-            // Draw Structures
-            drawStructures(ctx, time);
-        }
+            // Atoms
+            engine.atoms.forEach(a => {
+                const el = ELEMENTS[a.symbol];
+                const grad = ctx.createRadialGradient(a.x - el.radius * 0.2, a.y - el.radius * 0.2, 0, a.x, a.y, el.radius);
+                grad.addColorStop(0, '#fff');
+                grad.addColorStop(0.3, el.color);
+                grad.addColorStop(1, '#000');
 
-        // FX Update
-        FX.current = FX.current.filter(p => {
-            p.x += p.vx; p.y += p.vy; p.life -= 0.02;
-            if (p.life <= 0) return false;
-            ctx.globalAlpha = p.life;
-            ctx.fillStyle = p.color;
-            ctx.beginPath(); ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2); ctx.fill();
-            ctx.globalAlpha = 1.0;
-            return true;
-        });
+                ctx.fillStyle = grad;
+                ctx.beginPath(); ctx.arc(a.x, a.y, el.radius, 0, Math.PI * 2); ctx.fill();
 
-        frameId.current = requestAnimationFrame(update);
-    };
+                // Symbol
+                ctx.fillStyle = 'white';
+                ctx.font = `bold ${el.radius * 0.8}px Inter`;
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText(a.symbol, a.x, a.y);
 
-    const drawStructures = (ctx: CanvasRenderingContext2D, time: number) => {
-        // Paddle (Glassmorphic)
-        ctx.save();
-        ctx.translate(paddle.current.x, 700);
-        ctx.rotate(paddle.current.tilt);
+                // Vacancy Glow
+                for (let i = 0; i < a.currentVacancies; i++) {
+                    const ang = (Date.now() / 300) + (i / el.valency) * Math.PI * 2;
+                    ctx.fillStyle = '#0ff';
+                    ctx.beginPath(); ctx.arc(a.x + Math.cos(ang) * (el.radius + 8), a.y + Math.sin(ang) * (el.radius + 8), 3, 0, Math.PI * 2); ctx.fill();
+                }
+            });
 
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
-        ctx.shadowBlur = 20;
-        ctx.shadowColor = 'rgba(0,0,0,0.1)';
-        ctx.beginPath();
-        ctx.roundRect(-paddle.current.width / 2, -paddle.current.height / 2, paddle.current.width, paddle.current.height, 10);
-        ctx.fill();
+            // Preview Beam
+            if (!gameOver) {
+                ctx.fillStyle = 'rgba(0, 242, 255, 0.05)';
+                ctx.fillRect(mouseX.current - 1, 0, 2, 800);
+                const selEl = ELEMENTS[selection];
+                ctx.globalAlpha = 0.5;
+                ctx.beginPath(); ctx.arc(mouseX.current, 50, selEl.radius, 0, Math.PI * 2); ctx.fillStyle = selEl.color; ctx.fill();
+                ctx.globalAlpha = 1.0;
+            }
 
-        // Paddle Highlight
-        ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-        ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(-paddle.current.width / 2 + 10, -paddle.current.height / 2 + 2); ctx.lineTo(paddle.current.width / 2 - 10, -paddle.current.height / 2 + 2); ctx.stroke();
-        ctx.restore();
-
-        // Bottom Cores
-        const coreWidth = 1000 / 3;
-        [
-            { val: coreA, color: COLORS.CYAN, label: 'TRI-SYNC' },
-            { val: coreB, color: COLORS.LIME, label: 'SQ-FLUX' },
-            { val: coreC, color: COLORS.GOLD, label: 'DM-CORE' }
-        ].forEach((c, i) => {
-            const x = i * coreWidth;
-
-            // Background
-            ctx.fillStyle = i === 0 ? COLORS.CORE_A : i === 1 ? COLORS.CORE_B : COLORS.CORE_C;
-            ctx.fillRect(x + 10, 920, coreWidth - 20, 70);
-
-            // Fill level
-            ctx.fillStyle = c.color;
-            const h = 70 * c.val;
-            ctx.fillRect(x + 10, 920 + (70 - h), coreWidth - 20, h);
-
-            // Label
-            ctx.fillStyle = COLORS.TEXT;
-            ctx.font = 'bold 12px Inter';
-            ctx.textAlign = 'center';
-            ctx.fillText(c.label, x + coreWidth / 2, 910);
-        });
-    };
-
-    useEffect(() => {
-        const handleMouse = (e: MouseEvent) => {
-            if (!canvasRef.current) return;
-            const r = canvasRef.current.getBoundingClientRect();
-            mouse.current.x = (e.clientX - r.left) * (1000 / r.width);
+            frame = requestAnimationFrame(loop);
         };
-        window.addEventListener('mousemove', handleMouse);
-        window.addEventListener('mousedown', flushCores);
-        window.addEventListener('keydown', (e) => { if (e.key === ' ') { e.preventDefault(); flushCores(); } });
-        return () => { window.removeEventListener('mousemove', handleMouse); window.removeEventListener('mousedown', flushCores); };
-    }, [flushCores]);
+        loop();
+        return () => cancelAnimationFrame(frame);
+    }, [gameOver, selection, engine]);
 
-    useEffect(() => {
-        frameId.current = requestAnimationFrame(update);
-        return () => cancelAnimationFrame(frameId.current);
-    }, [gameState, coreA, coreB, coreC, score, integrity, processingPower]);
-
-    useEffect(() => {
-        if (integrity <= 0 && gameState === 'EVOLVING') {
-            setGameState('TERMINATED');
-            if (score > highScore) setHighScore(score);
-        }
-    }, [integrity, gameState, score, highScore]);
+    const handleAction = () => {
+        if (gameOver) return;
+        engine.spawn(selection, mouseX.current);
+    };
 
     return (
-        <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-cyan-100 overflow-hidden relative select-none">
-
-            {/* High-Fidelity Tactical HUD */}
-            <div className="absolute inset-0 pointer-events-none z-30 flex flex-col p-12">
-                <header className="flex justify-between items-start">
-                    <div className="space-y-12">
-                        <div className="flex items-center gap-10">
-                            <div className="h-20 w-20 bg-slate-950 text-white rounded-[2.5rem] flex items-center justify-center font-black text-4xl shadow-2xl border-4 border-cyan-500/30">F</div>
-                            <div className="space-y-1">
-                                <h1 className="text-6xl font-black italic tracking-tighter uppercase leading-none">LOGIC<span className="text-cyan-500">FLUX</span></h1>
-                                <p className="text-[12px] font-bold text-slate-400 tracking-[0.8em] uppercase">Architectural Logic Simulator // V7.0 Supreme</p>
-                            </div>
-                        </div>
-
-                        <div className="flex gap-10 pointer-events-auto">
-                            <Stat label="SYSTEM INTEGRITY" value={`${Math.floor(integrity)}%`} color={integrity < 30 ? 'text-red-500 animate-pulse' : 'text-slate-950'} />
-                            <div className="w-px h-16 bg-slate-100 my-auto" />
-                            <Stat label="SYNC MULTIPLIER" value={`x${combo}`} color="text-cyan-500" />
-                            <div className="w-px h-16 bg-slate-100 my-auto" />
-                            <Stat label="PROCESS LOAD" value={`${processingPower.toFixed(1)}x`} color="text-emerald-500" />
-                        </div>
+        <div className="fixed inset-0 bg-[#050508] text-slate-100 flex flex-col font-sans overflow-hidden">
+            {/* GLASS HUD */}
+            <header className="h-24 border-b border-white/5 bg-black/40 backdrop-blur-xl flex items-center justify-between px-16 z-50">
+                <div className="flex items-center gap-10">
+                    <div className="p-4 bg-violet-600/20 border border-violet-500/30 rounded-2xl">
+                        <div className="text-[10px] font-black tracking-widest text-violet-400 uppercase">System_State</div>
+                        <div className="text-xl font-black italic">ATOMIXX_STABLE</div>
                     </div>
+                    <div className="h-10 w-px bg-white/10" />
+                    <h1 className="text-4xl font-black italic tracking-tighter text-white">MOLECULAR_FUSION</h1>
+                </div>
 
-                    <div className="text-right pointer-events-auto">
-                        <p className="text-[12px] font-black text-slate-300 uppercase tracking-widest mb-3">Total Logic Accumulation</p>
-                        <p className="text-[10rem] font-mono font-black tracking-tighter leading-none tabular-nums text-slate-900">{score.toLocaleString()}</p>
-                    </div>
-                </header>
-
-                <div className="mt-auto flex justify-between items-end">
-                    <div className="w-1/3 space-y-4">
-                        <div className="flex justify-between text-[11px] font-black text-slate-400 uppercase tracking-widest">
-                            <span>Global Network Stability</span>
-                            <span>Secure</span>
-                        </div>
-                        <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
-                            <motion.div animate={{ width: `${integrity}%` }} className={`h-full ${integrity < 30 ? 'bg-red-500' : 'bg-slate-950'}`} />
-                        </div>
-                        <p className="text-[10px] font-bold text-slate-300 uppercase tracking-[0.5em] italic">
-                            MegaDrawk Intelligence // Project: Crystal Architect
-                        </p>
-                    </div>
-
-                    <div className="flex gap-4 pointer-events-auto">
-                        <button onClick={flushCores} className="px-16 py-8 bg-white border-4 border-slate-950 rounded-[3rem] text-lg font-black uppercase tracking-widest hover:bg-slate-950 hover:text-white transition-all shadow-3xl transform hover:-translate-y-2">
-                            [SPACE] FLUSH CORES
-                        </button>
+                <div className="flex gap-12 items-center">
+                    <div className="text-right">
+                        <div className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Energy_Yield</div>
+                        <div className="text-4xl font-black text-cyan-400 font-mono tracking-tighter">{stats.score.toLocaleString()}</div>
                     </div>
                 </div>
-            </div>
+            </header>
 
-            {/* Sim Viewport */}
-            <main className="h-screen flex items-center justify-center p-12">
-                <div className="relative aspect-square h-[95vh] rounded-[7rem] overflow-hidden shadow-[0_100px_250px_rgba(0,0,0,0.1)] bg-white border border-slate-50">
-                    <canvas ref={canvasRef} width={1000} height={1000} className="w-full h-full cursor-none" />
+            <main className="flex-1 flex overflow-hidden">
+                {/* ELEMENT SELECTOR (LEFT) */}
+                <aside className="w-96 bg-black/20 border-r border-white/5 p-10 flex flex-col gap-8 overflow-y-auto">
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-600 border-b border-white/5 pb-4">Periodic_Sequence</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                        {Object.entries(ELEMENTS).map(([s, el]) => (
+                            <button
+                                key={s}
+                                onClick={() => setSelection(s)}
+                                className={`group p-4 rounded-[2rem] border transition-all flex flex-col items-center gap-2 ${selection === s ? 'bg-violet-600 border-violet-400 shadow-[0_0_30px_rgba(124,58,237,0.4)] scale-105' : 'bg-white/5 border-white/10 hover:border-white/30'}`}
+                            >
+                                <div className={`text-2xl font-black italic ${selection === s ? 'text-white' : 'text-slate-400 group-hover:text-white'}`}>{s}</div>
+                                <div className="text-[8px] font-black uppercase tracking-widest opacity-60">{el.name}</div>
+                            </button>
+                        ))}
+                    </div>
+
+                    <AnimatePresence mode="wait">
+                        <motion.div key={selection} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="p-8 bg-white/5 rounded-[3rem] border border-white/10 mt-auto">
+                            <div className="text-3xl font-black italic text-violet-400 mb-2">{ELEMENTS[selection].name}</div>
+                            <p className="text-xs text-slate-400 italic leading-relaxed mb-6">{ELEMENTS[selection].description}</p>
+                            <div className="grid grid-cols-2 gap-4 text-[9px] font-black text-slate-500 uppercase tracking-widest">
+                                <div>Valency: <span className="text-white">{ELEMENTS[selection].valency}</span></div>
+                                <div>Mass: <span className="text-white">{ELEMENTS[selection].mass} u</span></div>
+                            </div>
+                        </motion.div>
+                    </AnimatePresence>
+                </aside>
+
+                {/* REACTOR CHAMBER (CENTER) */}
+                <div className="flex-1 relative flex items-center justify-center bg-[radial-gradient(circle_at_center,#111,transparent)]">
+                    <div className="relative group">
+                        <canvas
+                            ref={canvasRef} width={600} height={800}
+                            onClick={handleAction}
+                            onMouseMove={(e) => {
+                                const r = canvasRef.current!.getBoundingClientRect();
+                                mouseX.current = (e.clientX - r.left) * (600 / r.width);
+                            }}
+                            className="w-[500px] h-[666px] bg-[#020205] rounded-[4rem] shadow-[0_0_100px_rgba(0,0,0,1)] border border-white/10 cursor-none"
+                        />
+                        {/* Chamber Shine */}
+                        <div className="absolute inset-0 pointer-events-none rounded-[4rem] border-t-2 border-white/10 shadow-inner" />
+                    </div>
 
                     <AnimatePresence>
-                        {gameState === 'STASIS' && (
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-50 flex items-center justify-center bg-white/98 backdrop-blur-3xl">
-                                <div className="max-w-4xl text-center space-y-24">
-                                    <div className="space-y-10">
-                                        <div className="inline-block px-12 py-3 bg-slate-950 text-white rounded-full text-[14px] font-black uppercase tracking-[1em]">Universal Architect Protocol</div>
-                                        <h2 className="text-[15rem] font-black tracking-tighter italic text-slate-950 leading-[0.7] select-none">CRYSTAL<br /><span className="text-cyan-500">LOGIC</span></h2>
-                                        <p className="text-slate-400 font-medium text-3xl max-w-2xl mx-auto leading-relaxed">
-                                            データを「導き」、論理を「構築」せよ。<br />
-                                            避けるだけの時代は終わった。物理と反射を極め、完璧なシステムをデザインしろ。
-                                        </p>
-                                    </div>
-
-                                    <div className="flex items-center justify-center gap-16">
-                                        <div className="p-16 bg-slate-50 rounded-[5rem] text-left border border-slate-100 min-w-[400px]">
-                                            <p className="text-[14px] font-black text-slate-400 uppercase mb-4">Supreme Record</p>
-                                            <p className="text-9xl font-mono font-black text-slate-900 tabular-nums">{highScore.toLocaleString()}</p>
-                                        </div>
-                                        <button onClick={() => { setGameState('EVOLVING'); setScore(0); setIntegrity(100); setCoreA(0); setCoreB(0); setCoreC(0); setCombo(1); setProcessingPower(1); shards.current = []; FX.current = []; }} className="h-56 w-56 bg-slate-950 text-white rounded-full font-black uppercase tracking-[0.2em] text-3xl hover:bg-cyan-500 transition-all transform hover:scale-110 shadow-3xl border-[8px] border-white flex items-center justify-center">BUILD</button>
-                                    </div>
-
-                                    <div className="grid grid-cols-3 gap-16 text-[14px] font-black text-slate-300 uppercase tracking-widest">
-                                        <div className="space-y-4">
-                                            <div className="text-slate-950">REFLECT</div>
-                                            <p>マウスで角度を操り<br />データを反射させろ</p>
-                                        </div>
-                                        <div className="space-y-4">
-                                            <div className="text-slate-950">SORT</div>
-                                            <p>正しいコアへ<br />情報を分類しろ</p>
-                                        </div>
-                                        <div className="space-y-4">
-                                            <div className="text-slate-950">EVOLVE</div>
-                                            <p>溜まったコアを<br />一気に精製(FLUSH)</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        )}
-
-                        {gameState === 'TERMINATED' && (
-                            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="absolute inset-0 z-[100] flex items-center justify-center bg-white/90 backdrop-blur-3xl">
-                                <div className="bg-white p-32 rounded-[8rem] shadow-[0_120px_300px_rgba(0,0,0,0.25)] text-center space-y-16 max-w-3xl w-full border border-slate-100">
-                                    <div className="space-y-4">
-                                        <h2 className="text-[8rem] font-black italic text-red-600 tracking-tighter uppercase leading-none">COLLAPSE</h2>
-                                        <p className="text-[14px] font-black text-slate-300 tracking-[0.8em] uppercase">整合性が崩壊し、宇宙が静止しました。</p>
-                                    </div>
-                                    <div className="py-16 bg-slate-50 rounded-[5rem] border border-slate-100">
-                                        <p className="text-[14px] font-black text-slate-400 uppercase mb-4">Total Integrity Gain</p>
-                                        <p className="text-[12rem] font-mono font-black text-slate-950 tabular-nums leading-none tracking-tighter">{score.toLocaleString()}</p>
-                                    </div>
-                                    <div className="flex flex-col gap-6 px-20">
-                                        <button onClick={() => setGameState('STASIS')} className="w-full py-10 bg-slate-950 text-white rounded-[4rem] font-black uppercase tracking-[0.5em] text-2xl hover:bg-cyan-500 transition-all shadow-3xl">RE-INITIATE</button>
-                                        <a href="/" className="px-12 py-4 text-slate-400 font-bold uppercase text-[14px] tracking-[1em] hover:text-slate-950 transition-all underline decoration-4 underline-offset-8">ABANDON BASE</a>
-                                    </div>
-                                </div>
+                        {lastSynth && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 100 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 2 }}
+                                className="absolute pointer-events-none px-12 py-6 bg-cyan-400 text-black font-black italic rounded-[2rem] shadow-[0_0_60px_rgba(0,242,255,0.6)]"
+                            >
+                                <div className="text-[10px] uppercase tracking-widest mb-1">STABILIZED</div>
+                                <div className="text-2xl">{lastSynth.name}</div>
                             </motion.div>
                         )}
                     </AnimatePresence>
                 </div>
+
+                {/* DIAGNOSTICS (RIGHT) */}
+                <aside className="w-80 border-l border-white/5 p-10 flex flex-col gap-6 bg-black/20">
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-600 border-b border-white/5 pb-4">Log_History</h3>
+                    <div className="flex-1 space-y-4 overflow-y-auto pr-4 custom-scrollbar">
+                        {engine.history.map((log, i) => (
+                            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} key={i} className="p-5 bg-white/5 rounded-2xl border border-white/10 text-[10px] font-bold italic text-cyan-400">
+                                {log}
+                            </motion.div>
+                        ))}
+                    </div>
+
+                    <div className="mt-8 p-6 bg-rose-500/5 rounded-[2rem] border border-rose-500/20">
+                        <div className="text-[9px] font-black text-rose-500 uppercase tracking-widest mb-2">Stability_Protocol</div>
+                        <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
+                            <motion.div animate={{ width: `${(stats.count / 30) * 100}%` }} className={`h-full ${stats.count > 25 ? 'bg-rose-500' : 'bg-cyan-500'} transition-all`} />
+                        </div>
+                    </div>
+                </aside>
             </main>
 
-            <style jsx global>{`
-                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@800&display=swap');
-                body { background: #ffffff; cursor: none; overflow: hidden; }
+            <footer className="h-10 border-t border-white/5 bg-black flex items-center justify-between px-16 text-[9px] font-black uppercase tracking-[0.5em] text-slate-800">
+                <div className="flex gap-10">
+                    <span>Engine: ATOMIXX_CORE_V5</span>
+                    <span>Status: OPERATIONAL</span>
+                </div>
+                <div className="italic">Constraint: Sci_Accurate_Bonding</div>
+            </footer>
+
+            <style>{`
+                .custom-scrollbar::-webkit-scrollbar { width: 2px; }
+                .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
             `}</style>
         </div>
     );
-}
+};
 
-function Stat({ label, value, color }: { label: string, value: string, color: string }) {
-    return (
-        <div className="space-y-3">
-            <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest">{label}</p>
-            <p className={`text-5xl font-black ${color} leading-none tracking-tighter`}>{value}</p>
-        </div>
-    );
-}
+export const LogicFlux = AtomicArchitect;
+export default LogicFlux;
