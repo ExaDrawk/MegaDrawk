@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { headers } from "next/headers";
 import { SITE } from "../config/site";
+import { AdSense } from "../components/AdSense";
 import "./globals.css";
 
 const interSans = Inter({
@@ -29,17 +30,13 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <head>
-        <script
-          async
-          nonce={nonce}
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4594218580257200"
-          crossOrigin="anonymous"
-        />
+        {/* AdSense Script removed from here, managed by AdSense component */}
       </head>
       <body
         className={`${interSans.variable} ${jetBrainsMono.variable} antialiased`}
         nonce={nonce}
       >
+        <AdSense pId="ca-pub-4594218580257200" nonce={nonce} />
         {children}
       </body>
     </html>
