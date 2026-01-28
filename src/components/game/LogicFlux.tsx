@@ -5,242 +5,294 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { SITE } from '../../config/site';
 
 /**
- * LOGIC ASCENT: SYNCHRO-STORM (V4.0)
+ * LOGIC TETHER: KINETIC REFRACTION (V5.0)
  * -----------------------------------------
- * 超直感的・高爽快感 ニューロ・アクション
+ * 世界基準のタクティカル・フィジックス・アクション
+ * 
+ * コンセプト:
+ * 「リンク」と「衝撃」。
+ * 情報をただ消すのではなく、それらを「繋ぎ」、互いに「衝突」させることで、
+ * 高純度の論理エネルギーを生み出す、物理演算ベースのアクションゲーム。
  * 
  * 操作:
- * - マウス移動: 自機(コア)の移動
- * - クリック / スペース: 「シンクロ・バースト」 (周囲のデータを一括回収 ＆ ノイズを消去)
+ * - マウス移動: コアの操作
+ * - マウスドラッグ: フィールド上の「未処理データ」を「テザー」で連結
+ * - スペースキー / 右クリック: 「論理伝導 (CONDUCT)」
+ *   - 連結されたデータが一斉にコアへ向けて加速・衝突。
+ *   - 複数のデータを一気に衝突させることで、幾何学的な爆発とスコアボムが発生。
  * 
- * ルール:
- * - 飛来する「データ(青/緑)」に触れて回収。
- * - 回収し続けると「シンクロ率」が上昇し、自機が強化。
- * - 「ノイズ(赤)」に当たるとシールド低下。
+ * 視覚効果:
+ * - 高コントラストなホワイト・ミニマリズム
+ * - 紫色を一切排除したシアン・エメラルド・ゴールドの極彩色
+ * - Verlet積分による物理テザーシミュレーション
  */
 
 const COLORS = {
-    CYAN: '#00f2ff',
-    LIME: '#00ff88',
-    YELLOW: '#fff200',
-    ORANGE: '#ff9d00',
-    RED: '#ff4d00',
+    CYAN: '#00ccff',
+    EMERALD: '#00ffa2',
+    GOLD: '#ffcc00',
+    ORANGE: '#ff6600',
+    RED: '#ff3300',
     BG: '#ffffff',
     TEXT: '#0f172a',
-    UI_BG: 'rgba(255, 255, 255, 0.8)',
+    GRID: 'rgba(15, 23, 42, 0.03)',
 };
 
-interface Entity {
+interface Node {
     id: number;
     x: number;
     y: number;
+    px: number; // Previous X for Verlet
+    py: number; // Previous Y for Verlet
     vx: number;
     vy: number;
     size: number;
-    type: 'DATA' | 'NOISE' | 'POWERUP';
+    type: 'DATA' | 'IMPURITY' | 'CATALYST';
     color: string;
-    life: number;
+    isTethered: boolean;
+    mass: number;
+}
+
+interface Connection {
+    a: number; // Node ID
+    b: number; // Node ID
 }
 
 interface Particle {
-    x: number;
-    y: number;
-    vx: number;
-    vy: number;
-    life: number;
-    color: string;
+    x: number; y: number; vx: number; vy: number; life: number; color: string; size: number;
 }
 
 export function LogicFlux() {
-    const [gameState, setGameState] = useState<'IDLE' | 'PLAYING' | 'GAMEOVER'>('IDLE');
+    const [gameState, setGameState] = useState<'IDLE' | 'BOOTING' | 'ACTION' | 'COLLAPSE'>('IDLE');
     const [score, setScore] = useState(0);
     const [highScore, setHighScore] = useState(0);
-    const [shield, setShield] = useState(100);
-    const [syncRate, setSyncRate] = useState(0); // 0 to 100
-    const [level, setLevel] = useState(1);
+    const [energy, setEnergy] = useState(100);
+    const [linkCount, setLinkCount] = useState(0);
+    const [multiplier, setMultiplier] = useState(1.0);
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const entities = useRef<Entity[]>([]);
+    const nodes = useRef<Node[]>([]);
     const FX = useRef<Particle[]>([]);
-    const mousePos = useRef({ x: 500, y: 500 });
-    const corePos = useRef({ x: 500, y: 500 }); // Smoothed position
+    const tethers = useRef<Connection[]>([]);
+    const mouse = useRef({ x: 500, y: 500, isDown: false, lastX: 500, lastY: 500 });
+    const core = useRef({ x: 500, y: 500, r: 25 });
     const frameId = useRef(0);
     const lastSpawn = useRef(0);
     const lastId = useRef(0);
 
-    const createExplosion = (x: number, y: number, color: string, count = 10) => {
+    // --- Juice Systems ---
+    const addFX = (x: number, y: number, color: string, count = 10, speedMult = 1) => {
         for (let i = 0; i < count; i++) {
             const angle = Math.random() * Math.PI * 2;
-            const speed = Math.random() * 5 + 2;
+            const s = (Math.random() * 8 + 2) * speedMult;
             FX.current.push({
                 x, y,
-                vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed,
+                vx: Math.cos(angle) * s,
+                vy: Math.sin(angle) * s,
                 life: 1.0,
-                color
+                color,
+                size: Math.random() * 6 + 2
             });
         }
     };
 
-    const spawnEntity = useCallback(() => {
-        const typeRand = Math.random();
-        let type: Entity['type'] = 'DATA';
-        let color = COLORS.CYAN;
-        let size = 15;
-
-        if (typeRand < 0.2 + (level * 0.05)) {
-            type = 'NOISE';
-            color = COLORS.RED;
-            size = 20;
-        } else if (typeRand > 0.98) {
-            type = 'POWERUP';
-            color = COLORS.YELLOW;
-            size = 25;
-        } else if (Math.random() > 0.5) {
-            color = COLORS.LIME;
-        }
-
+    // --- Physics Engine ---
+    const spawnNode = useCallback(() => {
         const angle = Math.random() * Math.PI * 2;
-        const dist = 800;
+        const dist = 600;
         const x = 500 + Math.cos(angle) * dist;
         const y = 500 + Math.sin(angle) * dist;
 
-        const targetX = 500 + (Math.random() * 200 - 100);
-        const targetY = 500 + (Math.random() * 200 - 100);
-        const moveAngle = Math.atan2(targetY - y, targetX - x);
-        const speed = (2 + Math.random() * 3) * (1 + level * 0.1);
+        const typeRand = Math.random();
+        let type: Node['type'] = 'DATA';
+        let color = COLORS.CYAN;
+        let mass = 1.0;
 
-        entities.current.push({
+        if (typeRand < 0.15) { type = 'IMPURITY'; color = COLORS.RED; mass = 2.0; }
+        else if (typeRand > 0.95) { type = 'CATALYST'; color = COLORS.GOLD; mass = 0.5; }
+        else if (Math.random() > 0.5) { color = COLORS.EMERALD; }
+
+        const targetX = 500 + (Math.random() * 300 - 150);
+        const targetY = 500 + (Math.random() * 300 - 150);
+        const dx = targetX - x;
+        const dy = targetY - y;
+        const mag = Math.sqrt(dx * dx + dy * dy);
+        const vx = (dx / mag) * (1.5 + Math.random() * 2);
+        const vy = (dy / mag) * (1.5 + Math.random() * 2);
+
+        nodes.current.push({
             id: lastId.current++,
-            x, y,
-            vx: Math.cos(moveAngle) * speed,
-            vy: Math.sin(moveAngle) * speed,
-            size, type, color,
-            life: 1.0
+            x, y, px: x - vx, py: y - vy,
+            vx, vy,
+            size: type === 'IMPURITY' ? 25 : 18,
+            type, color,
+            isTethered: false,
+            mass
         });
-    }, [level]);
+    }, []);
 
-    const triggerBurst = useCallback(() => {
-        if (gameState !== 'PLAYING') return;
+    const conductEnergy = useCallback(() => {
+        if (gameState !== 'ACTION') return;
 
-        const burstRadius = 250 + (syncRate * 2);
-        createExplosion(corePos.current.x, corePos.current.y, COLORS.CYAN, 30);
+        const tethered = nodes.current.filter(n => n.isTethered);
+        if (tethered.length === 0) return;
 
-        entities.current.forEach(e => {
-            const d = Math.sqrt(Math.pow(e.x - corePos.current.x, 2) + Math.pow(e.y - corePos.current.y, 2));
-            if (d < burstRadius) {
-                if (e.type === 'DATA') {
-                    setScore(s => s + 100);
-                    setSyncRate(r => Math.min(100, r + 2));
-                } else if (e.type === 'NOISE') {
-                    setScore(s => s + 50);
-                }
-                e.life = 0;
-                createExplosion(e.x, e.y, e.color, 5);
-            }
+        // Visual Explosion from Core
+        addFX(core.current.x, corePos.current.y, COLORS.CYAN, 30, 2);
+
+        // Accelerate all tethered towards center of mass or core
+        tethered.forEach(n => {
+            const dx = core.current.x - n.x;
+            const dy = core.current.y - n.y;
+            const d = Math.sqrt(dx * dx + dy * dy);
+            n.px = n.x - (dx / d) * 20; // High impulse
+            n.py = n.y - (dy / d) * 20;
+            n.isTethered = false;
         });
-    }, [gameState, syncRate]);
+
+        const bonus = Math.floor(tethered.length * 500 * multiplier);
+        setScore(s => s + bonus);
+        setMultiplier(m => Math.min(5.0, m + 0.2));
+        addFX(500, 50, COLORS.GOLD, 20);
+        setLinkCount(0);
+        tethers.current = [];
+    }, [gameState, multiplier]);
+
+    const corePos = useRef({ x: 500, y: 500 });
 
     const update = (time: number) => {
         if (!canvasRef.current) return;
         const ctx = canvasRef.current.getContext('2d');
         if (!ctx) return;
 
-        // Clear with slight trail
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+        // Rendering Pipeline
+        ctx.fillStyle = COLORS.BG;
         ctx.fillRect(0, 0, 1000, 1000);
 
-        if (gameState === 'PLAYING') {
-            // Core smooth follow
-            corePos.current.x += (mousePos.current.x - corePos.current.x) * 0.15;
-            corePos.current.y += (mousePos.current.y - corePos.current.y) * 0.15;
+        // Grid Background
+        ctx.strokeStyle = COLORS.GRID;
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 1000; i += 50) {
+            ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 1000); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(1000, i); ctx.stroke();
+        }
+
+        if (gameState === 'ACTION') {
+            // Core Physics
+            corePos.current.x += (mouse.current.x - corePos.current.x) * 0.2;
+            corePos.current.y += (mouse.current.y - corePos.current.y) * 0.2;
+            core.current.x = corePos.current.x;
+            core.current.y = corePos.current.y;
 
             // Spawning
-            if (time - lastSpawn.current > 400 / (1 + level * 0.2)) {
-                spawnEntity();
+            if (time - lastSpawn.current > 500) {
+                spawnNode();
                 lastSpawn.current = time;
             }
 
-            // Update Entities
-            entities.current = entities.current.filter(e => {
-                if (e.life <= 0) return false;
+            // Verlet Physics Iteration for Nodes
+            nodes.current.forEach(n => {
+                const vx = (n.x - n.px) * 0.99; // Friction
+                const vy = (n.y - n.py) * 0.99;
+                n.px = n.x;
+                n.py = n.y;
+                n.x += vx;
+                n.y += vy;
 
-                e.x += e.vx;
-                e.y += e.vy;
+                // Dragging Tether Logic
+                if (mouse.current.isDown) {
+                    const dMouse = Math.sqrt(Math.pow(n.x - mouse.current.x, 2) + Math.pow(n.y - mouse.current.y, 2));
+                    if (dMouse < 50 && !n.isTethered) {
+                        n.isTethered = true;
+                        setLinkCount(lc => lc + 1);
+                        addFX(n.x, n.y, n.color, 5);
+                    }
+                }
 
-                const d = Math.sqrt(Math.pow(e.x - corePos.current.x, 2) + Math.pow(e.y - corePos.current.y, 2));
-                const hitDist = e.size + 20 + (syncRate * 0.2);
+                // Tether Attraction (String Physics)
+                if (n.isTethered) {
+                    const dx = core.current.x - n.x;
+                    const dy = core.current.y - n.y;
+                    const d = Math.sqrt(dx * dx + dy * dy);
+                    if (d > 100) {
+                        const force = (d - 100) * 0.05;
+                        n.x += (dx / d) * force;
+                        n.y += (dy / d) * force;
+                    }
+                }
+            });
 
-                if (d < hitDist) {
-                    if (e.type === 'DATA') {
-                        setScore(s => s + 10);
-                        setSyncRate(r => Math.min(100, r + 0.5));
-                        createExplosion(e.x, e.y, e.color, 3);
-                    } else if (e.type === 'NOISE') {
-                        setShield(s => Math.max(0, s - 10));
-                        createExplosion(e.x, e.y, COLORS.RED, 15);
-                    } else if (e.type === 'POWERUP') {
-                        setShield(s => Math.min(100, s + 20));
-                        setSyncRate(100);
-                        createExplosion(e.x, e.y, COLORS.YELLOW, 20);
+            // Collision & Interaction
+            nodes.current = nodes.current.filter(n => {
+                const dCore = Math.sqrt(Math.pow(n.x - core.current.x, 2) + Math.pow(n.y - core.current.y, 2));
+
+                // Core Interaction
+                if (dCore < core.current.r + n.size) {
+                    if (n.type === 'DATA' || n.type === 'CATALYST') {
+                        setScore(s => s + (n.type === 'CATALYST' ? 1000 : 100));
+                        setEnergy(e => Math.min(100, e + (n.type === 'CATALYST' ? 15 : 2)));
+                        addFX(n.x, n.y, n.color, 15);
+                    } else if (n.type === 'IMPURITY') {
+                        setEnergy(e => Math.max(0, e - 20));
+                        addFX(n.x, n.y, COLORS.RED, 30, 2.5);
+                        setMultiplier(1.0);
                     }
                     return false;
                 }
 
-                // Draw Entity
-                ctx.fillStyle = e.color;
+                // Draw Chain if Tethered
+                if (n.isTethered) {
+                    ctx.beginPath();
+                    ctx.strokeStyle = COLORS.EMERALD;
+                    ctx.lineWidth = 3;
+                    ctx.setLineDash([4, 4]);
+                    ctx.moveTo(core.current.x, core.current.y);
+                    ctx.lineTo(n.x, n.y);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+
+                // Draw Node
+                ctx.save();
+                ctx.translate(n.x, n.y);
+                ctx.fillStyle = n.color;
+                ctx.shadowBlur = n.isTethered ? 20 : 0;
+                ctx.shadowColor = n.color;
+
                 ctx.beginPath();
-                if (e.type === 'DATA') {
-                    ctx.arc(e.x, e.y, e.size, 0, Math.PI * 2);
-                } else if (e.type === 'NOISE') {
-                    ctx.rect(e.x - e.size, e.y - e.size, e.size * 2, e.size * 2);
+                if (n.type === 'IMPURITY') {
+                    // Spiky Hexagon
+                    for (let i = 0; i < 6; i++) {
+                        const a = i * Math.PI / 3;
+                        const r = i % 2 === 0 ? n.size : n.size * 0.7;
+                        ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+                    }
+                } else if (n.type === 'CATALYST') {
+                    // Diamond
+                    ctx.moveTo(0, -n.size); ctx.lineTo(n.size, 0); ctx.lineTo(0, n.size); ctx.lineTo(-n.size, 0);
                 } else {
-                    ctx.moveTo(e.x, e.y - e.size);
-                    ctx.lineTo(e.x + e.size, e.y + e.size);
-                    ctx.lineTo(e.x - e.size, e.y + e.size);
-                    ctx.closePath();
+                    ctx.arc(0, 0, n.size, 0, Math.PI * 2);
                 }
                 ctx.fill();
+                ctx.restore();
 
-                return e.x > -200 && e.x < 1200 && e.y > -200 && e.y < 1200;
+                return n.x > -500 && n.x < 1500 && n.y > -500 && n.y < 1500;
             });
 
-            // Level Up logic
-            if (score > level * level * 2000) {
-                setLevel(l => l + 1);
-            }
+            // Decay Score Multiplier
+            setMultiplier(m => Math.max(1.0, m - 0.001));
 
-            // Sync Decay
-            setSyncRate(r => Math.max(0, r - 0.05));
-
-            // Draw Core
-            ctx.shadowBlur = 15 + Math.sin(time * 0.01) * 5 + (syncRate * 0.5);
-            ctx.shadowColor = COLORS.CYAN;
-            ctx.fillStyle = COLORS.TEXT;
-            ctx.beginPath();
-            ctx.arc(corePos.current.x, corePos.current.y, 20 + (syncRate * 0.1), 0, Math.PI * 2);
-            ctx.fill();
-            ctx.shadowBlur = 0;
-
-            // Draw Sync Field
-            ctx.strokeStyle = COLORS.CYAN;
-            ctx.lineWidth = 2;
-            ctx.setLineDash([5, 5]);
-            ctx.beginPath();
-            ctx.arc(corePos.current.x, corePos.current.y, 60 + (syncRate * 0.5), 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.setLineDash([]);
+            // UI Elements in Canvas
+            drawHUD(ctx);
         }
 
-        // Particles
+        // Particle System
         FX.current = FX.current.filter(p => {
-            p.x += p.vx;
-            p.y += p.vy;
-            p.life -= 0.02;
+            p.x += p.vx; p.y += p.vy; p.life -= 0.02;
             if (p.life <= 0) return false;
             ctx.globalAlpha = p.life;
             ctx.fillStyle = p.color;
-            ctx.fillRect(p.x, p.y, 4, 4);
+            ctx.beginPath(); ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2); ctx.fill();
             ctx.globalAlpha = 1.0;
             return true;
         });
@@ -248,130 +300,181 @@ export function LogicFlux() {
         frameId.current = requestAnimationFrame(update);
     };
 
+    const drawHUD = (ctx: CanvasRenderingContext2D) => {
+        // Aesthetic Center Core
+        ctx.save();
+        ctx.translate(core.current.x, core.current.y);
+        ctx.rotate(Date.now() * 0.002);
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = COLORS.TEXT;
+        ctx.strokeRect(-20, -20, 40, 40);
+        ctx.restore();
+
+        // Chain Indicator if linking
+        if (mouse.current.isDown) {
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(15, 23, 42, 0.1)`;
+            ctx.lineWidth = 20;
+            ctx.lineCap = 'round';
+            ctx.moveTo(mouse.current.lastX, mouse.current.lastY);
+            ctx.lineTo(mouse.current.x, mouse.current.y);
+            ctx.stroke();
+            mouse.current.lastX = mouse.current.x;
+            mouse.current.lastY = mouse.current.y;
+        }
+    };
+
     useEffect(() => {
         const handleKeys = (e: KeyboardEvent) => {
-            if (e.key === ' ') { e.preventDefault(); triggerBurst(); }
+            if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); conductEnergy(); }
         };
         const handleMouse = (e: MouseEvent) => {
             if (!canvasRef.current) return;
             const r = canvasRef.current.getBoundingClientRect();
-            mousePos.current = { x: (e.clientX - r.left) * (1000 / r.width), y: (e.clientY - r.top) * (1000 / r.height) };
+            mouse.current.x = (e.clientX - r.left) * (1000 / r.width);
+            mouse.current.y = (e.clientY - r.top) * (1000 / r.height);
         };
+        const handleDown = () => { mouse.current.isDown = true; mouse.current.lastX = mouse.current.x; mouse.current.lastY = mouse.current.y; };
+        const handleUp = () => { mouse.current.isDown = false; };
+
         window.addEventListener('keydown', handleKeys);
         window.addEventListener('mousemove', handleMouse);
-        window.addEventListener('mousedown', triggerBurst);
+        window.addEventListener('mousedown', handleDown);
+        window.addEventListener('mouseup', handleUp);
+        window.addEventListener('contextmenu', (e) => { e.preventDefault(); conductEnergy(); });
+
         return () => {
             window.removeEventListener('keydown', handleKeys);
             window.removeEventListener('mousemove', handleMouse);
-            window.removeEventListener('mousedown', triggerBurst);
+            window.removeEventListener('mousedown', handleDown);
+            window.removeEventListener('mouseup', handleUp);
         };
-    }, [gameState, triggerBurst]);
+    }, [conductEnergy]);
 
     useEffect(() => {
         frameId.current = requestAnimationFrame(update);
         return () => cancelAnimationFrame(frameId.current);
-    }, [update]);
+    }, []);
 
     useEffect(() => {
-        if (shield <= 0 && gameState === 'PLAYING') {
-            setGameState('GAMEOVER');
+        if (energy <= 0 && gameState === 'ACTION') {
+            setGameState('COLLAPSE');
             if (score > highScore) setHighScore(score);
         }
-    }, [shield, gameState, score, highScore]);
+    }, [energy, gameState, score, highScore]);
 
     const startGame = () => {
-        setScore(0); setShield(100); setLevel(1); setSyncRate(0);
-        entities.current = []; FX.current = [];
-        setGameState('PLAYING');
+        setScore(0); setEnergy(100); setLinkCount(0); setMultiplier(1.0);
+        nodes.current = []; FX.current = []; tethers.current = [];
+        setGameState('ACTION');
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-900 font-sans overflow-hidden select-none">
-            {/* HUD Overlay */}
-            <div className="absolute inset-0 pointer-events-none z-20 flex flex-col p-8">
-                <div className="flex justify-between items-start">
-                    <div className="space-y-6">
-                        <div className="flex items-center gap-4">
-                            <div className="h-10 w-10 bg-slate-950 text-white rounded-2xl flex items-center justify-center font-black italic">LS</div>
+        <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-cyan-100 overflow-hidden select-none">
+
+            {/* Global HUD Layer */}
+            <div className="absolute inset-0 pointer-events-none z-30 flex flex-col p-12">
+                <header className="flex justify-between items-start">
+                    <div className="space-y-8">
+                        <div className="flex items-center gap-6">
+                            <div className="w-14 h-14 bg-slate-900 text-white rounded-[1.5rem] flex items-center justify-center font-black text-2xl shadow-2xl">L</div>
                             <div>
-                                <h1 className="text-2xl font-black tracking-tighter uppercase italic">LOGIC<span className="text-cyan-500">ASCENT</span></h1>
-                                <p className="text-[9px] font-bold text-slate-400 tracking-[0.4em]">SYNCHRO-STORM V4.0</p>
+                                <h1 className="text-4xl font-black italic tracking-tighter uppercase leading-none">LOGIC<span className="text-cyan-500">TETHER</span></h1>
+                                <p className="text-[10px] font-bold text-slate-400 tracking-[0.5em] mt-1 uppercase">Refraction Protocol Engine V5.0</p>
                             </div>
                         </div>
 
                         <div className="flex gap-4 pointer-events-auto">
-                            <div className="bg-white/90 backdrop-blur p-5 rounded-3xl shadow-xl border border-slate-100 flex gap-8">
-                                <div>
-                                    <p className="text-[9px] font-black text-slate-400 uppercase mb-1">Stability</p>
-                                    <p className={`text-2xl font-black ${shield < 30 ? 'text-red-500 animate-pulse' : 'text-slate-900'}`}>{Math.floor(shield)}%</p>
-                                </div>
-                                <div className="w-px h-8 bg-slate-100 my-auto" />
-                                <div>
-                                    <p className="text-[9px] font-black text-slate-400 uppercase mb-1">Sync Rate</p>
-                                    <p className="text-2xl font-black text-cyan-500">{Math.floor(syncRate)}%</p>
-                                </div>
-                            </div>
-                            <div className="bg-slate-950 text-white p-5 rounded-3xl shadow-2xl flex items-center gap-10">
-                                <div className="space-y-0.5">
-                                    <p className="text-[9px] font-black text-slate-500 uppercase">Process Score</p>
-                                    <p className="text-3xl font-mono font-black">{score.toLocaleString()}</p>
-                                </div>
-                                <div className="text-right">
-                                    <p className="text-[9px] font-black text-cyan-400 uppercase">Level</p>
-                                    <p className="text-3xl font-black italic">{level}</p>
-                                </div>
+                            <div className="bg-white/90 backdrop-blur-2xl p-6 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-slate-100 flex gap-10">
+                                <HUDMetric label="Core Integrity" value={`${Math.floor(energy)}%`} color={energy < 30 ? 'text-red-500' : 'text-slate-900'} />
+                                <div className="w-px h-10 bg-slate-100 my-auto" />
+                                <HUDMetric label="Efficiency Mult" value={`x${multiplier.toFixed(1)}`} color="text-cyan-500" />
+                                <div className="w-px h-10 bg-slate-100 my-auto" />
+                                <HUDMetric label="Links" value={linkCount.toString()} color="text-emerald-500" />
                             </div>
                         </div>
                     </div>
-                </div>
+
+                    <div className="flex flex-col items-end gap-2 pointer-events-auto">
+                        <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none">Global Accumulation</p>
+                        <p className="text-6xl font-mono font-black tracking-tighter tabular-nums leading-none">{score.toLocaleString()}</p>
+                    </div>
+                </header>
 
                 <div className="mt-auto flex justify-between items-end">
-                    <div className="bg-white/80 backdrop-blur px-6 py-4 rounded-full border border-slate-100 shadow-lg text-[10px] font-black uppercase tracking-widest text-slate-400 italic">
-                        MegaDrawk Logic Dept. // Protocol: Synchronize & ASCEND
+                    <div className="max-w-md space-y-4">
+                        <div className="flex gap-2">
+                            {[...Array(20)].map((_, i) => <div key={i} className={`h-1 w-4 rounded-full ${i < energy / 5 ? 'bg-slate-900' : 'bg-slate-100'}`} />)}
+                        </div>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em] italic">
+                            System Monitoring: Stable // MegaDrawk Kinetic R&D
+                        </p>
                     </div>
+
                     <div className="flex gap-4 pointer-events-auto">
-                        <a href="/" className="px-10 py-4 bg-slate-950 text-white rounded-3xl text-sm font-black uppercase tracking-widest hover:bg-cyan-500 transition-all shadow-xl">基地へ帰還</a>
+                        <a href="/" className="px-12 py-5 bg-slate-900 text-white rounded-[2rem] text-sm font-black uppercase tracking-widest hover:bg-cyan-500 transition-all shadow-2xl transform hover:-translate-y-1">退避する</a>
                     </div>
                 </div>
             </div>
 
-            {/* Game Viewport */}
+            {/* Game Core Viewport */}
             <main className="h-screen flex items-center justify-center">
-                <div className="relative aspect-square h-[90vh] rounded-[4rem] overflow-hidden shadow-2xl bg-white border border-slate-100">
+                <div className="relative aspect-square h-[92vh] rounded-[5rem] overflow-hidden shadow-[0_60px_150px_rgba(0,0,0,0.1)] bg-white border border-slate-50">
                     <canvas ref={canvasRef} width={1000} height={1000} className="w-full h-full cursor-none" />
 
                     <AnimatePresence>
                         {gameState === 'IDLE' && (
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-50 flex items-center justify-center bg-white/95 backdrop-blur-xl">
-                                <div className="max-w-xl text-center space-y-12">
-                                    <div className="space-y-4">
-                                        <div className="text-cyan-500 text-[10px] font-black uppercase tracking-[0.6em]">Neural Synchronization Environment</div>
-                                        <h2 className="text-9xl font-black tracking-tighter italic text-slate-950 leading-none">LOGIC<br /><span className="text-cyan-500">ASCENT</span></h2>
-                                        <p className="text-slate-400 font-medium text-lg">マウスを動かすだけ。直感的にデータを同期せよ。</p>
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-50 flex items-center justify-center bg-white/95 backdrop-blur-2xl">
+                                <div className="max-w-2xl text-center space-y-16">
+                                    <div className="space-y-6">
+                                        <div className="inline-block px-8 py-2 bg-slate-900 text-white rounded-full text-[10px] font-black uppercase tracking-[0.6em]">Kinetic Refraction System</div>
+                                        <h2 className="text-[10rem] font-black tracking-tighter italic text-slate-950 leading-[0.8]">LOGIC<br /><span className="text-cyan-500">TETHER</span></h2>
+                                        <p className="text-slate-400 font-medium text-xl max-w-lg mx-auto">
+                                            繋げ、導き、粉砕せよ。<br />
+                                            物理演算に基づいた、次世代の論理精製シミュレーター。
+                                        </p>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-6">
-                                        <div className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100">
-                                            <p className="text-[10px] font-black text-slate-400 uppercase mb-1">High Record</p>
-                                            <p className="text-5xl font-mono font-black">{highScore.toLocaleString()}</p>
+
+                                    <div className="flex items-center justify-center gap-8">
+                                        <div className="p-10 bg-slate-50 rounded-[4rem] text-left border border-slate-100 min-w-[300px]">
+                                            <p className="text-[10px] font-black text-slate-400 uppercase mb-2">Refusal High Score</p>
+                                            <p className="text-6xl font-mono font-black">{highScore.toLocaleString()}</p>
                                         </div>
-                                        <button onClick={startGame} className="bg-slate-950 text-white p-8 rounded-[2.5rem] font-black uppercase tracking-widest text-lg hover:bg-cyan-500 transition-all transform hover:scale-105 active:scale-95 shadow-2xl">演算開始</button>
+                                        <button onClick={startGame} className="h-40 w-40 bg-slate-950 text-white rounded-full font-black uppercase tracking-widest text-xl hover:bg-cyan-500 transition-all transform hover:scale-110 active:scale-90 shadow-2xl flex items-center justify-center">起動</button>
                                     </div>
-                                    <div className="text-[10px] font-black text-slate-300 uppercase tracking-widest">[Mouse] Move // [Click/Space] Burst</div>
+
+                                    <div className="grid grid-cols-3 gap-8 text-[11px] font-black text-slate-300 uppercase tracking-widest">
+                                        <div className="space-y-2">
+                                            <div className="text-slate-900">Drag</div>
+                                            <p>テザーで連結</p>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <div className="text-slate-900">Space / Right Click</div>
+                                            <p>論理伝導 (衝突)</p>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <div className="text-slate-900">Avoid Red</div>
+                                            <p>不純物からの回避</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </motion.div>
                         )}
 
-                        {gameState === 'GAMEOVER' && (
-                            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-[100] flex items-center justify-center bg-red-600/10 backdrop-blur-2xl">
-                                <div className="bg-white p-16 rounded-[4rem] shadow-[0_50px_100px_rgba(0,0,0,0.1)] text-center space-y-8 border border-red-50 max-w-lg w-full">
-                                    <h2 className="text-6xl font-black italic text-red-600 tracking-tighter uppercase">Sync Failure</h2>
+                        {gameState === 'COLLAPSE' && (
+                            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-[100] flex items-center justify-center bg-slate-950/20 backdrop-blur-3xl">
+                                <div className="bg-white p-24 rounded-[6rem] shadow-[0_80px_200px_rgba(0,0,0,0.2)] text-center space-y-12 max-w-xl w-full border border-slate-100">
                                     <div className="space-y-2">
-                                        <p className="text-[10px] font-black text-slate-400 uppercase">Final Accumulation</p>
-                                        <p className="text-7xl font-mono font-black">{score.toLocaleString()}</p>
+                                        <h2 className="text-7xl font-black italic text-red-600 tracking-tighter uppercase leading-none">System Collapse</h2>
+                                        <p className="text-[10px] font-black text-slate-300 tracking-[0.4em] uppercase">臨界点に到達し、論理網が崩壊しました。</p>
                                     </div>
-                                    <div className="flex flex-col gap-3">
-                                        <button onClick={startGame} className="w-full py-6 bg-slate-950 text-white rounded-3xl font-black uppercase tracking-widest hover:bg-cyan-500 transition-all animate-bounce">再試行する</button>
-                                        <a href="/" className="w-full py-6 text-slate-400 font-bold uppercase text-[10px] tracking-widest hover:text-slate-950 transition-all">基地へ帰還</a>
+                                    <div className="space-y-1">
+                                        <p className="text-[10px] font-black text-slate-400 uppercase">Total Efficiency Awarded</p>
+                                        <p className="text-8xl font-mono font-black tabular-nums tracking-tighter">{score.toLocaleString()}</p>
+                                    </div>
+                                    <div className="flex flex-col gap-4">
+                                        <button onClick={startGame} className="w-full py-8 bg-slate-950 text-white rounded-[2.5rem] font-black uppercase tracking-[0.3em] text-lg hover:bg-cyan-500 transition-all shadow-3xl">再構築を開始</button>
+                                        <a href="/" className="px-12 py-4 text-slate-400 font-bold uppercase text-[10px] tracking-[0.6em] hover:text-slate-950 transition-all">基地へ帰還</a>
                                     </div>
                                 </div>
                             </motion.div>
@@ -379,6 +482,20 @@ export function LogicFlux() {
                     </AnimatePresence>
                 </div>
             </main>
+
+            <style jsx global>{`
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@700;800&display=swap');
+                body { background: #ffffff; cursor: crosshair; }
+            `}</style>
+        </div>
+    );
+}
+
+function HUDMetric({ label, value, color }: { label: string, value: string, color: string }) {
+    return (
+        <div className="space-y-1">
+            <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest">{label}</p>
+            <p className={`text-3xl font-black ${color} leading-none tracking-tighter`}>{value}</p>
         </div>
     );
 }
