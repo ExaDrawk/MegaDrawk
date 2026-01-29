@@ -8,7 +8,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function QrGeneratorPage() {
     const [value, setValue] = useState('https://megadrawk.com');
-    const [value, setValue] = useState('https://megadrawk.com');
     const [fgColor, setFgColor] = useState('#000000');
     const [bgColor, setBgColor] = useState('#ffffff');
     const [size, setSize] = useState(512);
