@@ -16,48 +16,69 @@ export default function WordCounterPage() {
     });
 
     useEffect(() => {
+        // Japanese text analysis improvement
         const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
         const chars = text.length;
         const charsNoSpace = text.replace(/\s/g, '').length;
-        const sentences = text.trim() === '' ? 0 : text.split(/[.!?]+/).length - 1;
+        const sentences = text.trim() === '' ? 0 : text.split(/[.!?。！？]+/).length - 1;
         const paragraphs = text.trim() === '' ? 0 : text.replace(/\n$/gm, '').split(/\n/).length;
-        const readingTime = Math.ceil(words / 200); // 200 wpm
+        const readingTime = Math.ceil(chars / 600); // 600 characters per minute for Japanese
 
         setStats({ words, chars, charsNoSpace, sentences, paragraphs, readingTime });
     }, [text]);
 
-    const StatCard = ({ icon: Icon, label, value, color }: any) => (
-        <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex items-center justify-between">
-            <div>
-                <div className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">{label}</div>
-                <div className={`text-3xl font-black ${color}`}>{value}</div>
+    const StatCard = ({ icon: Icon, label, value, color, bg }: any) => (
+        <div className="bg-white border border-slate-100 p-8 rounded-[2.5rem] flex items-center justify-between group hover:border-blue-200 transition-all relative overflow-hidden shadow-sm hover:shadow-xl">
+            <div className={`absolute inset-0 bg-gradient-to-b ${bg} opacity-0 group-hover:opacity-100 transition-opacity duration-700`} />
+            <div className="relative z-10">
+                <div className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-2">{label}</div>
+                <div className={`text-4xl font-black tracking-tight ${color}`}>{value}</div>
             </div>
-            <div className={`p-3 rounded-xl bg-opacity-10 ${color.replace('text-', 'bg-')}`}>
-                <Icon size={24} className={color} />
+            <div className={`p-5 rounded-2xl ${bg} group-hover:scale-110 transition-transform relative z-10 shadow-sm`}>
+                <Icon size={32} className={color} />
             </div>
         </div>
     );
 
+    const howToUse = (
+        <ul className="list-disc pl-5 space-y-4 text-slate-600">
+            <li>テキストエリアに分析したい文章を入力または貼り付けてください。</li>
+            <li>入力と同時に、上部の統計パネルがリアルタイムで更新されます。</li>
+            <li><strong>読了時間</strong>は、日本語の平均的な読書速度（約600文字/分）に基づいて算出されます。</li>
+            <li>「空白なし」の文字数カウントは、原稿用紙の枚数計算などに便利です。</li>
+        </ul>
+    );
+
+    const faq = [
+        { q: "日本語以外の言語もカウントできますか？", a: "はい、英語を始めとする他言語も正確に単語数や文字数をカウントします。" },
+        { q: "プライバシーは守られますか？", a: "入力されたテキストはサーバーに送信されることはありません。すべての処理はブラウザ内で完結するため、機密文書の分析も安全です。" }
+    ];
+
     return (
         <ToolShell
-            title="Word & Character Counter"
-            description="Analyze your text density, reading time, and structure complexity in real-time."
+            title="文字・単語カウント"
+            description="リアルタイムで文章密度、読了時間、構造的複雑さを分析します。"
+            howToUse={howToUse}
+            faq={faq}
         >
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-8">
-                <StatCard icon={Type} label="Words" value={stats.words} color="text-cyan-400" />
-                <StatCard icon={Hash} label="Characters" value={stats.chars} color="text-purple-400" />
-                <StatCard icon={AlignLeft} label="Sentences" value={stats.sentences} color="text-yellow-400" />
-                <StatCard icon={Clock} label="Read Time" value={`${stats.readingTime} min`} color="text-green-400" />
-                <StatCard icon={AlignLeft} label="Paragraphs" value={stats.paragraphs} color="text-pink-400" />
-                <StatCard icon={Hash} label="No Spaces" value={stats.charsNoSpace} color="text-blue-400" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                <StatCard icon={Type} label="単語数 (Words)" value={stats.words} color="text-blue-600" bg="bg-blue-50" />
+                <StatCard icon={Hash} label="文字数 (Chars)" value={stats.chars} color="text-sky-600" bg="bg-sky-50" />
+                <StatCard icon={AlignLeft} label="文章数 (Sentences)" value={stats.sentences} color="text-indigo-600" bg="bg-indigo-50" />
+                <StatCard icon={Clock} label="読了時間 (目安)" value={`${stats.readingTime} 分`} color="text-emerald-600" bg="bg-emerald-50" />
+                <StatCard icon={AlignLeft} label="段落数" value={stats.paragraphs} color="text-amber-600" bg="bg-amber-50" />
+                <StatCard icon={Hash} label="文字数 (空白なし)" value={stats.charsNoSpace} color="text-blue-600" bg="bg-blue-50" />
             </div>
 
-            <textarea
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder="Start typing or paste your text here..."
-                className="w-full h-96 bg-[#0b1121] border border-slate-800 rounded-xl p-6 text-lg leading-relaxed text-slate-300 focus:outline-none focus:border-cyan-500 transition-all resize-y"
-            />
+            <div className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/10 to-transparent rounded-[2.5rem] blur-xl opacity-20 pointer-events-none" />
+                <textarea
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    placeholder="ここに文章を入力してください..."
+                    className="relative w-full h-[500px] bg-white border border-slate-200 rounded-[2rem] p-10 text-xl leading-relaxed text-slate-700 focus:outline-none focus:border-blue-500 shadow-sm transition-all resize-none font-medium placeholder:text-slate-200"
+                />
+            </div>
         </ToolShell>
     );
 }

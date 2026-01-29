@@ -63,13 +63,26 @@ const ICONS = {
       <defs>
         <radialGradient id="ar_g" cx="50%" cy="50%" r="50%">
           <stop offset="0%" style="stop-color:#f472b6" />
-          <stop offset="100%" style="stop-color:#818cf8" />
+          <stop offset="100%" style="stop-color:#38bdf8" />
         </radialGradient>
       </defs>
       <circle cx="50" cy="50" r="45" fill="none" stroke="url(#ar_g)" stroke-width="2" stroke-dasharray="10 5" />
       <path d="M50 20 L80 50 L50 80 L20 50 Z" fill="url(#ar_g)" opacity="0.8">
         <animate attributeName="opacity" values="0.4;0.8;0.4" dur="3s" repeatCount="indefinite" />
       </path>
+    </svg>
+  `)}`,
+  echocontrol: `data:image/svg+xml,${encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+      <defs>
+        <linearGradient id="ec_g" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#22d3ee" />
+          <stop offset="100%" style="stop-color:#38bdf8" />
+        </linearGradient>
+      </defs>
+      <circle cx="50" cy="50" r="40" fill="none" stroke="url(#ec_g)" stroke-width="4" stroke-dasharray="1 10" stroke-linecap="round" />
+      <circle cx="50" cy="50" r="25" fill="none" stroke="url(#ec_g)" stroke-width="2" opacity="0.5" />
+      <circle cx="50" cy="50" r="10" fill="url(#ec_g)" />
     </svg>
   `)}`,
 };
@@ -81,6 +94,7 @@ export const SERVICES = [
     description: "高度な意思決定を支える、次世代ミーティング管理プラットフォーム。会議の前後・最中におけるあらゆる情報を統合し、決定事項とその背景にある「文脈」を自動的に構造化します。組織の意思決定スピードを劇的に加速させる、知のエンジニアリングツールです。",
     url: "https://meetpicks.megadrawk.com",
     iconUrl: ICONS.meetpicks,
+    isGame: false,
   },
   {
     name: "LawDrawk",
@@ -88,13 +102,30 @@ export const SERVICES = [
     description: "法務プロフェッショナルのための、堅牢なワークフロー支援システム。条文、判例、そして社内規定の膨大な海から最適解を導き出します。法的リスクの可視化から契約管理まで、法務部門のDX（デジタルトランスフォーメーション）をトータルで支える中核システムです。",
     url: "https://lawdrawk.com",
     iconUrl: ICONS.lawdrawk,
+    isGame: false,
   },
   {
-    name: "AuraRefiner",
+    name: "オーラ精製機",
     subdomain: "aura.megadrawk.com",
-    description: "カオスを秩序へ。浮遊するノイズを精緻なロジックへと変換する、ミニマル・リフレクション・ゲーム。",
+    description: "不確実なデータを論理の結晶へと変える、反射と選別の高速シミュレーター。",
     url: "/aura-refiner",
     iconUrl: ICONS.aurarefiner,
+    isGame: true,
+  },
+  {
+    name: "エコー制御",
+    subdomain: "echo.megadrawk.com",
+    description: "未来の予約を清算する、時間構造パズル。1回のタップが時間を超えて反響し、盤面を書き換える。静寂を取り戻せ。",
+    url: "/echo-control",
+    iconUrl: ICONS.echocontrol,
+    isGame: true,
+  },
+  {
+    name: "ストリーム配線",
+    subdomain: "wiring.megadrawk.com",
+    description: "現実世界のAPI（気象・為替・変動）からパルスを抽出し、信号干渉を制御して目的の波形を構築する回路パズル。",
+    url: "/stream-wiring",
+    iconUrl: ICONS.echocontrol, // Will use ec icon for now, might customize later
     isGame: true,
   },
 ] as const;

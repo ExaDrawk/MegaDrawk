@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { ToolShell } from '@/components/tools/ToolShell';
-import { ArrowLeftRight, Copy, Trash2 } from 'lucide-react';
+import { Copy, RefreshCw } from 'lucide-react';
 
 export default function Base64ToolPage() {
     const [mode, setMode] = useState<'ENCODE' | 'DECODE'>('ENCODE');
@@ -20,98 +20,102 @@ export default function Base64ToolPage() {
 
         try {
             if (currentMode === 'ENCODE') {
-                setOutput(btoa(val));
+                setOutput(btoa(unescape(encodeURIComponent(val))));
             } else {
                 try {
-                    setOutput(atob(val));
+                    setOutput(decodeURIComponent(escape(atob(val))));
                 } catch (e) {
-                    setError('Invalid Base64 string');
+                    setError('無効なBase64文字列です');
                     setOutput('');
                 }
             }
         } catch (e) {
-            setError('Conversion failed');
-        }
-    };
-
-    const toggleMode = () => {
-        const newMode = mode === 'ENCODE' ? 'DECODE' : 'ENCODE';
-        setMode(newMode);
-        // Swap content if valid
-        if (!error && output) {
-            process(output, newMode);
-        } else {
-            process('', newMode);
+            setError('変換に失敗しました');
         }
     };
 
     const howToUse = (
-        <ul className="list-disc pl-5 space-y-2">
-            <li>Select <strong>Encode</strong> to convert plain text to Base64.</li>
-            <li>Select <strong>Decode</strong> to convert Base64 strings back to text.</li>
-            <li>Type in the left box, and the result appears instantly on the right.</li>
+        <ul className="list-disc pl-5 space-y-4">
+            <li><strong>エンコード</strong>を選択すると、通常のテキストをBase64形式に変換します。</li>
+            <li><strong>デコード</strong>を選択すると、Base64文字列を元のテキストに復元します。</li>
+            <li>左側の入力エリアにテキストを入力すると、右側に即座に結果が表示されます。</li>
+            <li>日本語（UTF-8）のエンコード・デコードにも完全対応しています。</li>
         </ul>
     );
 
+    const faq = [
+        { q: "日本語は使えますか？", a: "はい、本ツールはUTF-8エンコーディングに対応しているため、日本語を含むマルチバイト文字も安全に変換可能です。" },
+        { q: "大きなデータも扱えますか？", a: "ブラウザのメモリ制限内であれば動作しますが、あまりに巨大なファイル（数百MB以上）の場合は専用のツールを推奨します。" }
+    ];
+
     return (
         <ToolShell
-            title="Base64 Converter"
-            description="Encode text to Base64 or decode Base64 strings instantly with error checking."
+            title="Base64エンコーダー"
+            description="テキストからBase64への変換、およびBase64からの復元を瞬時に行います。"
             howToUse={howToUse}
+            faq={faq}
         >
-            <div className="flex flex-col gap-6">
-
+            <div className="flex flex-col gap-12">
                 {/* Mode Switcher */}
-                <div className="flex justify-center mb-6">
-                    <div className="bg-slate-900 p-1 rounded-xl flex gap-1 border border-slate-800">
-                        {['ENCODE', 'DECODE'].map((m) => (
+                <div className="flex justify-center">
+                    <div className="bg-slate-50 p-2 rounded-2xl flex gap-2 border border-slate-100 shadow-inner">
+                        {[
+                            { id: 'ENCODE', label: 'エンコード (Text → B64)' },
+                            { id: 'DECODE', label: 'デコード (B64 → Text)' }
+                        ].map((m) => (
                             <button
-                                key={m}
+                                key={m.id}
                                 onClick={() => {
-                                    setMode(m as any);
-                                    process(input, m as any);
+                                    setMode(m.id as any);
+                                    process(input, m.id as any);
                                 }}
-                                className={`px-8 py-3 rounded-lg text-sm font-bold transition-all ${mode === m ? 'bg-cyan-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
+                                className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${mode === m.id ? 'bg-white text-slate-900 shadow-lg border border-slate-100' : 'text-slate-400 hover:text-slate-900'}`}
                             >
-                                {m === 'ENCODE' ? 'Text → Base64' : 'Base64 → Text'}
+                                {m.label}
                             </button>
                         ))}
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                     {/* Input */}
-                    <div className="flex flex-col gap-2">
-                        <label className="text-sm font-bold text-slate-400 ml-2">Input</label>
+                    <div className="space-y-4">
+                        <div className="flex justify-between items-center ml-4">
+                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">入力 (Input)</label>
+                            <button onClick={() => process('', mode)} className="text-[10px] font-black text-slate-400 hover:text-red-500 transition-colors uppercase tracking-widest">リセット</button>
+                        </div>
                         <textarea
                             value={input}
                             onChange={(e) => process(e.target.value, mode)}
-                            className="w-full h-64 bg-[#0b1121] border border-slate-800 rounded-xl p-4 font-mono text-sm focus:border-cyan-500 transition-all resize-none"
-                            placeholder={mode === 'ENCODE' ? "Type plain text here..." : "Paste Base64 string here..."}
+                            className="w-full h-80 bg-white border border-slate-200 rounded-[2rem] p-8 font-mono text-sm text-slate-700 focus:outline-none focus:border-blue-500 shadow-sm transition-all resize-none placeholder:text-slate-300"
+                            placeholder={mode === 'ENCODE' ? "ここにテキストを入力してください..." : "ここにBase64文字列を貼り付けてください..."}
                         />
                     </div>
 
                     {/* Output */}
-                    <div className="flex flex-col gap-2">
-                        <label className="text-sm font-bold text-slate-400 ml-2 flex justify-between">
-                            <span>Output</span>
-                            {error && <span className="text-red-400">{error}</span>}
-                        </label>
+                    <div className="space-y-4">
+                        <div className="flex justify-between items-center ml-4">
+                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
+                                出力 (Output)
+                                {error && <span className="text-rose-600 animate-pulse">{error}</span>}
+                            </label>
+                            {output && (
+                                <button
+                                    onClick={() => navigator.clipboard.writeText(output)}
+                                    className="text-[10px] font-black text-blue-600 hover:text-blue-800 transition-colors uppercase tracking-widest flex items-center gap-1"
+                                >
+                                    コピー
+                                    <Copy size={12} />
+                                </button>
+                            )}
+                        </div>
                         <div className="relative">
                             <textarea
                                 readOnly
                                 value={output}
-                                className={`w-full h-64 bg-slate-900/50 border rounded-xl p-4 font-mono text-sm resize-none focus:outline-none ${error ? 'border-red-500/50 text-red-300' : 'border-slate-800 text-cyan-300'}`}
-                                placeholder="Result will appear here..."
+                                className={`w-full h-80 border rounded-[2rem] p-8 font-mono text-sm transition-all resize-none focus:outline-none ${error ? 'bg-rose-50 border-rose-100 text-rose-600' : 'bg-slate-50 border-slate-100 text-blue-600 shadow-inner'}`}
+                                placeholder="結果がここに表示されます..."
                             />
-                            {output && (
-                                <button
-                                    onClick={() => navigator.clipboard.writeText(output)}
-                                    className="absolute bottom-4 right-4 p-2 bg-slate-800 hover:bg-white hover:text-black rounded-lg text-slate-400 transition-all shadow-lg"
-                                >
-                                    <Copy size={16} />
-                                </button>
-                            )}
                         </div>
                     </div>
                 </div>

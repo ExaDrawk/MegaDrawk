@@ -2,17 +2,17 @@
 
 import React, { useState, useEffect } from 'react';
 import { ToolShell } from '@/components/tools/ToolShell';
-import { Check, X } from 'lucide-react';
+import { Check, X, Info } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function ContrastCheckerPage() {
     const [bg, setBg] = useState('#ffffff');
-    const [fg, setFg] = useState('#000000');
+    const [fg, setFg] = useState('#0f172a');
     const [ratio, setRatio] = useState(21);
     const [level, setLevel] = useState({ aa: true, aaLarge: true, aaa: true, aaaLarge: true });
 
-    // Calculates luminance
     const lum = (hex: string) => {
-        const rgb = parseInt(hex.slice(1), 16);
+        const rgb = parseInt(hex.replace('#', ''), 16);
         const r = (rgb >> 16) & 0xff;
         const g = (rgb >> 8) & 0xff;
         const b = (rgb >> 0) & 0xff;
@@ -24,7 +24,8 @@ export default function ContrastCheckerPage() {
     };
 
     useEffect(() => {
-        if (!/^#[0-9A-F]{6}$/i.test(bg) || !/^#[0-9A-F]{6}$/i.test(fg)) return;
+        const hexRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+        if (!hexRegex.test(bg) || !hexRegex.test(fg)) return;
 
         const l1 = lum(bg) + 0.05;
         const l2 = lum(fg) + 0.05;
@@ -40,65 +41,93 @@ export default function ContrastCheckerPage() {
     }, [bg, fg]);
 
     const ResultRow = ({ label, pass }: { label: string, pass: boolean }) => (
-        <div className={`p-4 rounded-xl border flex items-center justify-between ${pass ? 'bg-green-500/10 border-green-500/50' : 'bg-red-500/10 border-red-500/50'}`}>
-            <span className={`font-bold ${pass ? 'text-green-400' : 'text-red-400'}`}>{label}</span>
-            {pass ? <div className="bg-green-500 text-white px-3 py-1 rounded text-xs font-bold">PASS</div> : <div className="bg-red-500 text-white px-3 py-1 rounded text-xs font-bold">FAIL</div>}
+        <div className={`p-6 rounded-2xl border flex items-center justify-between transition-all ${pass ? 'bg-emerald-50/50 border-emerald-100' : 'bg-rose-50/50 border-rose-100'}`}>
+            <span className={`text-[10px] font-black uppercase tracking-widest ${pass ? 'text-emerald-600' : 'text-rose-600'}`}>{label}</span>
+            {pass ? (
+                <div className="flex items-center gap-2 text-emerald-600 font-black text-[10px] uppercase tracking-widest">
+                    <Check size={14} />
+                    合格
+                </div>
+            ) : (
+                <div className="flex items-center gap-2 text-rose-600 font-black text-[10px] uppercase tracking-widest">
+                    <X size={14} />
+                    不合格
+                </div>
+            )}
         </div>
     );
 
+    const howToUse = (
+        <ul className="list-disc pl-5 space-y-4 text-slate-600">
+            <li><strong>背景色</strong>と<strong>文字色</strong>のカラーコードを入力、またはカラーピッカーで選択してください。</li>
+            <li>中央のプレビューエリアで、実際の見た目を確認できます。</li>
+            <li><strong>WCAG (Web Content Accessibility Guidelines)</strong> の基準に基づいて、アクセシビリティレベルが自動判定されます。</li>
+            <li>Webサイトのアクセシビリティ向上のため、少なくとも <strong>AA (Normal Text)</strong> 以上の合格を目指してください。</li>
+        </ul>
+    );
+
+    const faq = [
+        { q: "AAとAAAの違いは何ですか？", a: "AAは標準的なアクセシビリティレベル、AAAはさらに厳しい高コントラスト基準です。一般的なウェブサイトではAAの合格が推奨されます。" },
+        { q: "Large Textの定義は？", a: "WCAGでは、通常18pt（約24px）以上、太字の場合は14pt（約18.6px）以上を大きなテキストと定義しています。" }
+    ];
+
     return (
         <ToolShell
-            title="Contrast Ratio Checker"
-            description="Ensure your color combinations meet WCAG accessibility standards for readability."
+            title="コントラスト比チェック"
+            description="色の組み合わせがWebアクセシビリティ基準（WCAG）を満たしているか瞬時に検証します。"
+            howToUse={howToUse}
+            faq={faq}
         >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                {/* Preview Area */}
-                <div
-                    className="h-96 rounded-3xl flex flex-col items-center justify-center p-8 ease-in-out transition-colors duration-300 shadow-2xl relative overflow-hidden"
-                    style={{ backgroundColor: bg, color: fg }}
-                >
-                    <h2 className="text-4xl font-black mb-4">Hello World</h2>
-                    <p className="text-lg max-w-sm text-center opacity-90">
-                        This is how your text looks on the background. Good contrast is essential for accessibility.
-                    </p>
-
-                    <div className="mt-8 text-6xl font-black opacity-20 absolute -bottom-10 -right-10 pointer-events-none">
-                        {ratio}:1
-                    </div>
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-12">
+                {/* Visual Preview */}
+                <div className="space-y-6">
+                    <motion.div
+                        className="h-[500px] rounded-[3.5rem] flex flex-col items-center justify-center p-12 relative overflow-hidden shadow-2xl transition-all duration-500 border border-slate-100"
+                        style={{ backgroundColor: bg, color: fg }}
+                    >
+                        <div className="absolute top-8 left-8 text-[10px] font-black uppercase tracking-[0.3em] opacity-40">Preview Canvas</div>
+                        <h2 className="text-5xl md:text-7xl font-black mb-6 tracking-tighter text-center leading-none">The quick brown fox<br />jumps over the lazy dog</h2>
+                        <p className="text-xl md:text-2xl font-medium max-w-lg text-center opacity-80 leading-relaxed">
+                            アクセシビリティは、デザインの整合性を保つための「論理的」な要件です。
+                        </p>
+                        <div className="mt-12 text-9xl font-black opacity-10 absolute -bottom-10 -right-10 pointer-events-none">
+                            {ratio}
+                        </div>
+                    </motion.div>
                 </div>
 
                 {/* Controls & Results */}
-                <div className="space-y-8">
-                    <div className="grid grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-slate-400">Text Color</label>
-                            <div className="flex gap-2">
-                                <input type="color" value={fg} onChange={e => setFg(e.target.value)} className="h-12 w-12 rounded-lg cursor-pointer bg-transparent border-none" />
-                                <input type="text" value={fg} onChange={e => setFg(e.target.value)} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 text-white uppercase" />
+                <div className="space-y-12">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-4">
+                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4 font-black">文字色 (Text)</label>
+                            <div className="flex gap-4">
+                                <input type="color" value={fg} onChange={e => setFg(e.target.value)} className="h-14 w-14 rounded-2xl cursor-pointer bg-white border border-slate-200 p-1 hover:border-blue-500 transition-colors shadow-sm" />
+                                <input type="text" value={fg} onChange={e => setFg(e.target.value)} className="flex-1 bg-white border border-slate-200 rounded-2xl px-6 font-mono text-slate-900 text-sm focus:border-blue-500 transition-all uppercase font-bold shadow-sm" />
                             </div>
                         </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-slate-400">Background</label>
-                            <div className="flex gap-2">
-                                <input type="color" value={bg} onChange={e => setBg(e.target.value)} className="h-12 w-12 rounded-lg cursor-pointer bg-transparent border-none" />
-                                <input type="text" value={bg} onChange={e => setBg(e.target.value)} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 text-white uppercase" />
+                        <div className="space-y-4">
+                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4 font-black">背景色 (Background)</label>
+                            <div className="flex gap-4">
+                                <input type="color" value={bg} onChange={e => setBg(e.target.value)} className="h-14 w-14 rounded-2xl cursor-pointer bg-white border border-slate-200 p-1 hover:border-blue-500 transition-colors shadow-sm" />
+                                <input type="text" value={bg} onChange={e => setBg(e.target.value)} className="flex-1 bg-white border border-slate-200 rounded-2xl px-6 font-mono text-slate-900 text-sm focus:border-blue-500 transition-all uppercase font-bold shadow-sm" />
                             </div>
                         </div>
                     </div>
 
-                    <div className="bg-slate-950 p-6 rounded-2xl border-2 border-slate-800">
-                        <div className="text-center mb-6">
-                            <div className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-2">Contrast Ratio</div>
-                            <div className={`text-6xl font-black ${ratio >= 7 ? 'text-green-400' : ratio >= 4.5 ? 'text-green-400' : ratio >= 3 ? 'text-yellow-400' : 'text-red-500'}`}>
-                                {ratio}:1
+                    <div className="bg-slate-50 p-10 rounded-[3.5rem] border border-slate-100 shadow-inner">
+                        <div className="text-center mb-10">
+                            <div className="text-[10px] font-black text-slate-300 uppercase tracking-[0.4em] mb-4">Contrast Ratio</div>
+                            <div className={`text-8xl font-black tracking-tighter ${ratio >= 7 ? 'text-emerald-500' : ratio >= 4.5 ? 'text-emerald-400' : ratio >= 3 ? 'text-amber-500' : 'text-rose-500'} drop-shadow-sm`}>
+                                {ratio}<span className="text-3xl text-slate-300 ml-1 italic">:1</span>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-3">
-                            <ResultRow label="WCAG AA (Normal Text)" pass={level.aa} />
-                            <ResultRow label="WCAG AA (Large Text)" pass={level.aaLarge} />
-                            <ResultRow label="WCAG AAA (Normal Text)" pass={level.aaa} />
-                            <ResultRow label="WCAG AAA (Large Text)" pass={level.aaaLarge} />
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <ResultRow label="WCAG AA (標準テキスト)" pass={level.aa} />
+                            <ResultRow label="WCAG AA (大きなテキスト)" pass={level.aaLarge} />
+                            <ResultRow label="WCAG AAA (標準テキスト)" pass={level.aaa} />
+                            <ResultRow label="WCAG AAA (大きなテキスト)" pass={level.aaaLarge} />
                         </div>
                     </div>
                 </div>

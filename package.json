@@ -12,15 +12,26 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@types/diff": "^7.0.2",
+    "@types/js-yaml": "^4.0.9",
+    "canvas-confetti": "^1.9.4",
+    "crypto-js": "^4.2.0",
+    "diff": "^8.0.3",
     "framer-motion": "^11.0.0",
+    "js-yaml": "^4.1.1",
     "lucide-react": "^0.563.0",
     "next": "14.2.35",
+    "qrcode.react": "^4.2.0",
     "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "sql-formatter": "^15.7.0",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@opennextjs/cloudflare": "^1.15.1",
     "@tailwindcss/postcss": "^4.0.0",
+    "@types/canvas-confetti": "^1.9.0",
+    "@types/crypto-js": "^4.2.2",
     "@types/node": "^20.11.30",
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",

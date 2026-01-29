@@ -51,10 +51,10 @@ interface Paddle {
 }
 
 const COLORS = {
-    CYAN: '#00f2ff',
-    MAGENTA: '#ff00ff',
-    YELLOW: '#ffcc00',
-    BG: '#050510'
+    CYAN: '#00d2ff',
+    MAGENTA: '#ff4d6d',
+    YELLOW: '#ffaa00',
+    BG: '#ffffff'
 };
 
 // --- GAME LOGIC ENGINE ---
@@ -263,7 +263,7 @@ export const CrystalLogic: React.FC = () => {
             ctx.fillRect(0, 0, 1000, 1000);
 
             // Grid Effects
-            ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+            ctx.strokeStyle = 'rgba(0,0,0,0.03)';
             ctx.lineWidth = 1;
             const t = Date.now() / 1000;
             const gridSize = 100;
@@ -275,23 +275,23 @@ export const CrystalLogic: React.FC = () => {
 
             // Draw Cores
             eng.cores.forEach(c => {
-                ctx.shadowBlur = 20 + c.pulse;
+                ctx.shadowBlur = 10 + c.pulse;
                 ctx.shadowColor = COLORS[c.type];
                 ctx.fillStyle = COLORS[c.type];
-                ctx.strokeStyle = '#fff';
+                ctx.strokeStyle = 'rgba(0,0,0,0.1)';
                 ctx.lineWidth = 2;
 
                 ctx.beginPath();
                 ctx.arc(c.x, c.y, c.radius + c.pulse * 0.5, 0, Math.PI * 2);
                 ctx.stroke();
 
-                ctx.globalAlpha = 0.2 + (c.pulse > 1 ? 0.3 : 0);
+                ctx.globalAlpha = 0.1 + (c.pulse > 1 ? 0.2 : 0);
                 ctx.fill();
                 ctx.globalAlpha = 1.0;
 
                 // Label
                 ctx.shadowBlur = 0;
-                ctx.fillStyle = '#fff';
+                ctx.fillStyle = '#64748b';
                 ctx.font = 'bold 12px Inter';
                 ctx.textAlign = 'center';
                 ctx.fillText('PROCESS', c.x, c.y - 15);
@@ -305,13 +305,13 @@ export const CrystalLogic: React.FC = () => {
             ctx.rotate(p.angle);
 
             ctx.shadowBlur = 15;
-            ctx.shadowColor = '#fff';
-            ctx.fillStyle = 'rgba(255,255,255,0.9)';
+            ctx.shadowColor = 'rgba(0,0,0,0.1)';
+            ctx.fillStyle = '#0f172a';
             ctx.fillRect(-p.length / 2, -p.width / 2, p.length, p.width);
 
             // Reflective sheen
-            ctx.fillStyle = 'rgba(0,242,255,0.5)';
-            ctx.fillRect(-p.length / 2 + 5, -p.width / 2 + 2, p.length - 10, p.width / 2);
+            ctx.fillStyle = 'rgba(255,255,255,0.2)';
+            ctx.fillRect(-p.length / 2 + 5, -p.width / 2 + 2, p.length - 10, p.width / 4);
 
             ctx.restore();
 
@@ -346,7 +346,7 @@ export const CrystalLogic: React.FC = () => {
     }, []);
 
     return (
-        <div className="fixed inset-0 bg-[#020205] text-white flex flex-col font-sans overflow-hidden cursor-none">
+        <div className="fixed inset-0 bg-white text-slate-900 flex flex-col font-sans overflow-hidden cursor-none">
             {/* CANVAS LAYER */}
             <div className="absolute inset-0 flex items-center justify-center">
                 <canvas
@@ -363,14 +363,14 @@ export const CrystalLogic: React.FC = () => {
                 {/* Header */}
                 <div className="flex justify-between items-start">
                     <div>
-                        <div className="text-[10px] font-bold text-cyan-400 tracking-[0.6em] uppercase mb-1">MegaDrawk_Labs</div>
-                        <h1 className="text-4xl font-black italic tracking-tighter text-white">CRYSTAL LOGIC <span className="text-xl text-slate-500 font-light not-italic">/ REFLECTOR</span></h1>
+                        <div className="text-[10px] font-bold text-blue-600 tracking-[0.6em] uppercase mb-1">MegaDrawk_Labs</div>
+                        <h1 className="text-4xl font-black italic tracking-tighter text-slate-900">CRYSTAL LOGIC <span className="text-xl text-slate-400 font-light not-italic">/ REFLECTOR</span></h1>
                     </div>
                     <div className="text-right">
-                        <div className="text-[10px] uppercase tracking-widest text-slate-500">Processing_Efficiency</div>
-                        <div className="text-4xl font-mono font-bold text-cyan-400">{stats.score.toLocaleString()}</div>
+                        <div className="text-[10px] uppercase tracking-widest text-slate-400">Processing_Efficiency</div>
+                        <div className="text-4xl font-mono font-bold text-blue-600">{stats.score.toLocaleString()}</div>
                         {stats.combo > 1 && (
-                            <motion.div initial={{ scale: 1.5 }} animate={{ scale: 1 }} className="text-xl font-bold text-yellow-400 italic mt-2">
+                            <motion.div initial={{ scale: 1.5 }} animate={{ scale: 1 }} className="text-xl font-bold text-amber-500 italic mt-2">
                                 CHAIN {stats.combo}x
                             </motion.div>
                         )}
@@ -379,7 +379,7 @@ export const CrystalLogic: React.FC = () => {
 
                 {/* Footer Controls / Energy */}
                 <div className="flex justify-between items-end">
-                    <div className="text-xs font-mono text-slate-500">
+                    <div className="text-xs font-mono text-slate-400">
                         <div>CONTROLS:</div>
                         <div>MOUSE: POSITION</div>
                         <div>WHEEL: ANGLE</div>
@@ -387,13 +387,13 @@ export const CrystalLogic: React.FC = () => {
 
                     <div className="w-64">
                         <div className="flex justify-between text-xs font-bold mb-2">
-                            <span>SYSTEM_INTEGRITY</span>
-                            <span>{stats.energy.toFixed(0)}%</span>
+                            <span className="text-slate-400">SYSTEM_INTEGRITY</span>
+                            <span className="text-slate-900">{stats.energy.toFixed(0)}%</span>
                         </div>
-                        <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+                        <div className="h-2 bg-slate-100 rounded-full overflow-hidden shadow-inner">
                             <motion.div
                                 animate={{ width: `${stats.energy}%` }}
-                                className={`h-full ${stats.energy < 30 ? 'bg-red-500' : 'bg-cyan-500'}`}
+                                className={`h-full ${stats.energy < 30 ? 'bg-rose-500' : 'bg-blue-600'}`}
                             />
                         </div>
                     </div>
@@ -401,10 +401,10 @@ export const CrystalLogic: React.FC = () => {
             </div>
 
             {/* Instruction Overlay (First Time) */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center opacity-50 pointer-events-none">
-                <div className="text-[10px] tracking-[0.5em] uppercase text-white mb-2">Initialize Reflector</div>
-                <div className="w-16 h-16 border border-white/20 rounded-full mx-auto flex items-center justify-center animate-pulse">
-                    <div className="w-1 h-1 bg-white rounded-full" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center opacity-30 pointer-events-none">
+                <div className="text-[10px] tracking-[0.5em] uppercase text-slate-400 mb-2">Initialize Reflector</div>
+                <div className="w-16 h-16 border border-slate-200 rounded-full mx-auto flex items-center justify-center animate-pulse">
+                    <div className="w-1 h-1 bg-slate-400 rounded-full" />
                 </div>
             </div>
         </div>

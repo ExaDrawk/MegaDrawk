@@ -12,7 +12,7 @@ export default function ToolsLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div className="bg-[#020617] min-h-screen">
+        <div className="bg-white min-h-screen">
             {children}
         </div>
     );

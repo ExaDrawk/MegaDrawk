@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import { headers } from "next/headers";
 import { SITE } from "../config/site";
 import { AdSense } from "../components/AdSense";
+import { Navbar } from "../components/layout/Navbar";
 import "./globals.css";
 
 const interSans = Inter({
@@ -37,6 +38,7 @@ export default function RootLayout({
         nonce={nonce}
       >
         <AdSense pId="ca-pub-4594218580257200" nonce={nonce} />
+        <Navbar />
         {children}
       </body>
     </html>

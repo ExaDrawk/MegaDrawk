@@ -2,16 +2,17 @@
 
 import React, { useState, useEffect } from 'react';
 import { ToolShell } from '@/components/tools/ToolShell';
-import { Copy, RefreshCw, ShieldCheck, ShieldAlert, Shield, Check } from 'lucide-react';
+import { Copy, RefreshCw, ShieldCheck, ShieldAlert, Shield, Check, Lock } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function PasswordGeneratorPage() {
     const [password, setPassword] = useState('');
-    const [length, setLength] = useState(16);
+    const [length, setLength] = useState(24);
     const [includeUppercase, setIncludeUppercase] = useState(true);
     const [includeLowercase, setIncludeLowercase] = useState(true);
     const [includeNumbers, setIncludeNumbers] = useState(true);
     const [includeSymbols, setIncludeSymbols] = useState(true);
-    const [strength, setStrength] = useState(0); // 0-100
+    const [strength, setStrength] = useState(0);
 
     const generate = () => {
         let chars = '';
@@ -26,9 +27,9 @@ export default function PasswordGeneratorPage() {
         }
 
         let result = '';
-        const crypto = window.crypto;
+        const cryptoContent = window.crypto;
         const array = new Uint32Array(length);
-        crypto.getRandomValues(array);
+        cryptoContent.getRandomValues(array);
 
         for (let i = 0; i < length; i++) {
             result += chars[array[i] % chars.length];
@@ -40,7 +41,7 @@ export default function PasswordGeneratorPage() {
     const calculateStrength = (pwd: string) => {
         let score = 0;
         if (pwd.length > 8) score += 20;
-        if (pwd.length > 12) score += 20;
+        if (pwd.length > 16) score += 20;
         if (/[A-Z]/.test(pwd)) score += 15;
         if (/[a-z]/.test(pwd)) score += 15;
         if (/[0-9]/.test(pwd)) score += 15;
@@ -58,91 +59,112 @@ export default function PasswordGeneratorPage() {
 
     const getStrengthColor = () => {
         if (strength < 40) return 'text-red-500 bg-red-500';
-        if (strength < 70) return 'text-yellow-500 bg-yellow-500';
+        if (strength < 80) return 'text-yellow-500 bg-yellow-500';
         return 'text-green-500 bg-green-500';
     };
 
+    const getStrengthLabel = () => {
+        if (strength < 40) return '危険 (Weak)';
+        if (strength < 80) return '良好 (Moderate)';
+        return '最高機密 (Very Strong)';
+    };
+
     const howToUse = (
-        <ul className="list-disc pl-5 space-y-2">
-            <li>Adjust the <strong>Length</strong> slider to your desired complexity (12+ recommended).</li>
-            <li>Toggle character sets (Uppercase, Numbers, Symbols) to meet specific requirements.</li>
-            <li>Press the <RefreshCw className="inline w-4 h-4" /> icon to generate a new random combination.</li>
-            <li>Click the Copy button to save it to your clipboard.</li>
+        <ul className="list-disc pl-5 space-y-4">
+            <li><strong>長さ</strong>スライダーを左右に動かし、パスワードの文字数を調整します（20文字以上を推奨）。</li>
+            <li><strong>英大文字、数字、記号</strong>のスイッチを切り替えて、要件に応じた文字セットを選択します。</li>
+            <li>「更新」ボタンをクリックすると、新しいランダムな組み合わせが生成されます。</li>
+            <li>「コピー」ボタンで生成されたパスワードを保存できます。</li>
         </ul>
     );
 
     const faq = [
-        { q: "Is it secure?", a: "Yes. We use the browser's native `window.crypto` API for cryptographically secure random number generation." },
-        { q: "Do you save my passwords?", a: "Absolutely not. The password is generated locally on your device and disappears when you close the tab." },
+        { q: "生成されたパスワードは安全ですか？", a: "はい。ブラウザの標準機能である `window.crypto` API を使用し、暗号学的に安全な乱数生成を行っています。" },
+        { q: "生成したパスワードが保存されることはありますか？", a: "いいえ。パスワードはあなたのデバイス上で物理的に生成され、メモリ内のみに保持されます。サーバーとの通信は一切行われません。" },
     ];
 
     return (
         <ToolShell
-            title="Secure Password Generator"
-            description="Create uncrackable, cryptographically secure passwords instantly."
+            title="セキュアパスワード生成"
+            description="解読不可能な、暗号学的に安全なパスワードを瞬時に生成します。"
             howToUse={howToUse}
             faq={faq}
         >
-            <div className="max-w-3xl mx-auto space-y-12">
-
-                {/* Display */}
+            <div className="max-w-4xl mx-auto space-y-20">
+                {/* Display Section */}
                 <div className="relative group">
-                    <div className="bg-[#0b1121] border-2 border-slate-800 rounded-2xl p-8 flex items-center justify-between shadow-inner">
-                        <div className="font-mono text-2xl md:text-4xl text-white tracking-widest break-all">
+                    <div className="bg-white border border-slate-200 rounded-[2.5rem] p-10 md:p-16 flex flex-col md:flex-row items-center justify-between gap-10 shadow-xl relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-500/10 to-transparent" />
+
+                        <div className="font-mono text-3xl md:text-5xl text-slate-900 tracking-[0.1em] break-all leading-relaxed text-center md:text-left select-all">
                             {password}
                         </div>
-                        <div className="flex gap-4 pl-4 shrink-0">
-                            <button onClick={generate} className="p-3 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-400 hover:text-white transition-all">
+
+                        <div className="flex gap-4 shrink-0">
+                            <button onClick={generate} className="p-5 bg-slate-50 border border-slate-100 hover:border-blue-500/30 rounded-2xl text-slate-400 hover:text-blue-600 transition-all shadow-sm">
                                 <RefreshCw size={24} />
                             </button>
-                            <button onClick={copyToClipboard} className="p-3 bg-cyan-600 hover:bg-cyan-500 rounded-xl text-white shadow-lg shadow-cyan-500/20 transition-all hover:scale-105">
-                                <Copy size={24} />
+                            <button onClick={copyToClipboard} className="p-5 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-black hover:scale-105 transition-all shadow-2xl shadow-blue-500/20 flex items-center gap-2">
+                                <Copy size={18} />
+                                コピー
                             </button>
                         </div>
                     </div>
-                    {/* Strength Bar */}
-                    <div className="h-1.5 w-full bg-slate-800 mt-0 rounded-b-2xl overflow-hidden">
-                        <div
-                            className={`h-full transition-all duration-500 ${getStrengthColor().split(' ')[1]}`}
-                            style={{ width: `${strength}%` }}
-                        />
-                    </div>
-                    <div className={`mt-2 text-right text-xs font-bold uppercase tracking-widest ${getStrengthColor().split(' ')[0]}`}>
-                        {strength < 40 ? 'Weak' : strength < 70 ? 'Moderate' : 'Very Strong'}
+
+                    {/* Strength Indicator Overlay */}
+                    <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-[80%]">
+                        <div className="bg-white/80 backdrop-blur-xl border border-slate-100 rounded-2xl px-8 py-3 flex items-center justify-between shadow-xl">
+                            <div className="flex items-center gap-3">
+                                <div className={`w-2 h-2 rounded-full ${strength < 40 ? 'bg-rose-500' : strength < 80 ? 'bg-amber-500' : 'bg-emerald-500'} animate-pulse`} />
+                                <span className={`text-[10px] font-black uppercase tracking-widest ${strength < 40 ? 'text-rose-600' : strength < 80 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                                    {getStrengthLabel()}
+                                </span>
+                            </div>
+                            <div className="w-48 h-1 bg-slate-100 rounded-full overflow-hidden">
+                                <motion.div
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${strength}%` }}
+                                    className={`h-full ${strength < 40 ? 'bg-rose-500' : strength < 80 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                                />
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                {/* Controls */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 bg-slate-900/50 p-8 rounded-3xl border border-slate-800">
-                    <div className="space-y-6">
-                        <label className="block">
-                            <div className="flex justify-between mb-2">
-                                <span className="font-bold text-slate-300">Length</span>
-                                <span className="font-mono text-cyan-400">{length}</span>
+                {/* Configuration Section */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 bg-slate-50 p-12 rounded-[3.5rem] border border-slate-100 shadow-inner">
+                    <div className="space-y-8">
+                        <div>
+                            <div className="flex justify-between items-end mb-6 ml-4">
+                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">文字数 (Length)</span>
+                                <span className="text-4xl font-black text-blue-600 italic leading-none">{length}</span>
                             </div>
                             <input
                                 type="range"
-                                min="6" max="64"
+                                min="12" max="64"
                                 value={length}
                                 onChange={(e) => setLength(Number(e.target.value))}
-                                className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+                                className="w-full h-1.5 bg-slate-200 rounded-full appearance-none cursor-pointer accent-blue-600"
                             />
-                        </label>
+                        </div>
+                        <p className="text-xs text-slate-400 font-medium ml-4 uppercase tracking-widest">
+                            RECOMMENDED: 20+ CHARACTERS
+                        </p>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         {[
-                            { label: 'Lowercase (a-z)', state: includeLowercase, set: setIncludeLowercase },
-                            { label: 'Uppercase (A-Z)', state: includeUppercase, set: setIncludeUppercase },
-                            { label: 'Numbers (0-9)', state: includeNumbers, set: setIncludeNumbers },
-                            { label: 'Symbols (!@#)', state: includeSymbols, set: setIncludeSymbols },
+                            { label: '小文字 (a-z)', state: includeLowercase, set: setIncludeLowercase },
+                            { label: '大文字 (A-Z)', state: includeUppercase, set: setIncludeUppercase },
+                            { label: '数字 (0-9)', state: includeNumbers, set: setIncludeNumbers },
+                            { label: '記号 (!@#)', state: includeSymbols, set: setIncludeSymbols },
                         ].map((opt, i) => (
-                            <label key={i} className="flex items-center gap-3 cursor-pointer group">
-                                <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all ${opt.state ? 'bg-cyan-500 border-cyan-500' : 'bg-transparent border-slate-600 group-hover:border-slate-500'}`}>
-                                    {opt.state && <Check size={14} className="text-white" />}
+                            <label key={i} className="flex items-center justify-between px-6 py-4 rounded-2xl bg-white border border-slate-100 cursor-pointer hover:border-blue-500 hover:shadow-md transition-all group shadow-sm">
+                                <span className={`text-[10px] font-black uppercase tracking-widest ${opt.state ? 'text-slate-900' : 'text-slate-400'}`}>{opt.label}</span>
+                                <div className={`w-8 h-8 rounded-xl border flex items-center justify-center transition-all ${opt.state ? 'bg-blue-600 border-blue-600 text-white shadow-lg' : 'bg-transparent border-slate-100 text-transparent'}`}>
+                                    <Check size={14} strokeWidth={4} />
                                 </div>
                                 <input type="checkbox" checked={opt.state} onChange={() => opt.set(!opt.state)} className="hidden" />
-                                <span className={`text-sm font-medium ${opt.state ? 'text-white' : 'text-slate-500'}`}>{opt.label}</span>
                             </label>
                         ))}
                     </div>
