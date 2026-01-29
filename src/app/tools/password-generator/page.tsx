@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { ToolShell } from '@/components/tools/ToolShell';
-import { Copy, RefreshCw, ShieldCheck, ShieldAlert, Shield } from 'lucide-react';
+import { Copy, RefreshCw, ShieldCheck, ShieldAlert, Shield, Check } from 'lucide-react';
 
 export default function PasswordGeneratorPage() {
     const [password, setPassword] = useState('');
@@ -139,7 +139,7 @@ export default function PasswordGeneratorPage() {
                         ].map((opt, i) => (
                             <label key={i} className="flex items-center gap-3 cursor-pointer group">
                                 <div className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all ${opt.state ? 'bg-cyan-500 border-cyan-500' : 'bg-transparent border-slate-600 group-hover:border-slate-500'}`}>
-                                    {opt.state && <CheckCircle size={14} className="text-white" />}
+                                    {opt.state && <Check size={14} className="text-white" />}
                                 </div>
                                 <input type="checkbox" checked={opt.state} onChange={() => opt.set(!opt.state)} className="hidden" />
                                 <span className={`text-sm font-medium ${opt.state ? 'text-white' : 'text-slate-500'}`}>{opt.label}</span>

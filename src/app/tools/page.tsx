@@ -4,13 +4,13 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Search } from 'lucide-react';
-import { ALL_TOOLS, TOOLS_BY_CATEGORY, ToolCategory } from '@/lib/tools-registry';
+import { ALL_TOOLS, TOOLS_BY_CATEGORY, ToolCategory, ToolMeta } from '@/lib/tools-registry';
 
 export default function ToolsIndexPage() {
     const [search, setSearch] = useState('');
     const [selectedCat, setSelectedCat] = useState<ToolCategory | 'All'>('All');
 
-    const filteredTools = ALL_TOOLS.filter(t => {
+    const filteredTools = ALL_TOOLS.filter((t: ToolMeta) => {
         const matchSearch = t.title.toLowerCase().includes(search.toLowerCase()) || t.description.toLowerCase().includes(search.toLowerCase());
         const matchCat = selectedCat === 'All' || t.category === selectedCat;
         return matchSearch && matchCat;
@@ -62,7 +62,7 @@ export default function ToolsIndexPage() {
                 {/* Grid */}
                 {filteredTools.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {filteredTools.map((tool, i) => (
+                        {filteredTools.map((tool: ToolMeta, i: number) => (
                             <Link key={tool.slug} href={tool.path}>
                                 <motion.div
                                     initial={{ opacity: 0, scale: 0.95 }}
