@@ -2,8 +2,9 @@
 
 import React, { useState } from 'react';
 import { ToolShell } from '@/components/tools/ToolShell';
-import { Type, Copy, Trash2, Zap, RefreshCw } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { ToolOutput } from '@/components/tools/shared/ToolOutput';
+import { ToolOptionGroup } from '@/components/tools/shared/ToolOptionGroup';
+import { RefreshCw } from 'lucide-react';
 
 import { LOREM_EN, LOREM_JP } from '@/config/lorem-data';
 
@@ -18,7 +19,6 @@ export default function LoremIpsumPage() {
         let result = [];
         for (let i = 0; i < count; i++) {
             if (type === 'PARAGRAPH') {
-                // Shuffle and pick 3-5 sentences for a paragraph
                 const shuffled = [...pool].sort(() => 0.5 - Math.random());
                 result.push(shuffled.slice(0, 4).join(lang === 'EN' ? ' ' : ''));
             } else {
@@ -30,86 +30,82 @@ export default function LoremIpsumPage() {
 
     const howToUse = (
         <ul className="list-disc pl-5 space-y-4">
-            <li><strong>言語</strong>（日本語 / 英語）を選択してください。</li>
-            <li><strong>生成タイプ</strong>（段落単位 / 文単位）と<strong>数量</strong>を指定します。</li>
-            <li>「ダミーテキストを生成」ボタンをクリックすると、ランダムな文章が作成されます。</li>
-            <li>デザインのレイアウト確認や、プレースホルダーとして自由にご使用ください。</li>
+            <li>Select the <strong>Language Vector</strong> (Japanese or English) for text generation.</li>
+            <li>Configure the <strong>Granularity</strong> (Sentences or Paragraphs) and <strong>Magnitude</strong> (1-20).</li>
+            <li>Execute the <strong>Synthesis Engine</strong> to generate placeholder content for UI/UX prototyping.</li>
+            <li>Designed for wireframing, layout stress-testing, and branding visualization.</li>
         </ul>
     );
 
     const faq = [
-        { q: "生成される文章に意味はありますか？", a: "英語（Lorem Ipsum）は伝統的なラテン語ベースの無意味な文字列です。日本語はMegaDrawkの世界観を反映した抽象的な文章が生成されますが、特定の主張を持つものではありません。" },
-        { q: "著作権はありますか？", a: "生成されたテキストには著作権は発生しません。商用・非商用を問わず、自由にご利用いただけます。" },
+        { q: "Is there semantic meaning in the generated strings?", a: "The English vector uses traditional Latin-based Lorem Ipsum. The Japanese vector utilizes abstract, professional linguistic constructs reflective of the MegaDrawk aesthetic." },
+        { q: "Usage licensing?", a: "Generated content is released under a zero-restriction protocol. Suitable for commercial or private design integration." },
     ];
 
     return (
         <ToolShell
-            title="ダミーテキスト生成"
-            description="デザインの試作やプレースホルダーに使用する、高品質なダミーテキストを生成します。"
+            title="Synthetic Content Generator"
+            description="High-fidelity placeholder text generation engine for professional UI/UX prototyping and layout calibration."
             howToUse={howToUse}
             faq={faq}
         >
             <div className="flex flex-col gap-12">
                 {/* Controls */}
-                <div className="bg-slate-50 p-10 rounded-[2.5rem] border border-slate-100 grid grid-cols-1 md:grid-cols-3 gap-8 items-end shadow-sm">
+                <div className="bg-slate-50 p-10 rounded-[2.5rem] border border-slate-100 grid grid-cols-1 md:grid-cols-3 gap-12 items-end shadow-inner">
                     <div className="space-y-4">
-                        <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 ml-4">言語 (Language)</label>
-                        <div className="flex gap-2 bg-slate-200/50 p-1.5 rounded-2xl border border-slate-200">
-                            {['JP', 'EN'].map(l => (
-                                <button key={l} onClick={() => setLang(l as any)} className={`flex-1 py-2 rounded-xl text-xs font-black transition-all ${lang === l ? 'bg-white text-slate-900 shadow-lg' : 'text-slate-500 hover:text-slate-900'}`}>
-                                    {l === 'JP' ? '日本語' : 'English'}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                    <div className="space-y-4">
-                        <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 ml-4">数量 (Count: {count})</label>
-                        <input
-                            type="range"
-                            min="1" max="20"
-                            value={count}
-                            onChange={(e) => setCount(Number(e.target.value))}
-                            className="w-full h-1.5 bg-slate-200 rounded-full appearance-none cursor-pointer accent-blue-600"
+                        <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 ml-4">Language Vector</label>
+                        <ToolOptionGroup
+                            value={lang}
+                            onChange={(v) => setLang(v as any)}
+                            options={[
+                                { id: 'JP', label: 'Japanese' },
+                                { id: 'EN', label: 'English' }
+                            ]}
                         />
                     </div>
                     <div className="space-y-4">
-                        <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 ml-4">単位 (Unit)</label>
-                        <div className="flex gap-2 bg-slate-200/50 p-1.5 rounded-2xl border border-slate-200">
-                            {['SENTENCE', 'PARAGRAPH'].map(t => (
-                                <button key={t} onClick={() => setType(t as any)} className={`flex-1 py-2 rounded-xl text-xs font-black transition-all ${type === t ? 'bg-white text-slate-900 shadow-lg' : 'text-slate-500 hover:text-slate-900'}`}>
-                                    {t === 'SENTENCE' ? '文' : '段落'}
-                                </button>
-                            ))}
+                        <div className="flex justify-between items-center ml-4">
+                            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Magnitude</label>
+                            <span className="text-[10px] font-black text-blue-600">{count} Units</span>
                         </div>
+                        <div className="px-4">
+                            <input
+                                type="range"
+                                min="1" max="20"
+                                value={count}
+                                onChange={(e) => setCount(Number(e.target.value))}
+                                className="w-full h-1.5 bg-slate-200 rounded-full appearance-none cursor-pointer accent-blue-600"
+                            />
+                        </div>
+                    </div>
+                    <div className="space-y-4">
+                        <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 ml-4">Granularity</label>
+                        <ToolOptionGroup
+                            value={type}
+                            onChange={(v) => setType(v as any)}
+                            options={[
+                                { id: 'SENTENCE', label: 'Sentence' },
+                                { id: 'PARAGRAPH', label: 'Paragraph' }
+                            ]}
+                        />
                     </div>
                 </div>
 
                 {/* Output */}
-                <div className="space-y-4 font-sans">
-                    <div className="flex justify-between items-center ml-4">
-                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">生成結果 (Result)</label>
-                        <div className="flex gap-4">
-                            <button onClick={() => setOutput('')} className="text-[10px] font-black text-slate-400 hover:text-red-500 transition-colors uppercase tracking-widest">クリア</button>
-                            {output && (
-                                <button onClick={() => navigator.clipboard.writeText(output)} className="text-[10px] font-black text-blue-600 hover:text-blue-800 transition-colors uppercase tracking-widest flex items-center gap-1">コピー <Copy size={12} /></button>
-                            )}
-                        </div>
-                    </div>
-                    <textarea
-                        readOnly
-                        value={output}
-                        className="w-full h-[500px] bg-white border border-slate-200 rounded-[2.5rem] p-12 text-xl leading-loose text-slate-700 focus:outline-none focus:border-blue-500/50 transition-all resize-none shadow-xl"
-                        placeholder="生成ボタンをクリックしてください..."
-                    />
-                </div>
+                <ToolOutput
+                    value={output}
+                    label="Synthetic Result"
+                    heightClass="h-[500px]"
+                    placeholder="Initiate synthesis to generate data..."
+                />
 
                 <div className="flex justify-center">
                     <button
                         onClick={generate}
-                        className="group relative flex items-center gap-4 px-16 py-6 bg-blue-600 text-white font-black text-sm uppercase tracking-[0.4em] rounded-2xl transition-all hover:bg-black hover:scale-105 active:scale-[0.98] shadow-2xl shadow-blue-500/20"
+                        className="group relative flex items-center gap-4 px-16 py-6 bg-blue-600 text-white font-black text-[10px] uppercase tracking-[0.4em] rounded-2xl transition-all hover:bg-black hover:scale-105 active:scale-[0.98] shadow-2xl shadow-blue-500/20"
                     >
                         <RefreshCw size={20} className="group-hover:rotate-180 transition-transform duration-500" />
-                        ダミーテキストを生成
+                        Execute Synthesis
                     </button>
                 </div>
             </div>

@@ -105,10 +105,10 @@ export default function Home() {
             <div className="flex flex-col md:flex-row items-end justify-between gap-8 mb-20">
               <div className="space-y-4">
                 <div className="text-[10px] font-black text-blue-600 uppercase tracking-[0.4em]">Integrated Toolkit</div>
-                <h2 className="text-4xl md:text-7xl font-black text-slate-900 tracking-tighter uppercase leading-none italic">Global <span className="text-slate-400">Utility</span></h2>
+                <h2 className="text-4xl md:text-7xl font-black text-slate-900 tracking-tighter uppercase leading-none italic">Core <span className="text-slate-400">Utilities</span></h2>
               </div>
               <Link href="/tools" className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 hover:text-blue-600 transition-all pb-2 border-b border-slate-200 flex items-center gap-4 group">
-                すべてのツールを閲覧
+                BROWSE ALL VECTORS
                 <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
@@ -123,7 +123,7 @@ export default function Home() {
           {/* Experimental Lab */}
           <section className="py-32 px-6 bg-slate-50 border-y border-slate-200">
             <div className="text-center mb-20">
-              <h2 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tighter mb-6 uppercase">Experimental <span className="text-slate-400">Lab</span></h2>
+              <h2 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tighter mb-6 uppercase">Technical <span className="text-slate-400">Simulators</span></h2>
               <div className="h-1 w-20 bg-blue-600 mx-auto rounded-full" />
             </div>
 
@@ -154,13 +154,13 @@ export default function Home() {
           <div className="space-y-6">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-blue-600 rounded-lg" />
-              <span className="text-2xl font-black tracking-tighter text-slate-900 uppercase">{SITE.name} Industries</span>
+              <span className="text-2xl font-black tracking-tighter text-slate-900 uppercase">{SITE.name} Utility Stack</span>
             </div>
             <p className="text-slate-500 text-sm font-medium">© {new Date().getFullYear()} {SITE.legalName}. All Rights Reserved.</p>
           </div>
           <div className="flex flex-wrap items-center gap-12 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
-            <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
-            <Link href="/contact" className="hover:text-white transition-colors">Contact</Link>
+            <Link href="/terms" className="hover:text-blue-600 transition-colors">Terms</Link>
+            <Link href="/contact" className="hover:text-blue-600 transition-colors">Contact</Link>
           </div>
         </div>
       </footer>

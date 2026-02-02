@@ -23,7 +23,7 @@ export const ToolShell: React.FC<ToolShellProps> = ({ title, description, childr
                 <nav className="flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-12">
                     <Link href="/tools" className="hover:text-blue-600 transition-colors flex items-center gap-1">
                         <ChevronLeft size={12} />
-                        Tools
+                        Utility Vectors
                     </Link>
                     <div className="w-1 h-1 bg-slate-200 rounded-full" />
                     <span className="text-slate-500 font-bold">{title}</span>
@@ -74,7 +74,7 @@ export const ToolShell: React.FC<ToolShellProps> = ({ title, description, childr
                             <section>
                                 <h2 className="text-sm font-black text-slate-900 mb-10 uppercase tracking-[0.3em] flex items-center gap-4">
                                     <span className="w-10 h-10 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center text-xs border border-blue-200 shadow-sm">01</span>
-                                    使い方ガイド
+                                    Operational Guidance
                                 </h2>
                                 <div className="text-slate-600 leading-8 font-medium prose prose-slate max-w-none prose-strong:text-slate-900 prose-strong:font-black">
                                     {howToUse}
@@ -86,7 +86,7 @@ export const ToolShell: React.FC<ToolShellProps> = ({ title, description, childr
                             <section>
                                 <h2 className="text-sm font-black text-slate-900 mb-10 uppercase tracking-[0.3em] flex items-center gap-4">
                                     <span className="w-10 h-10 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center text-xs border border-sky-200 shadow-sm">02</span>
-                                    よくある質問
+                                    Technical FAQ
                                 </h2>
                                 <div className="grid gap-6">
                                     {faq.map((item, i) => (
@@ -113,10 +113,10 @@ export const ToolShell: React.FC<ToolShellProps> = ({ title, description, childr
 
 
                         <div className="bg-white border border-slate-200 rounded-[2.5rem] p-10 shadow-sm">
-                            <h3 className="text-[10px] font-black text-slate-900 mb-8 uppercase tracking-[0.3em]">その他のツール</h3>
+                            <h3 className="text-[10px] font-black text-slate-900 mb-8 uppercase tracking-[0.3em]">Peripheral Utilities</h3>
                             <div className="space-y-4">
                                 <Link href="/tools" className="group flex items-center justify-between p-5 rounded-2xl bg-slate-50 border border-slate-100 hover:border-blue-500 transition-all text-xs font-black uppercase tracking-widest text-slate-500 hover:text-blue-600">
-                                    全ツールを表示
+                                    Show All Vectors
                                     <ArrowLeft size={14} className="rotate-180 group-hover:translate-x-1 transition-transform" />
                                 </Link>
                             </div>

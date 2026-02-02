@@ -12,11 +12,11 @@ export function Navbar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     const navLinks = [
-        { name: 'ホーム', href: '/' },
-        { name: 'ツール', href: '/tools' },
-        { name: 'オーラ精製機', href: '/aura-refiner' },
-        { name: 'エコー制御', href: '/echo-control' },
-        { name: 'ドキュメント', href: '/documentation' },
+        { name: 'Home', href: '/' },
+        { name: 'Utilities', href: '/tools' },
+        { name: 'Aura Refiner', href: '/aura-refiner' },
+        { name: 'Echo Control', href: '/echo-control' },
+        { name: 'Docs', href: '/documentation' },
     ];
 
     return (

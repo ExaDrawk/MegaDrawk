@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ToolShell } from '@/components/tools/ToolShell';
-import { Maximize, Layout, Copy, Zap } from 'lucide-react';
+import { Maximize } from 'lucide-react';
 
 export default function AspectRatioPage() {
     const [w1, setW1] = useState(1920);
@@ -35,21 +35,21 @@ export default function AspectRatioPage() {
 
     const howToUse = (
         <ul className="list-disc pl-5 space-y-4">
-            <li>基準となるサイズ（Original）を入力すると、そのアスペクト比を自動計算します。</li>
-            <li>リサイズ後の幅（Target Width）または高さ（Target Height）を入力すると、比率を維持したもう一方の数値を算出します。</li>
-            <li>「16:9」などのプリセットをクリックして、主要な比率を瞬時にセットできます。</li>
+            <li>Define the <strong>Basis Dimensions</strong> to automatically calculate the simplified aspect ratio.</li>
+            <li>Modify the <strong>Target Rendering</strong> values (Width/Height) to scale your assets while maintaining structural integrity.</li>
+            <li>Select <strong>Industry Standard Presets</strong> like 16:9 or 21:9 to quickly align with production requirements.</li>
         </ul>
     );
 
     const faq = [
-        { q: "なぜアスペクト比が重要なのですか？", a: "画像や動画をリサイズする際、アスペクト比を維持しないと不自然に引き伸ばされたり、歪んだりしてしまいます。Webデザインや映像制作において必須の計算です。" },
-        { q: "どのような比率が一般的ですか？", a: "YouTubeやテレビは16:9、古いディスプレイや写真は4:3、Instagramの投稿は1:1や4:5がよく使われます。" },
+        { q: "Why is aspect ratio calibration critical?", a: "To prevent visual distortion and letterboxing across varying display devices. Maintaining ratio integrity ensures a professional UX." },
+        { q: "What are common standards?", a: "Modern displays utilize 16:9, cinematic content often targets 21:9, and mobile social platforms frequently use 9:16 or 4:5." },
     ];
 
     return (
         <ToolShell
-            title="アスペクト比計算"
-            description="画像や動画の縦横比を維持したまま、リサイズ後の数値を計算します。"
+            title="Aspect Ratio Engine"
+            description="High-fidelity calculator for scaling visual assets while maintaining geometric proportions."
             howToUse={howToUse}
             faq={faq}
         >
@@ -72,8 +72,8 @@ export default function AspectRatioPage() {
                     <div className="bg-white p-10 rounded-[2.5rem] border border-slate-200 shadow-xl relative overflow-hidden group">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full blur-3xl -mr-16 -mt-16 opacity-50 group-hover:bg-blue-100 transition-colors" />
                         <div className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-300 mb-10 flex justify-between items-center relative z-10">
-                            <span>Original Dimensions</span>
-                            <span className="text-blue-600">RATIO: {ratioStr}</span>
+                            <span>Basis Dimensions</span>
+                            <span className="text-blue-600">Ratio: {ratioStr}</span>
                         </div>
                         <div className="space-y-8 relative z-10">
                             <div className="flex items-center gap-6">
@@ -89,7 +89,7 @@ export default function AspectRatioPage() {
 
                     {/* Target */}
                     <div className="bg-slate-50 p-10 rounded-[2.5rem] border border-slate-200 border-dashed">
-                        <div className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-300 mb-10">Target Dimensions</div>
+                        <div className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-300 mb-10">Target Rendering</div>
                         <div className="space-y-8">
                             <div className="flex items-center gap-6">
                                 <span className="w-12 text-slate-200 font-black italic text-2xl">W</span>

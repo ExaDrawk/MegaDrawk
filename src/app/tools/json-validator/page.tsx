@@ -38,22 +38,22 @@ export default function JsonValidatorPage() {
 
     const howToUse = (
         <ul className="list-disc pl-5 space-y-4">
-            <li>Paste your dirty JSON string into the Input area.</li>
-            <li>Click "<strong>Validate & Format</strong>" to check syntax and prettify.</li>
-            <li>Errors will be highlighted if the JSON is invalid.</li>
-            <li>Use the Copy button to grab the clean JSON.</li>
+            <li>Paste your raw JSON payload into the <strong>Payload Integration</strong> panel.</li>
+            <li>Execute <strong>Structural Validation</strong> to identify syntax deviations and prettify the schema.</li>
+            <li>Operational errors are highlighted with diagnostic reports for rapid debugging.</li>
+            <li>Export the sanitized output using the high-level copy protocol.</li>
         </ul>
     );
 
     const faq = [
-        { q: "Is my data safe?", a: "Yes. All processing is done locally in your browser via JavaScript. No data leaves your device." },
-        { q: "Does it support comments?", a: "No. Standard JSON does not support comments. This tool enforces strict JSON standards." },
+        { q: "Is the data integrity maintained locally?", a: "Yes. All semantic analysis and formatting occur within the client-side sandbox. No data leaves the local execution environment." },
+        { q: "Standard compliance?", a: "The engine enforces strict RFC 8259 standards. Comments and trailing commas are flagged as structural violations." },
     ];
 
     return (
         <ToolShell
-            title="JSON Validator"
-            description="Validate, format, and fix your JSON data instantly. Parse, prettify, and debug syntax errors."
+            title="Structural JSON Validator"
+            description="High-fidelity debugging and formatting engine for ensuring absolute integrity in JSON data structures."
             howToUse={howToUse}
             faq={faq}
         >
@@ -61,20 +61,20 @@ export default function JsonValidatorPage() {
                 <div className="flex justify-end gap-4 min-h-[40px]">
                     {stats && (
                         <div className="flex items-center gap-4 animate-in fade-in slide-in-from-bottom-2">
-                            <span className="px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                                <CheckCircle size={12} /> Valid JSON
+                            <span className="px-5 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+                                <CheckCircle size={12} /> Data Verified
                             </span>
-                            <span className="px-4 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-600 text-[10px] font-black uppercase tracking-widest">
-                                Size: {stats.size}
+                            <span className="px-5 py-2 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 text-[10px] font-black uppercase tracking-widest">
+                                Payload: {stats.size}
                             </span>
-                            <span className="px-4 py-1.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-600 text-[10px] font-black uppercase tracking-widest">
-                                Keys: {stats.uniqueKeys}
+                            <span className="px-5 py-2 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600 text-[10px] font-black uppercase tracking-widest">
+                                Root Nodes: {stats.uniqueKeys}
                             </span>
                         </div>
                     )}
                     {error && (
-                        <span className="px-4 py-1.5 rounded-full bg-rose-50 border border-rose-200 text-rose-600 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 animate-pulse">
-                            <AlertTriangle size={12} /> Syntax Error
+                        <span className="px-5 py-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 animate-pulse">
+                            <AlertTriangle size={12} /> Semantic Error
                         </span>
                     )}
                 </div>
@@ -83,8 +83,8 @@ export default function JsonValidatorPage() {
                     <ToolInput
                         value={input}
                         onChange={setInput}
-                        placeholder='{"status": "Paste JSON here..."}'
-                        label="Input JSON"
+                        placeholder='{"integrity": "Paste JSON payload..."}'
+                        label="Payload Integration"
                         heightClass="h-[600px]"
                         onClear={() => {
                             setInput('');
@@ -97,10 +97,9 @@ export default function JsonValidatorPage() {
                     <ToolOutput
                         value={formatted}
                         error={error}
-                        label={error ? "Error Details" : "Formatted JSON"}
+                        label={error ? "Diagnostic Report" : "Format Output"}
                         heightClass="h-[600px]"
-                        placeholder="Waiting for validation..."
-                        className={error ? "opacity-100" : ""}
+                        placeholder="Awaiting data injection..."
                     />
                 </div>
 
@@ -110,7 +109,7 @@ export default function JsonValidatorPage() {
                         className="group relative flex items-center gap-3 px-16 py-6 bg-blue-600 text-white font-black text-[10px] uppercase tracking-[0.3em] rounded-2xl transition-all hover:bg-black hover:scale-105 active:scale-[0.98] shadow-2xl shadow-blue-500/20"
                     >
                         <FileJson size={18} className="group-hover:rotate-12 transition-transform" />
-                        Validate & Format
+                        Execute Validation Engine
                         <Zap size={14} className="ml-1 opacity-50 animate-pulse" />
                     </button>
                 </div>

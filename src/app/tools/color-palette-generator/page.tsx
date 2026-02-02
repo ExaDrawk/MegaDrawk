@@ -11,21 +11,22 @@ export default function ColorPalettePage() {
 
     const howToUse = (
         <ul className="list-disc pl-5 space-y-4">
-            <li>「パレットを更新」ボタンをクリックすると、調和のとれた5色のカラーセットをランダムに生成します。</li>
-            <li>各カラーパネルをクリックすることで、HEXコードをクリップボードにコピーできます。</li>
-            <li>ベースとなる色相（Hue）から、類似色や補色を自動的に計算してパレットを構築します。</li>
+            <li>Initialize the <strong>Spectrum Synthesis</strong> to derive a harmonious configuration of five chromatic vectors.</li>
+            <li>Select any segment to capture the <strong>HEX Vector</strong> directly into the client-side clipboard.</li>
+            <li>The algorithm utilizes high-fidelity HSL space mathematics to enforce visual equilibrium and professional-grade gradients.</li>
+            <li>Designed for rapid chromatic profiling of UI components and architectural themes.</li>
         </ul>
     );
 
     const faq = [
-        { q: "生成される色の形式は何ですか？", a: "現在はWeb制作に最も適したRGB（HEX形式）でコピーされます。パレット自体はHSLカラースペースで計算されており、美しい階調を実現しています。" },
-        { q: "ブランドカラーの作成に使えますか？", a: "はい。メインカラーとアクセントカラーの組み合わせを検討する際のインスピレーションツールとして最適です。" },
+        { q: "Available chromatic formats?", a: "The current engine exports HEX vectors as the primary standard for web interface and design system integration." },
+        { q: "Synthesis logic?", a: "The system implements proportional hue rotation and saturation balancing to generate analogous, monochromatic, and complementary schematics." },
     ];
 
     return (
         <ToolShell
-            title="カラーパレット生成"
-            description="調和の取れた美しい配色セットを瞬時に生成します。デザインのインスピレーションに。"
+            title="Chromatic Synthesis Engine"
+            description="High-fidelity generation of harmonious, production-grade chromatic schematics for elite UI design and architectural layout."
             howToUse={howToUse}
             faq={faq}
         >
@@ -47,7 +48,7 @@ export default function ColorPalettePage() {
                                 >
                                     <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity" />
                                     <div className="bg-white/90 backdrop-blur-xl px-6 py-3 rounded-2xl border border-white text-slate-900 font-black text-[10px] tracking-[0.2em] opacity-0 group-hover:opacity-100 transition-all translate-y-4 group-hover:translate-y-0 shadow-xl">
-                                        COPY HEX
+                                        COPY HEX VECTOR
                                     </div>
                                     <div className="mt-4 text-white font-black text-2xl tracking-tighter drop-shadow-2xl">
                                         {hex}
@@ -64,7 +65,7 @@ export default function ColorPalettePage() {
                         className="group relative flex items-center gap-4 px-16 py-6 bg-blue-600 text-white font-black text-[10px] uppercase tracking-[0.4em] rounded-2xl transition-all hover:bg-black hover:scale-105 active:scale-[0.98] shadow-2xl shadow-blue-500/20"
                     >
                         <RefreshCw size={20} className="group-hover:rotate-180 transition-transform duration-700" />
-                        パレットを更新
+                        Execute Spectrum Synthesis
                     </button>
                 </div>
             </div>

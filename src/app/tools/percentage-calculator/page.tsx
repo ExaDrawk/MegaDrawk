@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { ToolShell } from '@/components/tools/ToolShell';
-import { Calculator, Percent, ArrowRight, Zap } from 'lucide-react';
+import { Percent, Zap } from 'lucide-react';
 
 export default function PercentageCalculatorPage() {
     const [q1, setQ1] = useState({ a: '20', b: '100', res: '20' });
@@ -18,21 +18,22 @@ export default function PercentageCalculatorPage() {
 
     const howToUse = (
         <ul className="list-disc pl-5 space-y-4">
-            <li><strong>割合の計算</strong>: 「100の20%はいくら？」といった数値を算出します。</li>
-            <li><strong>比率の計算</strong>: 「200のうち50は何%？」といった割合を算出します。</li>
-            <li>入力欄の数値を変更すると、結果が即座に反映されます。</li>
+            <li><strong>Value Extraction</strong>: Derive a specific magnitude from a basis total (e.g., "Determine 20% of 100 units").</li>
+            <li><strong>Ratio Derivation</strong>: Calculate the percentual representation of a minor vector within a major total (e.g., "50 units out of 200").</li>
+            <li>Inputs execute real-time recalibration for mission-critical financial and statistical modeling.</li>
+            <li>Precision engine compliant with standard DPD (Decimal Point Distribution) requirements.</li>
         </ul>
     );
 
     const faq = [
-        { q: "どのような場面で役立ちますか？", a: "割引額の計算、税計算、統計データの分析、進捗率の把握など、日常からビジネスまで幅広く活用できます。" },
-        { q: "小数の扱いは？", a: "小数点以下2位まで計算され、末尾の0は自動的にカットされます。精密な比率計算が可能です。" },
+        { q: "Sector-specific applications?", a: "Engineered for high-throughput discount modeling, tax nexus assessments, and performance delta analysis." },
+        { q: "Floating-point precision?", a: "The architecture maintains resolution up to 2 decimal places with automated zero-truncation for optimal data clarity." },
     ];
 
     return (
         <ToolShell
-            title="パーセント計算"
-            description="パーセンテージ、比率、変化率などを、直感的なインターフェースで素早く計算します。"
+            title="Analytical Dimension Engine"
+            description="High-precision arithmetic engines for complex magnitude extraction and ratio derivation in professional workflows."
             howToUse={howToUse}
             faq={faq}
         >
@@ -41,13 +42,14 @@ export default function PercentageCalculatorPage() {
                 <div className="bg-slate-50 p-10 rounded-[2.5rem] border border-slate-100 space-y-8 shadow-sm">
                     <div className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 mb-4 flex items-center gap-2">
                         <Zap size={12} className="text-amber-500" />
-                        Value Calculation
+                        Value Extraction Logic
                     </div>
                     <div className="flex flex-wrap items-center gap-6 text-2xl md:text-3xl font-black text-slate-900 italic">
-                        <input type="number" value={q1.b} onChange={e => calc1(q1.a, e.target.value)} className="w-40 bg-white border border-slate-200 rounded-2xl p-4 text-center text-blue-600 focus:border-blue-500 focus:outline-none shadow-sm" />
-                        <span className="text-slate-300">の</span>
+                        <span className="text-slate-300 not-italic">Derive</span>
                         <input type="number" value={q1.a} onChange={e => calc1(e.target.value, q1.b)} className="w-24 bg-white border border-slate-200 rounded-2xl p-4 text-center text-blue-600 focus:border-blue-500 focus:outline-none shadow-sm" />
-                        <span className="text-slate-300">% は</span>
+                        <span className="text-slate-300 not-italic">% of</span>
+                        <input type="number" value={q1.b} onChange={e => calc1(q1.a, e.target.value)} className="w-40 bg-white border border-slate-200 rounded-2xl p-4 text-center text-blue-600 focus:border-blue-500 focus:outline-none shadow-sm" />
+                        <span className="text-slate-300 not-italic">total</span>
                         <div className="flex-1 bg-blue-600 text-white rounded-2xl p-6 text-center shadow-xl">
                             {q1.res}
                         </div>
@@ -58,13 +60,13 @@ export default function PercentageCalculatorPage() {
                 <div className="bg-slate-50 p-10 rounded-[2.5rem] border border-slate-100 space-y-8 shadow-sm">
                     <div className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 mb-4 flex items-center gap-2">
                         <Percent size={12} className="text-emerald-500" />
-                        Ratio Calculation
+                        Ratio Derivation Engine
                     </div>
                     <div className="flex flex-wrap items-center gap-6 text-2xl md:text-3xl font-black text-slate-900 italic">
-                        <input type="number" value={q2.b} onChange={e => calc2(q2.a, e.target.value)} className="w-40 bg-white border border-slate-200 rounded-2xl p-4 text-center text-emerald-600 focus:border-emerald-500 focus:outline-none shadow-sm" />
-                        <span className="text-slate-300">のうち</span>
                         <input type="number" value={q2.a} onChange={e => calc2(e.target.value, q2.b)} className="w-40 bg-white border border-slate-200 rounded-2xl p-4 text-center text-emerald-600 focus:border-emerald-500 focus:outline-none shadow-sm" />
-                        <span className="text-slate-300">は</span>
+                        <span className="text-slate-300 not-italic">within</span>
+                        <input type="number" value={q2.b} onChange={e => calc2(q2.a, e.target.value)} className="w-40 bg-white border border-slate-200 rounded-2xl p-4 text-center text-emerald-600 focus:border-emerald-500 focus:outline-none shadow-sm" />
+                        <span className="text-slate-300 not-italic">is</span>
                         <div className="flex-1 bg-emerald-600 text-white rounded-2xl p-6 text-center shadow-xl flex items-center justify-center gap-2">
                             {q2.res} <span className="text-xl">%</span>
                         </div>

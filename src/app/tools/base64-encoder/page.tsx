@@ -30,64 +30,69 @@ export default function Base64ToolPage() {
                 try {
                     const decodedWords = CryptoJS.enc.Base64.parse(val);
                     const result = CryptoJS.enc.Utf8.stringify(decodedWords);
-                    if (!result) throw new Error('Invalid conversion');
+                    if (!result && val.trim().length > 0) throw new Error('Invalid conversion');
                     setOutput(result);
                 } catch (e) {
-                    setError('Invalid Base64 string');
+                    setError('Invalid Serialization: Malformed Base64 stream detected.');
                     setOutput('');
                 }
             }
         } catch (e) {
-            setError('Conversion failed');
+            setError('Operational failure during logic transcoding.');
         }
     };
 
     const howToUse = (
         <ul className="list-disc pl-5 space-y-4">
-            <li><strong>Encode</strong>: Convert text to Base64 format.</li>
-            <li><strong>Decode</strong>: Restore text from Base64 string.</li>
-            <li>Supports UTF-8 characters (Japanese, Emoji, etc.) safely.</li>
+            <li><strong>Encapsulation Vector</strong>: Map semantic plaintext payloads into standardized Base64 binary serialization.</li>
+            <li><strong>Extraction Protocol</strong>: Reconstruct high-fidelity UTF-8 strings from existing Base64 encoded streams.</li>
+            <li>Utilizes full character-set mapping for the safe deconstruction of multi-byte data profiles and architectural symbols.</li>
+            <li>Real-time serialization optimized for secure data transmission and network-safe payloads.</li>
         </ul>
     );
 
     const faq = [
-        { q: "Is Japanese supported?", a: "Yes, this tool uses UTF-8 encoding via CryptoJS, ensuring multi-byte characters are handled correctly." },
-        { q: "Data Privacy?", a: "All conversion happens entirely in your browser. No data is sent to any server." }
+        { q: "Is high-fidelity mapping supported?", a: "Yes. The architecture utilizes UTF-8 block parsing to ensure no data loss during complex multi-byte character transformation." },
+        { q: "Data sovereignty policy?", a: "Affirmative. The entire transcoding process is executed within the client-side sandbox. No external network requests are initiated for processing." }
     ];
 
     return (
         <ToolShell
-            title="Base64 Converter"
-            description="Securely encode and decode text to Base64 format with full UTF-8 support."
+            title="Base64 Serialization Engine"
+            description="Professional high-fidelity encoding and decoding system for mapping data payloads into robust Base64 binary serialization."
             howToUse={howToUse}
             faq={faq}
         >
             <div className="flex flex-col gap-12">
-                <ToolOptionGroup
-                    value={mode}
-                    onChange={(id) => {
-                        setMode(id as any);
-                        process(input, id as any);
-                    }}
-                    options={[
-                        { id: 'ENCODE', label: 'Encode (Text → B64)' },
-                        { id: 'DECODE', label: 'Decode (B64 → Text)' }
-                    ]}
-                />
+                <div className="flex justify-center">
+                    <ToolOptionGroup
+                        value={mode}
+                        onChange={(id) => {
+                            setMode(id as any);
+                            process(input, id as any);
+                        }}
+                        options={[
+                            { id: 'ENCODE', label: 'Encapsulate (Payload → B64)' },
+                            { id: 'DECODE', label: 'Extract (B64 → Payload)' }
+                        ]}
+                    />
+                </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                     <ToolInput
                         value={input}
                         onChange={(val) => process(val, mode)}
-                        placeholder={mode === 'ENCODE' ? "Enter text here..." : "Paste Base64 string here..."}
+                        placeholder={mode === 'ENCODE' ? "Inject payload source..." : "Inject Base64 stream..."}
                         onClear={() => process('', mode)}
-                        label="Input"
+                        label="Source Integration"
+                        heightClass="h-72"
                     />
 
                     <ToolOutput
                         value={output}
                         error={error}
-                        label="Output"
+                        label="Transcoded Result"
+                        heightClass="h-72"
                     />
                 </div>
             </div>

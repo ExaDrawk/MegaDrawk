@@ -29,7 +29,7 @@ export default function RootLayout({
   const nonce = headers().get("x-nonce") ?? undefined;
 
   return (
-    <html lang="ja">
+    <html lang="en">
       <head>
         {/* AdSense Script removed from here, managed by AdSense component */}
       </head>

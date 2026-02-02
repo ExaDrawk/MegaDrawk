@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { ToolShell } from '@/components/tools/ToolShell';
-import { Copy, RefreshCw, ShieldCheck, ShieldAlert, Shield, Check, Lock } from 'lucide-react';
+import { Copy, RefreshCw, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function PasswordGeneratorPage() {
@@ -57,36 +57,30 @@ export default function PasswordGeneratorPage() {
         navigator.clipboard.writeText(password);
     };
 
-    const getStrengthColor = () => {
-        if (strength < 40) return 'text-red-500 bg-red-500';
-        if (strength < 80) return 'text-yellow-500 bg-yellow-500';
-        return 'text-green-500 bg-green-500';
-    };
-
     const getStrengthLabel = () => {
-        if (strength < 40) return '危険 (Weak)';
-        if (strength < 80) return '良好 (Moderate)';
-        return '最高機密 (Very Strong)';
+        if (strength < 40) return 'Vulnerable (Weak)';
+        if (strength < 80) return 'Operational (Moderate)';
+        return 'Top Secret (Maximum Entropy)';
     };
 
     const howToUse = (
         <ul className="list-disc pl-5 space-y-4">
-            <li><strong>長さ</strong>スライダーを左右に動かし、パスワードの文字数を調整します（20文字以上を推奨）。</li>
-            <li><strong>英大文字、数字、記号</strong>のスイッチを切り替えて、要件に応じた文字セットを選択します。</li>
-            <li>「更新」ボタンをクリックすると、新しいランダムな組み合わせが生成されます。</li>
-            <li>「コピー」ボタンで生成されたパスワードを保存できます。</li>
+            <li>Adjust the <strong>Entropy Magnitude</strong> (length) slider to define your security threshold (20+ recommended).</li>
+            <li>Configure the <strong>Complexity Vector</strong> by toggling uppercase, numerical, and symbolic injection.</li>
+            <li>Execute the <strong>Randomization Engine</strong> to generate a cryptographically resilient character string.</li>
+            <li>Utilize the <strong>Copy Protocol</strong> to extract the generated secret into your integration layer.</li>
         </ul>
     );
 
     const faq = [
-        { q: "生成されたパスワードは安全ですか？", a: "はい。ブラウザの標準機能である `window.crypto` API を使用し、暗号学的に安全な乱数生成を行っています。" },
-        { q: "生成したパスワードが保存されることはありますか？", a: "いいえ。パスワードはあなたのデバイス上で物理的に生成され、メモリ内のみに保持されます。サーバーとの通信は一切行われません。" },
+        { q: "Is the entropy generation cryptographically secure?", a: "Yes. The engine utilizes the industry-standard `window.crypto` API for generating high-entropy pseudo-random character distributions." },
+        { q: "Data persistence policy?", a: "Negative. The generated secrets exist exclusively within the local process heap/memory and are never transmitted to external nodes or logs." },
     ];
 
     return (
         <ToolShell
-            title="セキュアパスワード生成"
-            description="解読不可能な、暗号学的に安全なパスワードを瞬時に生成します。"
+            title="Entropy Generation Engine"
+            description="Generate high-entropy, cryptographically secure character strings for mission-critical access control."
             howToUse={howToUse}
             faq={faq}
         >
@@ -106,7 +100,7 @@ export default function PasswordGeneratorPage() {
                             </button>
                             <button onClick={copyToClipboard} className="p-5 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-black hover:scale-105 transition-all shadow-2xl shadow-blue-500/20 flex items-center gap-2">
                                 <Copy size={18} />
-                                コピー
+                                COPY SECRETS
                             </button>
                         </div>
                     </div>
@@ -136,7 +130,7 @@ export default function PasswordGeneratorPage() {
                     <div className="space-y-8">
                         <div>
                             <div className="flex justify-between items-end mb-6 ml-4">
-                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">文字数 (Length)</span>
+                                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Magnitude (Length)</span>
                                 <span className="text-4xl font-black text-blue-600 italic leading-none">{length}</span>
                             </div>
                             <input
@@ -154,10 +148,10 @@ export default function PasswordGeneratorPage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         {[
-                            { label: '小文字 (a-z)', state: includeLowercase, set: setIncludeLowercase },
-                            { label: '大文字 (A-Z)', state: includeUppercase, set: setIncludeUppercase },
-                            { label: '数字 (0-9)', state: includeNumbers, set: setIncludeNumbers },
-                            { label: '記号 (!@#)', state: includeSymbols, set: setIncludeSymbols },
+                            { label: 'Lowercase (a-z)', state: includeLowercase, set: setIncludeLowercase },
+                            { label: 'Uppercase (A-Z)', state: includeUppercase, set: setIncludeUppercase },
+                            { label: 'Numerical (0-9)', state: includeNumbers, set: setIncludeNumbers },
+                            { label: 'Symbolic (!@#)', state: includeSymbols, set: setIncludeSymbols },
                         ].map((opt, i) => (
                             <label key={i} className="flex items-center justify-between px-6 py-4 rounded-2xl bg-white border border-slate-100 cursor-pointer hover:border-blue-500 hover:shadow-md transition-all group shadow-sm">
                                 <span className={`text-[10px] font-black uppercase tracking-widest ${opt.state ? 'text-slate-900' : 'text-slate-400'}`}>{opt.label}</span>

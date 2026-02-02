@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { ToolShell } from '@/components/tools/ToolShell';
+import { ToolInput } from '@/components/tools/shared/ToolInput';
 import { Type, Clock, AlignLeft, Hash } from 'lucide-react';
 
 export default function WordCounterPage() {
@@ -16,13 +17,12 @@ export default function WordCounterPage() {
     });
 
     useEffect(() => {
-        // Japanese text analysis improvement
         const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
         const chars = text.length;
         const charsNoSpace = text.replace(/\s/g, '').length;
-        const sentences = text.trim() === '' ? 0 : text.split(/[.!?。！？]+/).length - 1;
-        const paragraphs = text.trim() === '' ? 0 : text.replace(/\n$/gm, '').split(/\n/).length;
-        const readingTime = Math.ceil(chars / 600); // 600 characters per minute for Japanese
+        const sentences = text.trim() === '' ? 0 : text.split(/[.!?。！？]+/).filter(Boolean).length;
+        const paragraphs = text.trim() === '' ? 0 : text.replace(/\n$/gm, '').split(/\n/).filter(Boolean).length;
+        const readingTime = Math.ceil(chars / 500);
 
         setStats({ words, chars, charsNoSpace, sentences, paragraphs, readingTime });
     }, [text]);
@@ -41,42 +41,42 @@ export default function WordCounterPage() {
     );
 
     const howToUse = (
-        <ul className="list-disc pl-5 space-y-4 text-slate-600">
-            <li>テキストエリアに分析したい文章を入力または貼り付けてください。</li>
-            <li>入力と同時に、上部の統計パネルがリアルタイムで更新されます。</li>
-            <li><strong>読了時間</strong>は、日本語の平均的な読書速度（約600文字/分）に基づいて算出されます。</li>
-            <li>「空白なし」の文字数カウントは、原稿用紙の枚数計算などに便利です。</li>
+        <ul className="list-disc pl-5 space-y-4">
+            <li>Inject your semantic payload into the <strong>Payload Integration</strong> panel for real-time deconstruction.</li>
+            <li>Operational metrics (Word Density, Temporal Estimates) update automatically during the data injection phase.</li>
+            <li>Utilize the structural report to optimize content magnitude and linguistic complexity.</li>
         </ul>
     );
 
     const faq = [
-        { q: "日本語以外の言語もカウントできますか？", a: "はい、英語を始めとする他言語も正確に単語数や文字数をカウントします。" },
-        { q: "プライバシーは守られますか？", a: "入力されたテキストはサーバーに送信されることはありません。すべての処理はブラウザ内で完結するため、機密文書の分析も安全です。" }
+        { q: "Is the analysis compliant with multi-byte character sets?", a: "Yes. The engine correctly calculates magnitude and temporal duration for CJK (Chinese, Japanese, Korean) vectors based on standardized reading speed thresholds." },
+        { q: "Data persistence protocol?", a: "Negative. All deconstruction logic is executed within the client-side sandbox. No payload data is cached or transmitted to external nodes." }
     ];
 
     return (
         <ToolShell
-            title="文字・単語カウント"
-            description="リアルタイムで文章密度、読了時間、構造的複雑さを分析します。"
+            title="Lexical Analysis Engine"
+            description="Real-time deconstruction of linguistic payloads to derive structural complexity, magnitude, and temporal consumption requirements."
             howToUse={howToUse}
             faq={faq}
         >
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-                <StatCard icon={Type} label="単語数 (Words)" value={stats.words} color="text-blue-600" bg="bg-blue-50" />
-                <StatCard icon={Hash} label="文字数 (Chars)" value={stats.chars} color="text-sky-600" bg="bg-sky-50" />
-                <StatCard icon={AlignLeft} label="文章数 (Sentences)" value={stats.sentences} color="text-indigo-600" bg="bg-indigo-50" />
-                <StatCard icon={Clock} label="読了時間 (目安)" value={`${stats.readingTime} 分`} color="text-emerald-600" bg="bg-emerald-50" />
-                <StatCard icon={AlignLeft} label="段落数" value={stats.paragraphs} color="text-amber-600" bg="bg-amber-50" />
-                <StatCard icon={Hash} label="文字数 (空白なし)" value={stats.charsNoSpace} color="text-blue-600" bg="bg-blue-50" />
-            </div>
+            <div className="space-y-12">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <StatCard icon={Type} label="Lexical Magnitude" value={stats.words} color="text-blue-600" bg="bg-blue-50" />
+                    <StatCard icon={Hash} label="Character Vector" value={stats.chars} color="text-sky-600" bg="bg-sky-50" />
+                    <StatCard icon={AlignLeft} label="Structural Nodes" value={stats.sentences} color="text-indigo-600" bg="bg-indigo-50" />
+                    <StatCard icon={Clock} label="Temporal Estimate" value={`${stats.readingTime} min`} color="text-emerald-600" bg="bg-emerald-50" />
+                    <StatCard icon={AlignLeft} label="Paragraph Density" value={stats.paragraphs} color="text-amber-600" bg="bg-amber-50" />
+                    <StatCard icon={Hash} label="Net Payload" value={stats.charsNoSpace} color="text-blue-600" bg="bg-blue-50" />
+                </div>
 
-            <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/10 to-transparent rounded-[2.5rem] blur-xl opacity-20 pointer-events-none" />
-                <textarea
+                <ToolInput
                     value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    placeholder="ここに文章を入力してください..."
-                    className="relative w-full h-[500px] bg-white border border-slate-200 rounded-[2rem] p-10 text-xl leading-relaxed text-slate-700 focus:outline-none focus:border-blue-500 shadow-sm transition-all resize-none font-medium placeholder:text-slate-200"
+                    onChange={setText}
+                    placeholder="Inject linguistic payload here..."
+                    label="Payload Integration"
+                    heightClass="h-[600px]"
+                    onClear={() => setText('')}
                 />
             </div>
         </ToolShell>

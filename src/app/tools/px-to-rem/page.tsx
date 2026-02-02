@@ -2,8 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { ToolShell } from '@/components/tools/ToolShell';
-import { ArrowRightLeft, Settings2, LayoutGrid, Zap } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ArrowRightLeft, Settings2 } from 'lucide-react';
 
 export default function PxToRemPage() {
     const [baseSize, setBaseSize] = useState(16);
@@ -34,21 +33,22 @@ export default function PxToRemPage() {
 
     const howToUse = (
         <ul className="list-disc pl-5 space-y-4">
-            <li><strong>Base Font Size</strong> (通常は16px) を設定します。これはWebブラウザのデフォルト設定に準じます。</li>
-            <li>「Pixel (px)」欄に数値を入力すると、即座に「REM」に変換されます。</li>
-            <li>逆に「REM」欄に入力して、必要なピクセル値を算出することも可能です。</li>
+            <li>Configure the <strong>Basis Dimensions</strong> (default: 16px) to define the root font magnitude for calculations.</li>
+            <li>Inject values into the <strong>Absolute Vector (px)</strong> panel to instantly derive the <strong>Relative Magnitude (rem)</strong>.</li>
+            <li>Bi-directional transcoding allows for precise unit resolution based on design system constraints.</li>
+            <li>Engine optimized for responsive layout recalibration and accessibility compliance.</li>
         </ul>
     );
 
     const faq = [
-        { q: "なぜREMを使うべきなのですか？", a: "REMはルート要素（html）のフォントサイズに対する相対単位です。ユーザーがブラウザのフォントサイズを変更した際に、レイアウト全体が追従するため、アクセシビリティの観点から推奨されます。" },
-        { q: "Base Sizeを変更する必要はありますか？", a: "一般的なモダンブラウザのデフォルトは16pxですが、特定のプロジェクトデザイン規定がある場合は、その基本サイズに合わせて調整してください。" },
+        { q: "Why prioritize Relative Magnitudes (REM)?", a: "REM units are anchored to the client's environmental font settings. Utilizing relative scales ensures layout resilience and accessibility when root dimensions are adjusted." },
+        { q: "When to recalibrate Basis Dimensions?", a: "Standard environments default to 16px. Recalibration is required only when specific architectural resets or design systems override the root scaling factor." },
     ];
 
     return (
         <ToolShell
-            title="PX to REM変換"
-            description="ピクセル単位（px）と相対単位（rem）を、基準サイズに基づいて瞬時に変換します。レスポンシブ設計の必須ツール。"
+            title="Dimensions Transcoding Engine"
+            description="High-precision unit resolution for converting between Pixel (px) and Relative (rem) vectors in responsive UI architectures."
             howToUse={howToUse}
             faq={faq}
         >
@@ -60,8 +60,8 @@ export default function PxToRemPage() {
                             <Settings2 size={24} />
                         </div>
                         <div>
-                            <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-1">Base Configuration</div>
-                            <div className="text-xl font-black text-slate-900 italic">Base Font Size (px)</div>
+                            <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-1">Basis Configuration</div>
+                            <div className="text-xl font-black text-slate-900 italic">Root Magnitude (px)</div>
                         </div>
                     </div>
                     <div className="flex items-center gap-4 bg-slate-200/50 p-2 rounded-2xl border border-slate-200">
@@ -86,7 +86,7 @@ export default function PxToRemPage() {
                 {/* Main Converter */}
                 <div className="grid grid-cols-1 md:grid-cols-[1fr,auto,1fr] items-center gap-8">
                     <div className="space-y-4">
-                        <label className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 ml-6">Pixel (px)</label>
+                        <label className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 ml-6">Absolute Vector (px)</label>
                         <div className="relative group">
                             <div className="absolute -inset-1 bg-blue-500/10 rounded-[2.5rem] blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity" />
                             <input
@@ -106,7 +106,7 @@ export default function PxToRemPage() {
                     </div>
 
                     <div className="space-y-4">
-                        <label className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 ml-6">Relative (rem)</label>
+                        <label className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 ml-6">Relative Magnitude (rem)</label>
                         <div className="relative group">
                             <div className="absolute -inset-1 bg-emerald-500/10 rounded-[2.5rem] blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity" />
                             <input

@@ -1,40 +1,40 @@
 export const SITE = {
   name: "MegaDrawk",
-  legalName: "MegaDrawk Industries",
-  tagline: "未来を精緻化する",
+  legalName: "MegaDrawk Utility Stack",
+  tagline: "Integrated Utility for Engineering & Operations",
   description:
-    "MegaDrawk Industries は、法務、経営、そして最先端のテクノロジーを融合させ、ミッションクリティカルな業務におけるレジリエンスと生産性を極限まで高めるための次世代プラットフォームを提供しています。私たちは、不確実な未来をデータと論理で精緻化し、確かな意思決定を支える基盤を構築します。",
+    "MegaDrawk is a secure, browser-based utility suite integrating data transformation, syntax validation, and security tools. All processing occurs locally within your environment, ensuring absolute data privacy.",
   baseDomain: "megadrawk.com",
 } as const;
 
 export const UI_TEXT = {
-  heroHeadline: "レジリエントな未来基盤を構築する。",
-  heroSubheadline: "ミッションクリティカルな業務を支える、法務とオペレーションの中核プラットフォーム。データ、論理、そして確信をその手に。",
-  eyebrow: "エンタープライズ・エコシステム",
-  operationalRigor: "24時間 稼働体制",
-  servicesHeading: "ソリューション",
-  servicesSubheading: "2つのフラッグシップが、企業の知を統合し、次世代の業務基盤を形作ります。",
+  heroHeadline: "Rapid. Secure. Autonomous.",
+  heroSubheadline: "From core engineering to operational deconstruction. A high-performance suite for analysis and transformation.",
+  eyebrow: "Professional Toolkit",
+  operationalRigor: "Zero-Trust Architecture",
+  servicesHeading: "Core Architecture",
+  servicesSubheading: "Bridging the gap between engineering and operations with 30+ dedicated utilities.",
 
   // Mission Section
-  missionHeading: "私たちの使命",
-  missionText: "MegaDrawk Industries の使命は、複雑化する社会における「情報の不確実性」を最小化することです。法的整合性、迅速な意思決定、持続可能なオペレーション。これら三位一体の調和を、高度なシステムデザインを通じて実現します。私たちは単なるソフトウェア提供者ではなく、企業のレジリエンスを強化する戦略的パートナーです。",
+  missionHeading: "Architectural Intent",
+  missionText: "MegaDrawk is built on the principles of 'Zero Latency' and 'Zero Trust'. By eliminating server-side overhead and executing all logic in-process via client-side JavaScript, we maximize data privacy and execution speed. We prioritize pure functionality over abstraction, providing raw computational power directly in the browser.",
 
   // Technology Section
-  techHeading: "コア・テクノロジー",
-  techSubheading: "妥協のない技術選定が、圧倒的な信頼性を生みます。",
-  techFocus1: "リアルタイム・エンジニアリング",
-  techFocus1Desc: "ミリ秒単位の精度が求められる意思決定の現場において、遅延のないデータ処理と同期を実現します。",
-  techFocus2: "堅牢なセキュリティ",
-  techFocus2Desc: "金融機関レベルの暗号化とアクセスコントロールにより、企業の最重要資産である「知」を守り抜きます。",
-  techFocus3: "AIと人間知能の調和",
-  techFocus3Desc: "高度な言語処理エンジンと人間の直感を融合させ、ノイズを排除した有益なインサイトを提供します。",
+  techHeading: "Technical Specs",
+  techSubheading: "A stack optimized for high-fidelity execution.",
+  techFocus1: "In-Process Computing",
+  techFocus1Desc: "Zero data transmission. All logic executes locally in the browser, ideal for sensitive data encapsulation and cryptographic integrity.",
+  techFocus2: "Parsing Engines",
+  techFocus2Desc: "Industry-standard parsers for JSON, SQL, and Markdown. Guaranteed structural accuracy and real-time error detection.",
+  techFocus3: "Cryptographic Integrity",
+  techFocus3Desc: "Standardized implementations for Base64, Hash, and UUID generation using cryptographically secure protocols (Crypto-JS).",
 
   // Privacy & Compliance
-  privacyHeading: "法的開示とポリシー",
-  privacySubheading: "当サイトは、透明性と誠実な対話を重視し、適切な情報公開を行っています。",
-  footerPrivacy: "プライバシーポリシー",
-  footerContact: "お問い合わせ",
-  footerSuffix: "全著作権所有",
+  privacyHeading: "Compliance",
+  privacySubheading: "Operational transparency and data integrity disclosures.",
+  footerPrivacy: "Privacy Protocol",
+  footerContact: "Contact",
+  footerSuffix: "All Rights Reserved",
 } as const;
 
 // 高解像度・堅牢なアイコンデータ（SVG）
@@ -91,7 +91,7 @@ export const SERVICES = [
   {
     name: "MeetPicks",
     subdomain: "meetpicks.megadrawk.com",
-    description: "高度な意思決定を支える、次世代ミーティング管理プラットフォーム。会議の前後・最中におけるあらゆる情報を統合し、決定事項とその背景にある「文脈」を自動的に構造化します。組織の意思決定スピードを劇的に加速させる、知のエンジニアリングツールです。",
+    description: "Next-generation meeting architecture platform. Structure decision-making context and organizational intelligence with precision.",
     url: "https://meetpicks.megadrawk.com",
     iconUrl: ICONS.meetpicks,
     isGame: false,
@@ -99,31 +99,31 @@ export const SERVICES = [
   {
     name: "LawDrawk",
     subdomain: "lawdrawk.com",
-    description: "法務プロフェッショナルのための、堅牢なワークフロー支援システム。条文、判例、そして社内規定の膨大な海から最適解を導き出します。法的リスクの可視化から契約管理まで、法務部門のDX（デジタルトランスフォーメーション）をトータルで支える中核システムです。",
+    description: "Robust workflow system for operational professionals. Derive optimal solutions from complex regulatory and internal documentation.",
     url: "https://lawdrawk.com",
     iconUrl: ICONS.lawdrawk,
     isGame: false,
   },
   {
-    name: "オーラ精製機",
+    name: "Aura Refiner",
     subdomain: "aura.megadrawk.com",
-    description: "不確実なデータを論理の結晶へと変える、反射と選別の高速シミュレーター。",
+    description: "High-speed logic simulator for refining uncertain data into crystalline structures.",
     url: "/aura-refiner",
     iconUrl: ICONS.aurarefiner,
     isGame: true,
   },
   {
-    name: "エコー制御",
+    name: "Echo Control",
     subdomain: "echo.megadrawk.com",
-    description: "未来の予約を清算する、時間構造パズル。1回のタップが時間を超えて反響し、盤面を書き換える。静寂を取り戻せ。",
+    description: "Temporal puzzle architecture. Synchronize state across high-frequency reverberations and recalibrate the grid.",
     url: "/echo-control",
     iconUrl: ICONS.echocontrol,
     isGame: true,
   },
   {
-    name: "ストリーム配線",
+    name: "Stream Wiring",
     subdomain: "wiring.megadrawk.com",
-    description: "現実世界のAPI（気象・為替・変動）からパルスを抽出し、信号干渉を制御して目的の波形を構築する回路パズル。",
+    description: "Circuit logic simulation. Extract pulses from environmental APIs to construct objective waveforms.",
     url: "/stream-wiring",
     iconUrl: ICONS.echocontrol, // Will use ec icon for now, might customize later
     isGame: true,

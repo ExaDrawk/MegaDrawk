@@ -35,44 +35,47 @@ export default function SqlFormatterPage() {
             setOutput(result);
             setError('');
         } catch (e: any) {
-            setError('Failed to format SQL. Check syntax.');
+            setError('Architectural failure. Coordinate-syntax verification failed.');
         }
     };
 
     const howToUse = (
         <ul className="list-disc pl-5 space-y-4">
-            <li>Paste your SQL query into the left Input area.</li>
-            <li>Select your SQL dialect (PostgreSQL, MySQL, etc.).</li>
-            <li>Click "<strong>Format SQL</strong>" to prettify and indent.</li>
-            <li>Copy the result from the Output area.</li>
+            <li>Inject your raw relational query into the <strong>Query Integration</strong> panel.</li>
+            <li>Select the appropriate <strong>Dialect Vector</strong> (PostgreSQL, MySQL, etc.) for syntax alignment.</li>
+            <li>Execute the <strong>Architectural Layout</strong> to normalize keyword casing and structural indentation.</li>
+            <li>Design optimized for nested subqueries and complex relational JOIN operations.</li>
         </ul>
     );
 
     const faq = [
-        { q: "What does this tool do?", a: "It capitalizes keywords (SELECT, FROM, WHERE), adds proper indentation, and separates queries for maximum readability." },
-        { q: "Does it support nested queries?", a: "Yes. Complex subqueries and joins are formatted with proper hierarchy." },
+        { q: "What parameters are optimized?", a: "The engine enforces keyword capitalization (DML/DDL), logical indentation, and query isolation for maximum cognitive clarity." },
+        { q: "Support for non-standard dialects?", a: "Yes. The system supports multiple legacy and modern T-SQL, MariaDB, and SQLite extensions." },
     ];
 
     return (
         <ToolShell
-            title="SQL Formatter"
-            description="Instantly beautify and structure complex SQL queries."
+            title="Relational Query Architect"
+            description="Professional SQL normalization engine for structuring complex database queries into standardized architectural layouts."
             howToUse={howToUse}
             faq={faq}
         >
             <div className="flex flex-col gap-12">
-                <ToolOptionGroup
-                    options={languages}
-                    value={language}
-                    onChange={setLanguage}
-                />
+                <div className="space-y-4">
+                    <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 ml-4">Dialect Vector</label>
+                    <ToolOptionGroup
+                        options={languages}
+                        value={language}
+                        onChange={setLanguage}
+                    />
+                </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                     <ToolInput
                         value={input}
                         onChange={setInput}
-                        placeholder="SELECT * FROM users WHERE active = 1..."
-                        label="Input SQL"
+                        placeholder="SELECT * FROM node_map WHERE active = 1..."
+                        label="Query Integration"
                         onClear={() => setInput('')}
                         heightClass="h-96"
                     />
@@ -80,7 +83,7 @@ export default function SqlFormatterPage() {
                     <ToolOutput
                         value={output}
                         error={error}
-                        label="Formatted SQL"
+                        label="Architectural Result"
                         heightClass="h-96"
                     />
                 </div>
@@ -91,7 +94,7 @@ export default function SqlFormatterPage() {
                         className="group relative flex items-center gap-3 px-16 py-6 bg-blue-600 text-white font-black text-[10px] uppercase tracking-[0.3em] rounded-2xl transition-all hover:bg-black hover:scale-105 active:scale-[0.98] shadow-2xl shadow-blue-500/20"
                     >
                         <Database size={18} className="group-hover:translate-y-[-2px] transition-transform" />
-                        Format SQL
+                        Execute Architectural Layout
                         <Zap size={14} className="ml-1 opacity-50 animate-pulse" />
                     </button>
                 </div>
