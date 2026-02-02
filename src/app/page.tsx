@@ -41,7 +41,7 @@ export default function Home() {
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-[0.3em] mb-8"
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 text-[10px] font-black uppercase tracking-[0.3em] mb-8"
             >
               <Zap size={12} className="animate-pulse" />
               {HERO_CONTENT.badge}
@@ -51,7 +51,7 @@ export default function Home() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, ease: 'easeOut' }}
-              className="text-6xl md:text-9xl font-black text-white tracking-tighter leading-[0.9] mb-12"
+              className="text-6xl md:text-9xl font-black text-slate-900 tracking-tighter leading-[0.9] mb-12"
             >
               {HERO_CONTENT.headline.line1}<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-sky-500 italic">
@@ -64,7 +64,7 @@ export default function Home() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5, duration: 1 }}
-              className="text-xl md:text-2xl text-slate-400 max-w-3xl mx-auto leading-relaxed font-medium mb-12"
+              className="text-xl md:text-2xl text-slate-600 max-w-3xl mx-auto leading-relaxed font-medium mb-12"
             >
               {HERO_CONTENT.description}
             </motion.p>
