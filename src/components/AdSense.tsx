@@ -2,29 +2,17 @@
 
 import { usePathname } from 'next/navigation';
 import Script from 'next/script';
+import { ADSENSE_CONFIG } from '@/config/site';
 
 type Props = {
-    pId: string;
+    pId?: string; // Made optional, defaults to config
     nonce?: string;
 };
 
-export function AdSense({ pId, nonce }: Props) {
+export function AdSense({ pId = ADSENSE_CONFIG.id, nonce }: Props) {
     const pathname = usePathname();
 
-    // アドセンスを表示するパスのリスト（ホワイトリスト方式）
-    // 意図しないページ（404、システムページ等）での広告表示を防ぐため、
-    // コンテンツが確実に存在するパスのみを指定します。
-    const allowedPaths = [
-        '/',
-        '/compliance',
-        '/documentation',
-        '/governance',
-        '/tools',
-    ];
-
-    // パスが許可リストに含まれているかチェック
-    // ルート("/")は完全一致、それ以外は前方一致で判定
-    const isAllowed = allowedPaths.some((path) => {
+    const isAllowed = ADSENSE_CONFIG.allowedPaths.some((path) => {
         if (path === '/') return pathname === '/';
         return pathname?.startsWith(path);
     });

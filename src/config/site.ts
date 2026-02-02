@@ -131,3 +131,14 @@ export const SERVICES = [
 ] as const;
 
 export type Service = (typeof SERVICES)[number];
+
+export const ADSENSE_CONFIG = {
+  id: "ca-pub-4594218580257200",
+  allowedPaths: [
+    '/',
+    '/compliance',
+    '/documentation',
+    '/governance',
+    '/tools',
+  ]
+} as const;

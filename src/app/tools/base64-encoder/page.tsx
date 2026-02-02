@@ -2,7 +2,10 @@
 
 import React, { useState } from 'react';
 import { ToolShell } from '@/components/tools/ToolShell';
-import { Copy, RefreshCw } from 'lucide-react';
+import { ToolInput } from '@/components/tools/shared/ToolInput';
+import { ToolOutput } from '@/components/tools/shared/ToolOutput';
+import { ToolOptionGroup } from '@/components/tools/shared/ToolOptionGroup';
+import CryptoJS from 'crypto-js';
 
 export default function Base64ToolPage() {
     const [mode, setMode] = useState<'ENCODE' | 'DECODE'>('ENCODE');
@@ -20,106 +23,75 @@ export default function Base64ToolPage() {
 
         try {
             if (currentMode === 'ENCODE') {
-                setOutput(btoa(unescape(encodeURIComponent(val))));
+                const utf8Words = CryptoJS.enc.Utf8.parse(val);
+                const result = CryptoJS.enc.Base64.stringify(utf8Words);
+                setOutput(result);
             } else {
                 try {
-                    setOutput(decodeURIComponent(escape(atob(val))));
+                    const decodedWords = CryptoJS.enc.Base64.parse(val);
+                    const result = CryptoJS.enc.Utf8.stringify(decodedWords);
+                    if (!result) throw new Error('Invalid conversion');
+                    setOutput(result);
                 } catch (e) {
-                    setError('無効なBase64文字列です');
+                    setError('Invalid Base64 string');
                     setOutput('');
                 }
             }
         } catch (e) {
-            setError('変換に失敗しました');
+            setError('Conversion failed');
         }
     };
 
     const howToUse = (
         <ul className="list-disc pl-5 space-y-4">
-            <li><strong>エンコード</strong>を選択すると、通常のテキストをBase64形式に変換します。</li>
-            <li><strong>デコード</strong>を選択すると、Base64文字列を元のテキストに復元します。</li>
-            <li>左側の入力エリアにテキストを入力すると、右側に即座に結果が表示されます。</li>
-            <li>日本語（UTF-8）のエンコード・デコードにも完全対応しています。</li>
+            <li><strong>Encode</strong>: Convert text to Base64 format.</li>
+            <li><strong>Decode</strong>: Restore text from Base64 string.</li>
+            <li>Supports UTF-8 characters (Japanese, Emoji, etc.) safely.</li>
         </ul>
     );
 
     const faq = [
-        { q: "日本語は使えますか？", a: "はい、本ツールはUTF-8エンコーディングに対応しているため、日本語を含むマルチバイト文字も安全に変換可能です。" },
-        { q: "大きなデータも扱えますか？", a: "ブラウザのメモリ制限内であれば動作しますが、あまりに巨大なファイル（数百MB以上）の場合は専用のツールを推奨します。" }
+        { q: "Is Japanese supported?", a: "Yes, this tool uses UTF-8 encoding via CryptoJS, ensuring multi-byte characters are handled correctly." },
+        { q: "Data Privacy?", a: "All conversion happens entirely in your browser. No data is sent to any server." }
     ];
 
     return (
         <ToolShell
-            title="Base64エンコーダー"
-            description="テキストからBase64への変換、およびBase64からの復元を瞬時に行います。"
+            title="Base64 Converter"
+            description="Securely encode and decode text to Base64 format with full UTF-8 support."
             howToUse={howToUse}
             faq={faq}
         >
             <div className="flex flex-col gap-12">
-                {/* Mode Switcher */}
-                <div className="flex justify-center">
-                    <div className="bg-slate-50 p-2 rounded-2xl flex gap-2 border border-slate-100 shadow-inner">
-                        {[
-                            { id: 'ENCODE', label: 'エンコード (Text → B64)' },
-                            { id: 'DECODE', label: 'デコード (B64 → Text)' }
-                        ].map((m) => (
-                            <button
-                                key={m.id}
-                                onClick={() => {
-                                    setMode(m.id as any);
-                                    process(input, m.id as any);
-                                }}
-                                className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${mode === m.id ? 'bg-white text-slate-900 shadow-lg border border-slate-100' : 'text-slate-400 hover:text-slate-900'}`}
-                            >
-                                {m.label}
-                            </button>
-                        ))}
-                    </div>
-                </div>
+                <ToolOptionGroup
+                    value={mode}
+                    onChange={(id) => {
+                        setMode(id as any);
+                        process(input, id as any);
+                    }}
+                    options={[
+                        { id: 'ENCODE', label: 'Encode (Text → B64)' },
+                        { id: 'DECODE', label: 'Decode (B64 → Text)' }
+                    ]}
+                />
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                    {/* Input */}
-                    <div className="space-y-4">
-                        <div className="flex justify-between items-center ml-4">
-                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">入力 (Input)</label>
-                            <button onClick={() => process('', mode)} className="text-[10px] font-black text-slate-400 hover:text-red-500 transition-colors uppercase tracking-widest">リセット</button>
-                        </div>
-                        <textarea
-                            value={input}
-                            onChange={(e) => process(e.target.value, mode)}
-                            className="w-full h-80 bg-white border border-slate-200 rounded-[2rem] p-8 font-mono text-sm text-slate-700 focus:outline-none focus:border-blue-500 shadow-sm transition-all resize-none placeholder:text-slate-300"
-                            placeholder={mode === 'ENCODE' ? "ここにテキストを入力してください..." : "ここにBase64文字列を貼り付けてください..."}
-                        />
-                    </div>
+                    <ToolInput
+                        value={input}
+                        onChange={(val) => process(val, mode)}
+                        placeholder={mode === 'ENCODE' ? "Enter text here..." : "Paste Base64 string here..."}
+                        onClear={() => process('', mode)}
+                        label="Input"
+                    />
 
-                    {/* Output */}
-                    <div className="space-y-4">
-                        <div className="flex justify-between items-center ml-4">
-                            <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
-                                出力 (Output)
-                                {error && <span className="text-rose-600 animate-pulse">{error}</span>}
-                            </label>
-                            {output && (
-                                <button
-                                    onClick={() => navigator.clipboard.writeText(output)}
-                                    className="text-[10px] font-black text-blue-600 hover:text-blue-800 transition-colors uppercase tracking-widest flex items-center gap-1"
-                                >
-                                    コピー
-                                    <Copy size={12} />
-                                </button>
-                            )}
-                        </div>
-                        <div className="relative">
-                            <textarea
-                                readOnly
-                                value={output}
-                                className={`w-full h-80 border rounded-[2rem] p-8 font-mono text-sm transition-all resize-none focus:outline-none ${error ? 'bg-rose-50 border-rose-100 text-rose-600' : 'bg-slate-50 border-slate-100 text-blue-600 shadow-inner'}`}
-                                placeholder="結果がここに表示されます..."
-                            />
-                        </div>
-                    </div>
+                    <ToolOutput
+                        value={output}
+                        error={error}
+                        label="Output"
+                    />
                 </div>
             </div>
         </ToolShell>
     );
 }
+

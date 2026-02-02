@@ -2,29 +2,12 @@
 
 import React, { useState } from 'react';
 import { ToolShell } from '@/components/tools/ToolShell';
-import { Palette, Copy, RefreshCw, Zap } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { hslToHex, generateRandomPalette } from '@/lib/colors';
 
 export default function ColorPalettePage() {
-    const generateColor = () => {
-        const h = Math.floor(Math.random() * 360);
-        const s = Math.floor(Math.random() * 40) + 60; // 60-100%
-        const l = Math.floor(Math.random() * 40) + 30; // 30-70%
-        return `hsl(${h}, ${s}%, ${l}%)`;
-    };
-
-    const generatePalette = () => {
-        const baseH = Math.floor(Math.random() * 360);
-        return [
-            `hsl(${baseH}, 70%, 50%)`,
-            `hsl(${(baseH + 30) % 360}, 65%, 45%)`,
-            `hsl(${(baseH + 60) % 360}, 60%, 40%)`,
-            `hsl(${(baseH + 180) % 360}, 70%, 50%)`,
-            `hsl(${(baseH + 210) % 360}, 65%, 45%)`,
-        ];
-    };
-
-    const [palette, setPalette] = useState<string[]>(generatePalette());
+    const [palette, setPalette] = useState<string[]>(generateRandomPalette());
 
     const howToUse = (
         <ul className="list-disc pl-5 space-y-4">
@@ -38,38 +21,6 @@ export default function ColorPalettePage() {
         { q: "生成される色の形式は何ですか？", a: "現在はWeb制作に最も適したRGB（HEX形式）でコピーされます。パレット自体はHSLカラースペースで計算されており、美しい階調を実現しています。" },
         { q: "ブランドカラーの作成に使えますか？", a: "はい。メインカラーとアクセントカラーの組み合わせを検討する際のインスピレーションツールとして最適です。" },
     ];
-
-    const hslToHex = (hslStr: string) => {
-        // Simple conversion if needed, but for now let's just use CSS for display
-        // and a helper for hex copy
-        const [h, s, l] = hslStr.match(/\d+/g)!.map(Number);
-        const hVal = h / 360;
-        const sVal = s / 100;
-        const lVal = l / 100;
-        let r, g, b;
-        if (sVal === 0) {
-            r = g = b = lVal;
-        } else {
-            const hue2rgb = (p: number, q: number, t: number) => {
-                if (t < 0) t += 1;
-                if (t > 1) t -= 1;
-                if (t < 1 / 6) return p + (q - p) * 6 * t;
-                if (t < 1 / 2) return q;
-                if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-                return p;
-            };
-            const q = lVal < 0.5 ? lVal * (1 + sVal) : lVal + sVal - lVal * sVal;
-            const p = 2 * lVal - q;
-            r = hue2rgb(p, q, hVal + 1 / 3);
-            g = hue2rgb(p, q, hVal);
-            b = hue2rgb(p, q, hVal - 1 / 3);
-        }
-        const toHex = (x: number) => {
-            const hex = Math.round(x * 255).toString(16);
-            return hex.length === 1 ? '0' + hex : hex;
-        };
-        return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase();
-    };
 
     return (
         <ToolShell
@@ -109,7 +60,7 @@ export default function ColorPalettePage() {
 
                 <div className="flex justify-center">
                     <button
-                        onClick={() => setPalette(generatePalette())}
+                        onClick={() => setPalette(generateRandomPalette())}
                         className="group relative flex items-center gap-4 px-16 py-6 bg-blue-600 text-white font-black text-[10px] uppercase tracking-[0.4em] rounded-2xl transition-all hover:bg-black hover:scale-105 active:scale-[0.98] shadow-2xl shadow-blue-500/20"
                     >
                         <RefreshCw size={20} className="group-hover:rotate-180 transition-transform duration-700" />

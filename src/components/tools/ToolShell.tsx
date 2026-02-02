@@ -4,6 +4,8 @@ import React from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Share2, Star, ChevronLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { AdSense } from '../AdSense'; // Correct relative import
+import { ADSENSE_CONFIG } from '@/config/site';
 
 interface ToolShellProps {
     title: string;
@@ -43,10 +45,10 @@ export const ToolShell: React.FC<ToolShellProps> = ({ title, description, childr
                             </p>
                         </div>
                         <div className="flex gap-4">
-                            <button className="p-4 rounded-2xl bg-white border border-slate-200 hover:border-blue-500 hover:text-blue-600 transition-all text-slate-400 shadow-sm">
+                            <button className="p-4 rounded-2xl bg-white border border-slate-200 hover:border-blue-500 hover:text-blue-600 transition-all text-slate-400 shadow-sm" aria-label="Share">
                                 <Share2 size={20} />
                             </button>
-                            <button className="p-4 rounded-2xl bg-white border border-slate-200 hover:border-yellow-500 hover:text-yellow-600 transition-all text-slate-400 shadow-sm">
+                            <button className="p-4 rounded-2xl bg-white border border-slate-200 hover:border-yellow-500 hover:text-yellow-600 transition-all text-slate-400 shadow-sm" aria-label="Star">
                                 <Star size={20} />
                             </button>
                         </div>
@@ -100,11 +102,15 @@ export const ToolShell: React.FC<ToolShellProps> = ({ title, description, childr
 
                     {/* Sidebar */}
                     <aside className="lg:col-span-4 space-y-12">
-                        <div className="bg-slate-50 border border-slate-200 rounded-[2.5rem] p-10 text-center h-80 flex flex-col items-center justify-center gap-4 relative overflow-hidden shadow-sm">
-                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-transparent opacity-50" />
-                            <div className="text-[10px] font-black text-slate-400 tracking-[0.4em] uppercase">Sponsored</div>
-                            <div className="text-slate-300 font-bold italic">Place AdSense Unit Here</div>
+                        {/* AdSense Unit Container */}
+                        <div className="bg-slate-50 border border-slate-200 rounded-[2.5rem] overflow-hidden shadow-sm min-h-[300px] flex flex-col items-center justify-center relative">
+                            {/* Using the component directly. ID is from configuration in site.ts. */}
+                            <div className="w-full h-full flex items-center justify-center bg-slate-100">
+                                <AdSense pId={ADSENSE_CONFIG.id} />
+                                <span className="text-[10px] text-slate-300 uppercase tracking-widest absolute bottom-4">Advertisement</span>
+                            </div>
                         </div>
+
 
                         <div className="bg-white border border-slate-200 rounded-[2.5rem] p-10 shadow-sm">
                             <h3 className="text-[10px] font-black text-slate-900 mb-8 uppercase tracking-[0.3em]">その他のツール</h3>
@@ -119,7 +125,7 @@ export const ToolShell: React.FC<ToolShellProps> = ({ title, description, childr
                 </article>
 
                 <footer className="mt-40 pt-12 border-t border-slate-100 text-center">
-                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.4em]">© 2026 MegaDrawk Tools Suite. Professional Utility Collection.</p>
+                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.4em]">© {new Date().getFullYear()} MegaDrawk Tools Suite. Professional Utility Collection.</p>
                 </footer>
             </div>
         </div>
