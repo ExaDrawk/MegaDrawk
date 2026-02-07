@@ -1,3 +1,12 @@
+/**
+ * prepare-pages.js
+ *
+ * Post-build script for Cloudflare Pages deployment.
+ * Restructures the OpenNext build output into the format expected
+ * by Cloudflare Pages (worker + static assets + routes config).
+ *
+ * Run via: npm run deploy
+ */
 const fs = require("fs");
 const path = require("path");
 
@@ -31,6 +40,8 @@ if (fs.existsSync(workerPath)) {
   throw new Error("worker.js not found in .open-next output.");
 }
 
+// Routes configuration: static assets are served directly,
+// everything else goes through the worker.
 const routes = {
   version: 1,
   include: ["/*"],
@@ -40,6 +51,9 @@ const routes = {
     "/favicon.ico",
     "/robots.txt",
     "/sitemap.xml",
+    "/ads.txt",
+    "/manifest.webmanifest",
+    "/.well-known/*",
   ],
 };
 

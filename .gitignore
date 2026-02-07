@@ -1,6 +1,32 @@
-node_modules
-.next
-.open-next
-.wrangler
+# Dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# OpenNext / Cloudflare build output
+.open-next/
+.wrangler/
+
+# Environment variables (NEVER commit secrets)
 .env
 .env.*
+!.env.example
+
+# OS / Editor artifacts
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/settings.json
+.idea/
+
+# Deployment logs (may contain infrastructure IDs)
+deployments.txt
+
+# Test coverage
+coverage/
+
+# TypeScript build cache
+*.tsbuildinfo
