@@ -25,7 +25,7 @@ function buildCsp(nonce: string): string {
     "script-src": `'self' 'nonce-${nonce}' 'strict-dynamic'`,
     "style-src": "'self' 'unsafe-inline'",
     "img-src": `'self' data: ${ALLOWED_IMG_ORIGINS.join(" ")}`,
-    "font-src": "'self' data:",
+    "font-src": "'self' data: https://fonts.gstatic.com",
     "connect-src": "'self'",
     "media-src": "'none'",
     "frame-src": "'none'",
