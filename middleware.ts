@@ -9,6 +9,44 @@ import { SERVICES } from "@/config/site";
 const ALLOWED_IMG_ORIGINS = SERVICES.map((s) => `https://${s.subdomain}`);
 
 /**
+ * Google AdSense / Ad Manager origins.
+ * Required for ad script loading, frame rendering, and tracking.
+ * Ref: https://support.google.com/adsense/answer/10502938
+ */
+const ADSENSE_SCRIPT_ORIGINS = [
+  "https://pagead2.googlesyndication.com",
+  "https://adservice.google.com",
+  "https://adservice.google.co.jp",
+  "https://www.googletagservices.com",
+  "https://partner.googleadservices.com",
+  "https://tpc.googlesyndication.com",
+  "https://www.google.com",
+  "https://www.google.co.jp",
+];
+
+const ADSENSE_FRAME_ORIGINS = [
+  "https://googleads.g.doubleclick.net",
+  "https://tpc.googlesyndication.com",
+  "https://www.google.com",
+  "https://www.google.co.jp",
+];
+
+const ADSENSE_IMG_ORIGINS = [
+  "https://pagead2.googlesyndication.com",
+  "https://www.google.com",
+  "https://www.google.co.jp",
+  "https://googleads.g.doubleclick.net",
+];
+
+const ADSENSE_CONNECT_ORIGINS = [
+  "https://pagead2.googlesyndication.com",
+  "https://adservice.google.com",
+  "https://adservice.google.co.jp",
+  "https://www.google-analytics.com",
+  "https://www.googletagmanager.com",
+];
+
+/**
  * Build Content-Security-Policy header value.
  *
  * ACCEPTED RISK: style-src 'unsafe-inline' is required because Tailwind CSS v4
@@ -22,13 +60,13 @@ const ALLOWED_IMG_ORIGINS = SERVICES.map((s) => `https://${s.subdomain}`);
 function buildCsp(nonce: string): string {
   const directives: Record<string, string> = {
     "default-src": "'self'",
-    "script-src": `'self' 'nonce-${nonce}' 'strict-dynamic'`,
+    "script-src": `'self' 'nonce-${nonce}' 'strict-dynamic' ${ADSENSE_SCRIPT_ORIGINS.join(" ")}`,
     "style-src": "'self' 'unsafe-inline'",
-    "img-src": `'self' data: ${ALLOWED_IMG_ORIGINS.join(" ")}`,
+    "img-src": `'self' data: ${ALLOWED_IMG_ORIGINS.join(" ")} ${ADSENSE_IMG_ORIGINS.join(" ")}`,
     "font-src": "'self' data: https://fonts.gstatic.com",
-    "connect-src": "'self'",
+    "connect-src": `'self' ${ADSENSE_CONNECT_ORIGINS.join(" ")}`,
     "media-src": "'none'",
-    "frame-src": "'none'",
+    "frame-src": ADSENSE_FRAME_ORIGINS.join(" "),
     "child-src": "'none'",
     "worker-src": "'self'",
     "object-src": "'none'",

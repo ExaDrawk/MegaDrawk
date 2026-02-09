@@ -1,7 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import Script from "next/script";
 import { SITE } from "@/config/site";
 import "./globals.css";
+
+/** Google AdSense publisher ID — used for verification and ad serving. */
+const ADSENSE_PUB_ID = "pub-4594218580257200";
 
 const interSans = Inter({
   variable: "--font-body",
@@ -105,6 +109,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang={SITE.language}>
+      <head>
+        {/* Google AdSense — site ownership verification & ad serving */}
+        <Script
+          id="adsense"
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-${ADSENSE_PUB_ID}`}
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
+      </head>
       <body
         className={`${interSans.variable} ${jetBrainsMono.variable} antialiased`}
       >
