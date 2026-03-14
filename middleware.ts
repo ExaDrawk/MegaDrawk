@@ -1,17 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { SERVICES } from "@/config/site";
 
 /**
- * Allowed image origins derived from SERVICES config.
- * Single source of truth: src/config/site.ts
- */
-const ALLOWED_IMG_ORIGINS = SERVICES.map((s) => `https://${s.subdomain}`);
-
-/**
- * Google AdSense / Ad Manager origins.
- * Required for ad script loading, frame rendering, and tracking.
- * Ref: https://support.google.com/adsense/answer/10502938
+ * AdSense 関連の許可オリジン
+ * CSP で AdSense スクリプト・フレーム・画像・接続を許可するために必要。
  */
 const ADSENSE_SCRIPT_ORIGINS = [
   "https://pagead2.googlesyndication.com",
@@ -42,27 +34,14 @@ const ADSENSE_CONNECT_ORIGINS = [
   "https://pagead2.googlesyndication.com",
   "https://adservice.google.com",
   "https://adservice.google.co.jp",
-  "https://www.google-analytics.com",
-  "https://www.googletagmanager.com",
 ];
 
-/**
- * Build Content-Security-Policy header value.
- *
- * ACCEPTED RISK: style-src 'unsafe-inline' is required because Tailwind CSS v4
- * injects runtime styles via <style> elements. Documented per OWASP ASVS V14.4.
- *
- * References:
- * - OWASP ASVS V14.4 (HTTP Security Headers)
- * - OWASP Top 10 A05 (Security Misconfiguration)
- * - NIST SSDF PW.6 (Secure Configuration)
- */
 function buildCsp(nonce: string): string {
   const directives: Record<string, string> = {
     "default-src": "'self'",
-    "script-src": `'self' 'nonce-${nonce}' 'strict-dynamic' ${ADSENSE_SCRIPT_ORIGINS.join(" ")}`,
+    "script-src": `'self' 'nonce-${nonce}' ${ADSENSE_SCRIPT_ORIGINS.join(" ")}`,
     "style-src": "'self' 'unsafe-inline'",
-    "img-src": `'self' data: ${ALLOWED_IMG_ORIGINS.join(" ")} ${ADSENSE_IMG_ORIGINS.join(" ")}`,
+    "img-src": `'self' data: ${ADSENSE_IMG_ORIGINS.join(" ")}`,
     "font-src": "'self' data: https://fonts.gstatic.com",
     "connect-src": `'self' ${ADSENSE_CONNECT_ORIGINS.join(" ")}`,
     "media-src": "'none'",
@@ -81,11 +60,6 @@ function buildCsp(nonce: string): string {
     .join("; ");
 }
 
-/**
- * Comprehensive Permissions-Policy.
- * Disables all browser APIs not used by this application.
- * Ref: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy
- */
 const PERMISSIONS_POLICY = [
   "camera=()",
   "microphone=()",
@@ -103,7 +77,9 @@ const PERMISSIONS_POLICY = [
   "browsing-topics=()",
 ].join(", ");
 
-/** Generate a cryptographically random nonce (128-bit, base64). */
+const ALLOWED_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
+const MAX_URL_LENGTH = 2048;
+
 function generateNonce(): string {
   const bytes = new Uint8Array(16);
   globalThis.crypto.getRandomValues(bytes);
@@ -111,11 +87,16 @@ function generateNonce(): string {
 }
 
 export function middleware(request: NextRequest) {
+  if (!ALLOWED_METHODS.has(request.method)) {
+    return new NextResponse(null, { status: 405 });
+  }
+
+  if (request.nextUrl.href.length > MAX_URL_LENGTH) {
+    return new NextResponse(null, { status: 414 });
+  }
+
   const nonce = generateNonce();
 
-  // Pass nonce to server components via REQUEST headers only.
-  // SECURITY: The nonce is NOT exposed as a response header.
-  // Server components read it via headers().get("x-nonce").
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-nonce", nonce);
 
@@ -123,7 +104,6 @@ export function middleware(request: NextRequest) {
     request: { headers: requestHeaders },
   });
 
-  // ── Security response headers (OWASP ASVS V14, NIST SSDF PW.6) ──
   response.headers.set("Content-Security-Policy", buildCsp(nonce));
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   response.headers.set("X-Content-Type-Options", "nosniff");
@@ -132,10 +112,8 @@ export function middleware(request: NextRequest) {
   response.headers.set("Permissions-Policy", PERMISSIONS_POLICY);
   response.headers.set(
     "Strict-Transport-Security",
-    "max-age=63072000; includeSubDomains; preload"
+    "max-age=63072000; includeSubDomains; preload",
   );
-
-  // Cross-Origin isolation headers
   response.headers.set("Cross-Origin-Opener-Policy", "same-origin");
   response.headers.set("Cross-Origin-Resource-Policy", "same-origin");
 
@@ -144,14 +122,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - api, _next/static, _next/image (framework routes)
-     * - favicon.ico, assets (static public files)
-     * - robots.txt, sitemap.xml, ads.txt (SEO/ad files)
-     * - .well-known (RFC 8615 well-known URIs)
-     * - manifest.webmanifest (PWA manifest)
-     */
     "/((?!api|_next/static|_next/image|favicon\\.ico|assets|robots\\.txt|sitemap\\.xml|ads\\.txt|manifest\\.webmanifest|\\.well-known).*)",
   ],
 };

@@ -1,28 +1,16 @@
-/**
- * Animation & layout orchestration tokens.
- *
- * Stagger delays (ms) for landing page element entry animations.
- * Actual animation curves/durations are in globals.css (--duration-*, --ease-*).
- * This file only holds the orchestration timing.
- *
- * Layout tokens define reusable sizing/spacing values used by
- * multiple components (e.g., loading skeleton mirrors hero dimensions).
- */
+/** アニメーション遅延（セクション順序の表現） */
 export const STAGGER = {
   header: 0,
   hero: 100,
-  about: 250,
-  features: 400,
-  services: 550,
-  cta: 700,
-  footer: 850,
+  section1: 200,
+  section2: 300,
+  section3: 400,
+  footer: 500,
 } as const;
 
-/**
- * Shared layout dimensions.
- * Used by HeroBrand and Loading skeleton to stay in sync.
- */
+/** レイアウトトークン */
 export const LAYOUT = {
-  logoSize: "5.5rem",
-  logoRadius: "1.375rem",
+  maxWidth: "68rem",
+  contentWidth: "42rem",
+  headerHeight: "4rem",
 } as const;

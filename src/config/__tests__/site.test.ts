@@ -1,10 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { SITE, SERVICES, FEATURES, NAV_LINKS, FOOTER_LINKS } from "@/config/site";
+import { SITE, NAV_LINKS, FOOTER_LINKS } from "@/config/site";
 
 describe("SITE config", () => {
   it("has all required fields", () => {
     expect(SITE.name).toBeDefined();
-    expect(SITE.legalName).toBeDefined();
     expect(SITE.tagline).toBeDefined();
     expect(SITE.description).toBeDefined();
     expect(SITE.domain).toBeDefined();
@@ -12,7 +11,9 @@ describe("SITE config", () => {
     expect(SITE.locale).toBeDefined();
     expect(SITE.language).toBeDefined();
     expect(SITE.themeColor).toBeDefined();
-    expect(SITE.contactEmail).toBeDefined();
+    expect(SITE.social).toBeDefined();
+    expect(SITE.social.x).toBeDefined();
+    expect(SITE.social.xHandle).toBeDefined();
   });
 
   it("url starts with https://", () => {
@@ -31,57 +32,12 @@ describe("SITE config", () => {
     expect(SITE.locale).toMatch(/^[a-z]{2}_[A-Z]{2}$/);
   });
 
-  it("contactEmail is a valid email format", () => {
-    expect(SITE.contactEmail).toMatch(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
-  });
-});
-
-describe("SERVICES config", () => {
-  it("has at least one service", () => {
-    expect(SERVICES.length).toBeGreaterThanOrEqual(1);
+  it("social X URL is valid", () => {
+    expect(SITE.social.x).toMatch(/^https:\/\/x\.com\//);
   });
 
-  it("each service has required fields", () => {
-    for (const service of SERVICES) {
-      expect(service.id).toBeDefined();
-      expect(service.name).toBeDefined();
-      expect(service.subdomain).toBeDefined();
-      expect(service.url).toBeDefined();
-      expect(service.description).toBeDefined();
-    }
-  });
-
-  it("each service URL is HTTPS", () => {
-    for (const service of SERVICES) {
-      expect(service.url).toMatch(/^https:\/\//);
-    }
-  });
-
-  it("each service subdomain matches its URL hostname", () => {
-    for (const service of SERVICES) {
-      const url = new URL(service.url);
-      expect(url.hostname).toBe(service.subdomain);
-    }
-  });
-});
-
-describe("FEATURES config", () => {
-  it("has at least one feature", () => {
-    expect(FEATURES.length).toBeGreaterThanOrEqual(1);
-  });
-
-  it("each feature has required fields", () => {
-    for (const feature of FEATURES) {
-      expect(feature.id).toBeDefined();
-      expect(feature.icon).toBeDefined();
-      expect(feature.title).toBeDefined();
-      expect(feature.description).toBeDefined();
-    }
-  });
-
-  it("feature IDs are unique", () => {
-    const ids = FEATURES.map((f) => f.id);
-    expect(new Set(ids).size).toBe(ids.length);
+  it("social X handle starts with @", () => {
+    expect(SITE.social.xHandle).toMatch(/^@/);
   });
 });
 
@@ -96,6 +52,12 @@ describe("NAV_LINKS config", () => {
       expect(link.href).toBeDefined();
     }
   });
+
+  it("each link href starts with /", () => {
+    for (const link of NAV_LINKS) {
+      expect(link.href).toMatch(/^\//);
+    }
+  });
 });
 
 describe("FOOTER_LINKS config", () => {
@@ -108,5 +70,18 @@ describe("FOOTER_LINKS config", () => {
       expect(group.label).toBeDefined();
       expect(group.links.length).toBeGreaterThanOrEqual(1);
     }
+  });
+
+  it("each link has label and href", () => {
+    for (const group of Object.values(FOOTER_LINKS)) {
+      for (const link of group.links) {
+        expect(link.label).toBeDefined();
+        expect(link.href).toBeDefined();
+      }
+    }
+  });
+
+  it("pages group keeps the same knowledge as NAV_LINKS", () => {
+    expect(FOOTER_LINKS.pages.links).toEqual(NAV_LINKS);
   });
 });

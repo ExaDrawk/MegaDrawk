@@ -2,38 +2,42 @@
   "name": "megadrawk",
   "private": true,
   "version": "1.0.0",
-  "type": "commonjs",
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "lint:fix": "next lint --fix",
+    "lint": "eslint src middleware.ts next.config.mjs vitest.config.ts open-next.config.ts",
+    "lint:fix": "eslint src middleware.ts next.config.mjs vitest.config.ts open-next.config.ts --fix",
     "typecheck": "tsc --noEmit",
     "opennext:build": "npx @opennextjs/cloudflare build",
-    "deploy": "next build && npx @opennextjs/cloudflare build && node scripts/prepare-pages.js",
+    "deploy": "next build && npx @opennextjs/cloudflare build && node scripts/prepare-pages.cjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "lucide-react": "^0.563.0",
-    "next": "14.2.35",
-    "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "next": "^16.1.6",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
   },
   "devDependencies": {
     "@opennextjs/cloudflare": "^1.15.1",
     "@tailwindcss/postcss": "^4.0.0",
     "@types/node": "^20.11.30",
-    "@types/react": "^18.2.66",
-    "@types/react-dom": "^18.2.22",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
     "autoprefixer": "^10.4.19",
-    "eslint": "^8.57.0",
-    "eslint-config-next": "^14.2.0",
+    "eslint": "^9.39.0",
+    "eslint-config-next": "^16.1.6",
     "postcss": "^8.4.38",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.4.3",
     "vitest": "^4.0.18"
+  },
+  "overrides": {
+    "minimatch": "^10.2.3",
+    "undici": "^7.24.0"
   }
 }

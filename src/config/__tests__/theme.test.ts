@@ -14,10 +14,9 @@ describe("STAGGER animation delays", () => {
     const ordered = [
       STAGGER.header,
       STAGGER.hero,
-      STAGGER.about,
-      STAGGER.features,
-      STAGGER.services,
-      STAGGER.cta,
+      STAGGER.section1,
+      STAGGER.section2,
+      STAGGER.section3,
       STAGGER.footer,
     ];
     for (let i = 1; i < ordered.length; i++) {
@@ -34,11 +33,15 @@ describe("STAGGER animation delays", () => {
 });
 
 describe("LAYOUT tokens", () => {
-  it("logoSize is a valid CSS dimension", () => {
-    expect(LAYOUT.logoSize).toMatch(/^\d+(\.\d+)?(rem|px|em)$/);
+  it("maxWidth is a valid CSS dimension", () => {
+    expect(LAYOUT.maxWidth).toMatch(/^\d+(\.\d+)?(rem|px|em)$/);
   });
 
-  it("logoRadius is a valid CSS dimension", () => {
-    expect(LAYOUT.logoRadius).toMatch(/^\d+(\.\d+)?(rem|px|em)$/);
+  it("contentWidth is a valid CSS dimension", () => {
+    expect(LAYOUT.contentWidth).toMatch(/^\d+(\.\d+)?(rem|px|em)$/);
+  });
+
+  it("headerHeight is a valid CSS dimension", () => {
+    expect(LAYOUT.headerHeight).toMatch(/^\d+(\.\d+)?(rem|px|em)$/);
   });
 });

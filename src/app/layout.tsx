@@ -1,41 +1,32 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Inter, Noto_Sans_JP } from "next/font/google";
+import { headers } from "next/headers";
 import Script from "next/script";
 import { SITE } from "@/config/site";
+import { SiteHeader } from "@/components/layout/SiteHeader";
+import { SiteFooter } from "@/components/layout/SiteFooter";
+import { SkipNav } from "@/components/ui/SkipNav";
 import "./globals.css";
 
-/** Google AdSense publisher ID — used for verification and ad serving. */
-const ADSENSE_PUB_ID = "pub-4594218580257200";
-
-const interSans = Inter({
-  variable: "--font-body",
+const inter = Inter({
+  variable: "--font-sans",
   subsets: ["latin"],
   display: "swap",
 });
 
-const jetBrainsMono = JetBrains_Mono({
-  variable: "--font-code",
+const notoSansJP = Noto_Sans_JP({
+  variable: "--font-jp",
   subsets: ["latin"],
   display: "swap",
+  weight: ["400", "500", "600", "700"],
 });
 
-/**
- * Viewport configuration.
- * Exported separately per Next.js 14 convention (not inside metadata).
- * themeColor from SITE config (single source of truth).
- */
 export const viewport: Viewport = {
   themeColor: SITE.themeColor,
   width: "device-width",
   initialScale: 1,
 };
 
-/**
- * Site-wide metadata.
- *
- * Open Graph, Twitter, and standard HTML metadata are all derived from
- * SITE config to eliminate duplicate branding strings.
- */
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
@@ -44,86 +35,77 @@ export const metadata: Metadata = {
   },
   description: SITE.description,
   applicationName: SITE.name,
-  authors: [{ name: SITE.legalName }],
+  authors: [{ name: SITE.name }],
   generator: "Next.js",
   referrer: "strict-origin-when-cross-origin",
-  robots: {
-    index: true,
-    follow: true,
-  },
-
-  // Open Graph
+  robots: { index: true, follow: true },
   openGraph: {
     type: "website",
     locale: SITE.locale,
     url: SITE.url,
     siteName: SITE.name,
-    title: SITE.name,
+    title: `${SITE.name} — ${SITE.tagline}`,
     description: SITE.description,
   },
-
-  // Twitter / X
   twitter: {
     card: "summary",
-    title: SITE.name,
+    site: SITE.social.xHandle,
+    title: `${SITE.name} — ${SITE.tagline}`,
     description: SITE.description,
   },
-
-  // Icons — references the existing favicon.ico in /app
-  icons: {
-    icon: "/favicon.ico",
-  },
+  icons: { icon: "/favicon.ico" },
 };
 
-/**
- * JSON-LD structured data for the organization.
- * Improves search engine understanding. Ref: https://schema.org/Organization
- */
-function OrganizationJsonLd() {
+function PersonJsonLd({ nonce }: { nonce?: string }) {
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "Organization",
-    name: SITE.legalName,
+    "@type": "Person",
+    name: SITE.name,
     url: SITE.url,
     description: SITE.description,
+    sameAs: [SITE.social.x],
   };
 
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-    />
+    <script type="application/ld+json" nonce={nonce}>
+      {JSON.stringify(jsonLd)}
+    </script>
   );
 }
 
-/**
- * Root layout — React Server Component.
- *
- * CSP nonce is generated in middleware.ts and passed via request headers.
- * Next.js automatically injects it into framework <script> tags.
- */
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const headersList = await headers();
+  const nonce = headersList.get("x-nonce") ?? undefined;
+  const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim();
+
   return (
     <html lang={SITE.language}>
       <head>
-        {/* Google AdSense — site ownership verification & ad serving */}
-        <Script
-          id="adsense"
-          async
-          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-${ADSENSE_PUB_ID}`}
-          crossOrigin="anonymous"
-          strategy="afterInteractive"
-        />
+        {adsenseClient ? (
+          <Script
+            id="adsense"
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
+            crossOrigin="anonymous"
+            strategy="afterInteractive"
+            nonce={nonce}
+          />
+        ) : null}
       </head>
-      <body
-        className={`${interSans.variable} ${jetBrainsMono.variable} antialiased`}
-      >
-        <OrganizationJsonLd />
-        {children}
+      <body className={`${inter.variable} ${notoSansJP.variable} antialiased`}>
+        <PersonJsonLd nonce={nonce} />
+        <SkipNav />
+        <div className="page-container">
+          <SiteHeader />
+          <main id="main-content" className="page-main">
+            {children}
+          </main>
+          <SiteFooter />
+        </div>
       </body>
     </html>
   );

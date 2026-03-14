@@ -1,63 +1,133 @@
-import { SITE, NAV_LINKS } from "@/config/site";
+"use client";
 
-/**
- * Site header — fixed navigation bar.
- *
- * Pure RSC, no client JS. Uses CSS backdrop-blur for glass effect.
- * Navigation links are derived from NAV_LINKS config (single source of truth).
- */
-export function SiteHeader({ delay = 0 }: { delay?: number }) {
+import { useState, useCallback } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { SITE, NAV_LINKS } from "@/config/site";
+import { Menu, X } from "lucide-react";
+
+export function SiteHeader() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname();
+
+  const toggleMenu = useCallback(() => {
+    setIsMenuOpen((prev) => !prev);
+  }, []);
+
+  const closeMenu = useCallback(() => {
+    setIsMenuOpen(false);
+  }, []);
+
   return (
     <header
-      className="animate-enter-fade fixed top-0 left-0 right-0 z-50"
+      className="fixed top-0 left-0 right-0 z-50"
       style={{
-        animationDelay: `${delay}ms`,
-        background: "rgba(11, 17, 33, 0.8)",
+        height: "var(--header-height)",
+        background: "rgba(255, 255, 255, 0.85)",
         backdropFilter: "blur(12px)",
         WebkitBackdropFilter: "blur(12px)",
-        borderBottom: "1px solid var(--color-border-subtle)",
+        borderBottom: "1px solid var(--color-border)",
       }}
     >
-      <div className="mx-auto max-w-5xl flex items-center justify-between px-5 sm:px-8 h-16">
-        {/* Logo + Brand */}
-        <a
+      <div
+        className="mx-auto flex items-center justify-between h-full"
+        style={{
+          maxWidth: "var(--max-width)",
+          paddingLeft: "1.5rem",
+          paddingRight: "1.5rem",
+        }}
+      >
+        {/* ── Logo ── */}
+        <Link
           href="/"
-          className="flex items-center gap-3 group"
+          className="text-lg font-bold tracking-tight transition-opacity duration-150 hover:opacity-70"
+          style={{ color: "var(--color-text)" }}
           aria-label={`${SITE.name} トップページ`}
+          onClick={closeMenu}
         >
-          <div
-            className="w-8 h-8 rounded-lg shrink-0"
-            style={{
-              background:
-                "linear-gradient(135deg, var(--color-brand), var(--color-accent))",
-            }}
-            aria-hidden="true"
-          />
-          <span
-            className="text-lg font-bold tracking-tight transition-colors duration-[var(--duration-normal)] group-hover:text-[var(--color-brand-light)]"
-            style={{ color: "var(--color-text-primary)" }}
-          >
-            {SITE.name}
-          </span>
-        </a>
+          {SITE.name}
+        </Link>
 
-        {/* Navigation */}
-        <nav aria-label="メインナビゲーション">
+        {/* ── Desktop Navigation ── */}
+        <nav className="hidden sm:block" aria-label="メインナビゲーション">
           <ul className="flex items-center gap-1">
-            {NAV_LINKS.map((link) => (
-              <li key={link.href}>
-                <a
-                  href={link.href}
-                  className="px-3 py-2 text-sm font-medium rounded-[var(--radius-button)] transition-colors duration-[var(--duration-normal)] hover:bg-[var(--color-surface-overlay-hover)]"
-                  style={{ color: "var(--color-text-secondary)" }}
-                >
-                  {link.label}
-                </a>
-              </li>
-            ))}
+            {NAV_LINKS.map((link) => {
+              const isActive = pathname === link.href;
+              return (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150"
+                    style={{
+                      color: isActive
+                        ? "var(--color-text)"
+                        : "var(--color-text-secondary)",
+                    }}
+                    aria-current={isActive ? "page" : undefined}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </nav>
+
+        {/* ── Mobile Menu Button ── */}
+        <button
+          type="button"
+          className="sm:hidden p-2 -mr-2 rounded-md transition-colors duration-150"
+          style={{ color: "var(--color-text-secondary)" }}
+          onClick={toggleMenu}
+          aria-expanded={isMenuOpen}
+          aria-controls="mobile-menu"
+          aria-label={isMenuOpen ? "メニューを閉じる" : "メニューを開く"}
+        >
+          {isMenuOpen ? (
+            <X size={20} aria-hidden="true" />
+          ) : (
+            <Menu size={20} aria-hidden="true" />
+          )}
+        </button>
       </div>
+
+      {/* ── Mobile Menu ── */}
+      {isMenuOpen && (
+        <nav
+          id="mobile-menu"
+          className="sm:hidden"
+          style={{
+            background: "rgba(255, 255, 255, 0.98)",
+            backdropFilter: "blur(12px)",
+            borderBottom: "1px solid var(--color-border)",
+          }}
+          aria-label="モバイルナビゲーション"
+        >
+          <ul className="flex flex-col py-2 px-6">
+            {NAV_LINKS.map((link) => {
+              const isActive = pathname === link.href;
+              return (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="block py-3 text-sm font-medium transition-colors duration-150"
+                    style={{
+                      color: isActive
+                        ? "var(--color-text)"
+                        : "var(--color-text-secondary)",
+                      borderBottom: "1px solid var(--color-border-subtle)",
+                    }}
+                    aria-current={isActive ? "page" : undefined}
+                    onClick={closeMenu}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+      )}
     </header>
   );
 }

@@ -1,67 +1,63 @@
-import { SITE, FOOTER_LINKS, NAV_LINKS } from "@/config/site";
+import Link from "next/link";
+import { SITE, FOOTER_LINKS } from "@/config/site";
 
-/**
- * Full site footer with link groups, branding, and legal info.
- *
- * Pure RSC. Year computed at build time.
- * All content derived from config (single source of truth).
- */
-export function SiteFooter({ delay = 0 }: { delay?: number }) {
+export function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (
     <footer
-      className="animate-enter-fade w-full border-t"
       style={{
-        animationDelay: `${delay}ms`,
-        borderColor: "var(--color-border-subtle)",
+        borderTop: "1px solid var(--color-border)",
         color: "var(--color-text-muted)",
       }}
     >
-      <div className="mx-auto max-w-5xl px-5 sm:px-8 py-16">
-        {/* Top section: Brand + Link columns */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-          {/* Brand column */}
-          <div className="sm:col-span-2 lg:col-span-1">
-            <a href="/" className="flex items-center gap-3 mb-4 group">
-              <div
-                className="w-8 h-8 rounded-lg shrink-0"
-                style={{
-                  background:
-                    "linear-gradient(135deg, var(--color-brand), var(--color-accent))",
-                }}
-                aria-hidden="true"
-              />
-              <span
-                className="text-lg font-bold tracking-tight"
-                style={{ color: "var(--color-text-primary)" }}
-              >
-                {SITE.name}
-              </span>
-            </a>
-            <p className="text-sm leading-relaxed max-w-xs">
+      <div
+        className="mx-auto px-6 sm:px-8 py-12"
+        style={{ maxWidth: "var(--max-width)" }}
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+          {/* ── Site Info ── */}
+          <div>
+            <Link
+              href="/"
+              className="text-base font-bold tracking-tight"
+              style={{ color: "var(--color-text)" }}
+            >
+              {SITE.name}
+            </Link>
+            <p className="mt-2 text-sm" style={{ color: "var(--color-text-muted)" }}>
               {SITE.tagline}
             </p>
+            <a
+              href={SITE.social.x}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block mt-3 text-sm transition-colors duration-150"
+              style={{ color: "var(--color-text-secondary)" }}
+              aria-label="X (Twitter)"
+            >
+              {SITE.social.xHandle}
+            </a>
           </div>
 
-          {/* Link columns */}
+          {/* ── Link Groups ── */}
           {Object.values(FOOTER_LINKS).map((group) => (
             <div key={group.label}>
               <h3
-                className="text-sm font-semibold mb-4"
+                className="text-xs font-semibold uppercase tracking-wider mb-3"
                 style={{ color: "var(--color-text-secondary)" }}
               >
                 {group.label}
               </h3>
-              <ul className="flex flex-col gap-2.5">
+              <ul className="flex flex-col gap-2">
                 {group.links.map((link) => (
-                  <li key={link.label}>
-                    <a
+                  <li key={link.href}>
+                    <Link
                       href={link.href}
-                      className="text-sm transition-colors duration-[var(--duration-normal)] hover:text-[var(--color-brand-light)]"
+                      className="text-sm transition-colors duration-150 hover:text-[var(--color-text)]"
                     >
                       {link.label}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -69,26 +65,12 @@ export function SiteFooter({ delay = 0 }: { delay?: number }) {
           ))}
         </div>
 
-        {/* Bottom bar */}
+        {/* ── Copyright ── */}
         <div
-          className="mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 border-t text-xs"
-          style={{ borderColor: "var(--color-border-subtle)" }}
+          className="mt-10 pt-6 text-xs"
+          style={{ borderTop: "1px solid var(--color-border-subtle)" }}
         >
-          <p>&copy; {year} {SITE.legalName}. All rights reserved.</p>
-          <nav aria-label="フッターナビゲーション">
-            <ul className="flex items-center gap-4">
-              {NAV_LINKS.map((link) => (
-                <li key={link.href}>
-                  <a
-                    href={link.href}
-                    className="transition-colors duration-[var(--duration-normal)] hover:text-[var(--color-brand-light)]"
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
+          <p>&copy; {year} {SITE.name}. All rights reserved.</p>
         </div>
       </div>
     </footer>

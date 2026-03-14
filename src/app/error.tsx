@@ -1,14 +1,5 @@
 "use client";
 
-/**
- * Global error boundary.
- * Must be a client component (Next.js requirement).
- *
- * Styling via .status-page / .status-page-btn (globals.css).
- * INTENTIONALLY avoids importing theme.ts or site.ts to minimize
- * dependency surface — if those modules are the source of the error,
- * this page must still render.
- */
 export default function GlobalError({
   reset,
 }: {
@@ -18,7 +9,12 @@ export default function GlobalError({
   return (
     <div className="status-page">
       <main className="text-center">
-        <h1 className="text-2xl font-bold mb-4">エラーが発生しました</h1>
+        <h1
+          className="text-2xl font-bold mb-4"
+          style={{ color: "var(--color-text)" }}
+        >
+          エラーが発生しました
+        </h1>
         <p
           className="mb-8 text-sm max-w-md mx-auto"
           style={{ color: "var(--color-text-secondary)" }}
