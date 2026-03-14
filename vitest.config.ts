@@ -3,10 +3,12 @@ import path from "path";
 
 export default defineConfig({
   test: {
-    environment: "node",
+    environment: "jsdom",
     include: ["src/**/*.test.{ts,tsx}", "tests/**/*.test.{ts,tsx}"],
     exclude: ["node_modules", ".next", ".open-next"],
     globals: true,
+    fileParallelism: false,
+    maxWorkers: 1,
   },
   resolve: {
     alias: {

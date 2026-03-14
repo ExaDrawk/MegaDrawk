@@ -2,46 +2,63 @@
 export interface BlogPost {
   readonly id: string;
   readonly title: string;
+  readonly body?: string;
   readonly excerpt: string;
   readonly date: string;
   readonly tags: readonly string[];
 }
 
+interface BlogPostInput {
+  readonly title: string;
+  readonly body: string;
+  readonly tags?: readonly string[];
+  readonly date?: string;
+}
+
+function createSlug(title: string): string {
+  return title
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 /**
- * ブログ記事一覧（事実ベースのタイトルのみ）
- * ※ 創作禁止。本人の実際の活動に基づくテーマのみ。
+ * 最小入力で記事を作るためのヘルパー。
+ * title/body があれば公開できる。
  */
-export const BLOG_POSTS: readonly BlogPost[] = [
-  {
-    id: "unity-first-try",
-    title: "Unityを初めて触ってみた",
-    excerpt:
-      "2026年3月、初めてUnityを使ってみた記録。ゲームエンジンの第一印象と学んだこと。",
-    date: "2026-03-01",
-    tags: ["Unity", "学習記録"],
-  },
-  {
-    id: "kimi-k25-free",
-    title: "Kimi K2.5が無料になったので試してみた",
-    excerpt:
-      "KiloCodeでKimi K2.5を無料で使用。MiniMaxより安定していると感じた使用感をまとめます。",
-    date: "2026-02-28",
-    tags: ["AI", "Kimi K2.5"],
-  },
-  {
-    id: "gemini-png-svg",
-    title: "GeminiでPNGをSVGに変換する実験",
-    excerpt:
-      "Gemini 3.1 Pro / Flashを使ってPNG画像をSVG形式に変換する実験の結果と考察。",
-    date: "2026-02-25",
-    tags: ["AI", "Gemini", "SVG"],
-  },
-  {
-    id: "quiver-arrow-test",
-    title: "quiver arrow 1.0のSVG性能をテスト",
-    excerpt:
-      "quiver arrow 1.0のSVG単独性能を検証。非常に優れた結果が出た。",
-    date: "2026-02-20",
-    tags: ["SVG", "quiver arrow"],
-  },
-] as const;
+export function createBlogPost(input: BlogPostInput): BlogPost {
+  const normalizedTitle = input.title.trim();
+  const normalizedBody = input.body.trim();
+
+  if (!normalizedTitle) {
+    throw new Error("Blog post title is required.");
+  }
+
+  if (!normalizedBody) {
+    throw new Error("Blog post body is required.");
+  }
+
+  return {
+    id: createSlug(normalizedTitle) || `post-${Date.now()}`,
+    title: normalizedTitle,
+    body: normalizedBody,
+    excerpt: normalizedBody.slice(0, 120),
+    date: input.date ?? new Date().toISOString().slice(0, 10),
+    tags: input.tags ?? [],
+  };
+}
+
+/**
+ * ブログ記事一覧
+ * いったん全記事をリセット。以下のテンプレを複製して追加してください。
+ *
+ * createBlogPost({
+ *   title: "記事タイトル",
+ *   body: "本文。まずは短文でOK。",
+ *   tags: ["メモ"],
+ * })
+ */
+export const BLOG_POSTS: readonly BlogPost[] = [] as const;

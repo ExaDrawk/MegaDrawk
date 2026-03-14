@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { SITE } from "@/config/site";
 import { BLOG_POSTS } from "@/config/blog";
 import { formatJaDate } from "@/lib/date";
+import { CommentSection } from "@/components/blog/CommentSection";
 
 export const metadata: Metadata = {
   title: "Blog",
@@ -14,7 +15,7 @@ export default function BlogPage() {
       <section className="pt-8 pb-16 sm:pt-16 sm:pb-24">
         <h1 className="section-heading">Blog</h1>
         <p className="section-description">
-          ジオラマ制作、Unity学習記録、AIツールの実験など。
+          まずは短いメモから書けるようにしています。
         </p>
 
         <div className="mt-10" style={{ maxWidth: "var(--content-width)" }}>
@@ -52,23 +53,18 @@ export default function BlogPage() {
                       </span>
                     ))}
                   </div>
+                  <CommentSection postId={post.id} />
                 </article>
               ))}
             </div>
           ) : (
             <div className="card p-6">
               <p style={{ color: "var(--color-text-secondary)" }}>
-                ブログ記事はまだ公開されていません。
+                ブログ記事は0件です。まずは `src/config/blog.ts` に1件追加してください。
               </p>
-              <a
-                href={SITE.social.x}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex mt-4 text-sm"
-                style={{ color: "var(--color-link)" }}
-              >
-                Xで最新情報を見る
-              </a>
+              <p className="mt-3 text-sm" style={{ color: "var(--color-text-muted)" }}>
+                createBlogPost で始まるテンプレを複製すれば、すぐ投稿できます。
+              </p>
             </div>
           )}
         </div>
