@@ -5,6 +5,7 @@ export interface BlogPost {
   readonly body?: string;
   readonly excerpt: string;
   readonly date: string;
+  readonly updatedAt: string;
   readonly tags: readonly string[];
 }
 
@@ -13,6 +14,7 @@ interface BlogPostInput {
   readonly body: string;
   readonly tags?: readonly string[];
   readonly date?: string;
+  readonly updatedAt?: string;
 }
 
 function createSlug(title: string): string {
@@ -41,12 +43,15 @@ export function createBlogPost(input: BlogPostInput): BlogPost {
     throw new Error("Blog post body is required.");
   }
 
+  const publishedAt = input.date ?? new Date().toISOString().slice(0, 10);
+
   return {
     id: createSlug(normalizedTitle) || `post-${Date.now()}`,
     title: normalizedTitle,
     body: normalizedBody,
     excerpt: normalizedBody.slice(0, 120),
-    date: input.date ?? new Date().toISOString().slice(0, 10),
+    date: publishedAt,
+    updatedAt: input.updatedAt ?? publishedAt,
     tags: input.tags ?? [],
   };
 }
@@ -59,6 +64,18 @@ export function createBlogPost(input: BlogPostInput): BlogPost {
  *   title: "記事タイトル",
  *   body: "本文。まずは短文でOK。",
  *   tags: ["メモ"],
+ *   date: "2026-03-15",
  * })
  */
 export const BLOG_POSTS: readonly BlogPost[] = [] as const;
+
+export function getPublishedBlogPosts(): readonly BlogPost[] {
+  return [...BLOG_POSTS].sort((left, right) =>
+    right.date.localeCompare(left.date)
+  );
+}
+
+export function getLatestBlogUpdateDate(): string | null {
+  const latestPost = getPublishedBlogPosts()[0];
+  return latestPost ? latestPost.updatedAt : null;
+}

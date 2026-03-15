@@ -1,45 +1,58 @@
 import type { MetadataRoute } from "next";
+import { getLatestBlogUpdateDate, getPublishedBlogPosts } from "@/config/blog";
 import { SITE } from "@/config/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const now = new Date();
+  const latestBlogUpdate = getLatestBlogUpdateDate();
+  const fallbackDate = new Date().toISOString();
+  const lastBlogModified = latestBlogUpdate ?? fallbackDate;
+  const posts = getPublishedBlogPosts();
 
-  return [
+  const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: SITE.url,
-      lastModified: now,
+      lastModified: latestBlogUpdate ?? fallbackDate,
       changeFrequency: "weekly",
       priority: 1,
     },
     {
       url: `${SITE.url}/about`,
-      lastModified: now,
+      lastModified: fallbackDate,
       changeFrequency: "monthly",
       priority: 0.8,
     },
     {
       url: `${SITE.url}/blog`,
-      lastModified: now,
+      lastModified: lastBlogModified,
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
       url: `${SITE.url}/contact`,
-      lastModified: now,
+      lastModified: fallbackDate,
       changeFrequency: "yearly",
       priority: 0.5,
     },
     {
       url: `${SITE.url}/privacy`,
-      lastModified: now,
+      lastModified: fallbackDate,
       changeFrequency: "yearly",
       priority: 0.3,
     },
     {
       url: `${SITE.url}/terms`,
-      lastModified: now,
+      lastModified: fallbackDate,
       changeFrequency: "yearly",
       priority: 0.3,
     },
   ];
+
+  const blogRoutes: MetadataRoute.Sitemap = posts.map((post) => ({
+    url: `${SITE.url}/blog#${post.id}`,
+    lastModified: post.updatedAt,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  }));
+
+  return [...staticRoutes, ...blogRoutes];
 }

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { SITE, FOOTER_LINKS } from "@/config/site";
 
@@ -23,10 +24,14 @@ export function SiteFooter() {
               className="inline-flex items-center gap-2 transition-opacity hover:opacity-80"
               aria-label={SITE.name}
             >
-              <img src="/logo.svg" alt="" width={24} height={24} aria-hidden="true" />
-              <span className="text-base font-bold tracking-tight" style={{ color: "var(--color-text)" }}>
-                {SITE.name}
-              </span>
+              <Image src="/icon.svg" alt="" width={20} height={20} aria-hidden="true" />
+              <Image
+                src="/logo.svg"
+                alt={SITE.name}
+                width={96}
+                height={20}
+                className="object-contain"
+              />
             </Link>
             <p className="mt-4 text-sm" style={{ color: "var(--color-text-muted)" }}>
               {SITE.tagline}

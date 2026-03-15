@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SITE, NAV_LINKS } from "@/config/site";
@@ -40,16 +41,26 @@ export function SiteHeader() {
         {/* ── Logo ── */}
         <Link
           href="/"
-          className="transition-all duration-300 hover:opacity-80 flex items-center gap-2 text-xl font-black tracking-tighter"
-          style={{
-            color: "var(--color-primary)",
-            textShadow: "0 2px 4px rgba(0, 85, 255, 0.15)"
-          }}
+          className="transition-all duration-300 hover:opacity-80 flex items-center gap-2"
           aria-label={`${SITE.name} トップページ`}
           onClick={closeMenu}
         >
-          <img src="/logo.svg" alt="" width={32} height={32} className="object-contain" aria-hidden="true" />
-          <span>{SITE.name}</span>
+          <Image
+            src="/icon.svg"
+            alt=""
+            width={30}
+            height={30}
+            className="object-contain"
+            aria-hidden="true"
+          />
+          <Image
+            src="/logo.svg"
+            alt={SITE.name}
+            width={112}
+            height={24}
+            className="object-contain"
+            priority
+          />
         </Link>
 
         {/* ── Desktop Navigation ── */}

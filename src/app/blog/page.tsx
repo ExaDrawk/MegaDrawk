@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { SITE } from "@/config/site";
-import { BLOG_POSTS } from "@/config/blog";
+import { getPublishedBlogPosts } from "@/config/blog";
 import { formatJaDate } from "@/lib/date";
 import { CommentSection } from "@/components/blog/CommentSection";
 
@@ -10,6 +10,8 @@ export const metadata: Metadata = {
 };
 
 export default function BlogPage() {
+  const posts = getPublishedBlogPosts();
+
   return (
     <div className="animate-enter-up">
       <section className="pt-8 pb-16 sm:pt-16 sm:pb-24">
@@ -19,13 +21,13 @@ export default function BlogPage() {
         </p>
 
         <div className="mt-10" style={{ maxWidth: "var(--content-width)" }}>
-          {BLOG_POSTS.length > 0 ? (
+          {posts.length > 0 ? (
             <div className="flex flex-col gap-6">
-              {BLOG_POSTS.map((post) => (
+              {posts.map((post) => (
                 <article
                   key={post.id}
                   className="p-6 transition-all duration-300 rounded-xl"
-                  style={{ 
+                  style={{
                     border: "1px solid var(--color-border)",
                     backgroundColor: "var(--color-bg-subtle)",
                     boxShadow: "var(--shadow-sm)"
@@ -38,6 +40,14 @@ export default function BlogPage() {
                   >
                     {formatJaDate(post.date)}
                   </time>
+                  {post.updatedAt !== post.date ? (
+                    <p
+                      className="mt-1 text-xs"
+                      style={{ color: "var(--color-text-muted)" }}
+                    >
+                      更新: {formatJaDate(post.updatedAt)}
+                    </p>
+                  ) : null}
                   <h2
                     className="mt-1.5 text-xl font-bold"
                     style={{ color: "var(--color-text)" }}
@@ -66,10 +76,10 @@ export default function BlogPage() {
           ) : (
             <div className="card p-8 border-dashed border-2 rounded-xl flex flex-col items-center text-center">
               <p className="font-semibold text-lg" style={{ color: "var(--color-text-secondary)" }}>
-                ブログ記事は0件です。まずは `src/config/blog.ts` に1件追加してください。
+                まだ公開中のブログ記事はありません。
               </p>
               <p className="mt-2 text-sm" style={{ color: "var(--color-text-muted)" }}>
-                <code>createBlogPost</code> で始まるテンプレを複製すれば、すぐ投稿できます。
+                最初の記事を準備中です。公開まで少しお待ちください。
               </p>
             </div>
           )}

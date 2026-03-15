@@ -1,15 +1,16 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import type { CommentItem } from "@/domain/comment/types";
 import { commentStorageRepository } from "@/infra/storage/commentStorage";
 
 export function useComments(postId: string) {
-  // UI layer uses the specific infra implementation directly here, 
-  // but could be injected via Context/Props if more strictly following DIP.
-  const [comments, setComments] = useState<CommentItem[]>(() =>
-    commentStorageRepository.getComments(postId)
-  );
+  // Read storage after mount so SSR and hydration start from the same snapshot.
+  const [comments, setComments] = useState<CommentItem[]>([]);
 
   const [errorText, setErrorText] = useState("");
+
+  useEffect(() => {
+    setComments(commentStorageRepository.getComments(postId));
+  }, [postId]);
 
   const addComment = useCallback(
     (name: string, message: string) => {

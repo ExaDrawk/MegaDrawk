@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { createBlogPost } from "../blog";
+import {
+  createBlogPost,
+  getLatestBlogUpdateDate,
+  getPublishedBlogPosts,
+} from "../blog";
 
 describe("createBlogPost", () => {
   it("should create a blog post with minimum input", () => {
@@ -13,6 +17,7 @@ describe("createBlogPost", () => {
     expect(post.id).toBe("test-title");
     expect(post.excerpt).toBe("This is a test body.");
     expect(post.date).toBeTypeOf("string");
+    expect(post.updatedAt).toBe(post.date);
     expect(post.tags).toEqual([]);
   });
 
@@ -34,5 +39,15 @@ describe("createBlogPost", () => {
     expect(() =>
       createBlogPost({ title: "title", body: "   " })
     ).toThrowError("Blog post body is required.");
+  });
+});
+
+describe("blog helpers", () => {
+  it("returns published blog posts as an array", () => {
+    expect(Array.isArray(getPublishedBlogPosts())).toBe(true);
+  });
+
+  it("returns null as the latest update when no posts exist", () => {
+    expect(getLatestBlogUpdateDate()).toBeNull();
   });
 });

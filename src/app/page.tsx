@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { SITE } from "@/config/site";
-import { BLOG_POSTS } from "@/config/blog";
+import { getPublishedBlogPosts } from "@/config/blog";
 import { formatJaDate } from "@/lib/date";
 import { ArrowRight } from "lucide-react";
 
 export default function HomePage() {
-  const latestPosts = BLOG_POSTS.slice(0, 3);
+  const latestPosts = getPublishedBlogPosts().slice(0, 3);
 
   return (
     <div className="animate-enter-up">
@@ -37,7 +37,10 @@ export default function HomePage() {
           <Link
             href="/blog"
             className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white rounded-lg transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5"
-            style={{ background: "linear-gradient(135deg, var(--color-primary), #0033aa)" }}
+            style={{
+              background:
+                "linear-gradient(135deg, var(--color-primary), var(--color-accent-hover))",
+            }}
           >
             ブログを読む
             <ArrowRight size={16} aria-hidden="true" />
@@ -75,7 +78,7 @@ export default function HomePage() {
               <article
                 key={post.id}
                 className="p-5 transition-all duration-300 rounded-xl hover:shadow-md group"
-                style={{ 
+                style={{
                   border: "1px solid var(--color-border)",
                   backgroundColor: "var(--color-bg-secondary)"
                 }}

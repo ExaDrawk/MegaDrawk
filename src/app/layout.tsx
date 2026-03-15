@@ -34,10 +34,22 @@ export const metadata: Metadata = {
     template: `%s | ${SITE.name}`,
   },
   description: SITE.description,
+  keywords: [...SITE.keywords],
   applicationName: SITE.name,
-  authors: [{ name: SITE.name }],
+  authors: [{ name: SITE.ownerName, url: SITE.url }],
+  creator: SITE.ownerName,
+  publisher: SITE.name,
   generator: "Next.js",
   referrer: "strict-origin-when-cross-origin",
+  alternates: {
+    canonical: SITE.url,
+  },
+  category: "portfolio",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   robots: { index: true, follow: true },
   openGraph: {
     type: "website",
@@ -59,7 +71,7 @@ function PersonJsonLd({ nonce }: { nonce?: string }) {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Person",
-    name: SITE.name,
+    name: SITE.ownerName,
     url: SITE.url,
     description: SITE.description,
     sameAs: [SITE.social.x],

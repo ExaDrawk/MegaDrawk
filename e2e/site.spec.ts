@@ -21,6 +21,9 @@ test.describe('Site features', () => {
   test('blog page loads', async ({ page }) => {
     await page.goto('/blog');
     await expect(page.getByRole('heading', { name: /Blog/i })).toBeVisible();
+    await expect(
+      page.getByText('src/config/blog.ts').or(page.getByText('createBlogPost'))
+    ).toHaveCount(0);
   });
 
   test('contact page loads', async ({ page }) => {

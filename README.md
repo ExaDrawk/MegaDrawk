@@ -24,6 +24,22 @@ npm run dev
 - テスト: npm run test
 - ビルド: npm run build
 
+## ブログ運用フロー
+
+1. `src/config/blog.ts` の `BLOG_POSTS` に `createBlogPost(...)` を追加します。
+2. `date` は公開日、追記した日は `updatedAt` に入れます。
+3. `excerpt` は自動生成されるので、本文の冒頭120文字が一覧に出る前提で書きます。
+4. 追加後は `npm run lint` と `npm run typecheck` を通します。
+5. 公開画面に内部ファイル名や実装都合の文言が出ていないことを確認します。
+
+## 定期保守チェック
+
+- 月1回: 依存更新、リンク切れ、法的ページの最終更新日確認
+- 記事公開時: `title` / `description` / 日付 / タグ / sitemap 反映確認
+- ブランド変更時: `src/config/site.ts` を更新し、個人名とサイト名の混線がないか確認
+- UI変更時: loading / empty / error / success の各状態が崩れていないか確認
+- デプロイ前: `npm run lint`, `npm run typecheck`, `npm run build`
+
 ## デプロイ
 
 Cloudflare Pages 向け:
@@ -35,6 +51,7 @@ npm run deploy
 ## 設計メモ
 
 - サイト共通情報は src/config/site.ts に集約
+- ブログ公開順と最新更新日は src/config/blog.ts に集約
 - 日付フォーマットは src/lib/date.ts に集約
 - UI は loading / empty / error / success の状態を各ページで表現
 - セキュリティヘッダーと CSP は middleware.ts で一元管理

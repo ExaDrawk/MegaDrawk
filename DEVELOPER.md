@@ -41,11 +41,14 @@ npm run build
 ## 3. よくある変更手順
 
 *   **ブログ記事の追加:**
-    `src/config/blog.ts` にある `BLOG_POSTS` 配列に `createBlogPost({...})` を追加するだけで公開されます。手軽に執筆が可能です。
+    `src/config/blog.ts` にある `BLOG_POSTS` 配列に `createBlogPost({...})` を追加します。`date` は公開日、追記・修正日は `updatedAt` に入れてください。サイトマップはここから自動的に更新されます。
 *   **テーマ・配色の変更:**
     `src/app/globals.css` のCSS変数、および `src/config/theme.ts` を修正することでサイト全体の色合いを統制できます。
+*   **サイト名・運営者名の変更:**
+    `src/config/site.ts` のみを更新します。公開名 (`name`) と運営者名 (`ownerName`) は別の知識として扱います。
 
 ## 4. 運用注意事項
 
 *   現在ブログの「コメント機能」は LocalStorage を用いたクライアント完結型（プロトタイプ）です。複数ユーザー間での共有や、別ブラウザでの状態永続化が必要な場合は、データベース (PostgreSQL, D1 等) への移行が必須です (`tasks/todo.md` に将来の課題として記録してください)。
 *   本番デプロイにあたっては、Cloudflare Pages/Workers (`open-next`, `wrangler.toml` 構成) のビルドフローに従って `npm run build` のエラーゼロを維持してください。
+*   公開UIでは内部ファイルパスや実装ヘルパー名を表示しないでください。空状態文言はユーザー向けの表現を優先します。
