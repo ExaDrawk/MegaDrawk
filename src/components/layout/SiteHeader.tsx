@@ -40,8 +40,11 @@ export function SiteHeader() {
         {/* ── Logo ── */}
         <Link
           href="/"
-          className="text-lg font-bold tracking-tight transition-opacity duration-150 hover:opacity-70"
-          style={{ color: "var(--color-text)" }}
+          className="text-2xl font-black tracking-tighter transition-all duration-300 hover:opacity-80"
+          style={{ 
+            color: "var(--color-primary)",
+            textShadow: "0 2px 4px rgba(0,0,205,0.15)"
+          }}
           aria-label={`${SITE.name} トップページ`}
           onClick={closeMenu}
         >
@@ -57,10 +60,10 @@ export function SiteHeader() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150"
+                    className={`px-4 py-2 text-sm font-semibold rounded-full transition-all duration-300 ${isActive ? 'bg-[var(--color-primary-muted)] text-[var(--color-primary)]' : 'hover:bg-[var(--color-bg-muted)] hover:text-[var(--color-primary)]'}`}
                     style={{
                       color: isActive
-                        ? "var(--color-text)"
+                        ? "var(--color-primary)"
                         : "var(--color-text-secondary)",
                     }}
                     aria-current={isActive ? "page" : undefined}

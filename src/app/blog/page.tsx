@@ -20,50 +20,56 @@ export default function BlogPage() {
 
         <div className="mt-10" style={{ maxWidth: "var(--content-width)" }}>
           {BLOG_POSTS.length > 0 ? (
-            <div className="flex flex-col">
+            <div className="flex flex-col gap-6">
               {BLOG_POSTS.map((post) => (
                 <article
                   key={post.id}
-                  className="py-6 transition-colors duration-150"
-                  style={{ borderBottom: "1px solid var(--color-border)" }}
+                  className="p-6 transition-all duration-300 rounded-xl"
+                  style={{ 
+                    border: "1px solid var(--color-border)",
+                    backgroundColor: "var(--color-bg-subtle)",
+                    boxShadow: "var(--shadow-sm)"
+                  }}
                 >
                   <time
                     dateTime={post.date}
-                    className="text-xs"
-                    style={{ color: "var(--color-text-muted)" }}
+                    className="text-xs font-semibold tracking-wide"
+                    style={{ color: "var(--color-primary-muted)" }}
                   >
                     {formatJaDate(post.date)}
                   </time>
                   <h2
-                    className="mt-1.5 text-lg font-semibold"
+                    className="mt-1.5 text-xl font-bold"
                     style={{ color: "var(--color-text)" }}
                   >
                     {post.title}
                   </h2>
                   <p
-                    className="mt-2 text-sm leading-relaxed"
+                    className="mt-2 text-base leading-relaxed"
                     style={{ color: "var(--color-text-secondary)" }}
                   >
                     {post.excerpt}
                   </p>
-                  <div className="mt-3 flex flex-wrap gap-1.5">
+                  <div className="mt-4 flex flex-wrap gap-2">
                     {post.tags.map((tag) => (
-                      <span key={tag} className="tag">
+                      <span key={tag} className="tag bg-[var(--color-primary-muted)] text-[var(--color-primary)] font-medium">
                         {tag}
                       </span>
                     ))}
                   </div>
-                  <CommentSection postId={post.id} />
+                  <div className="mt-6 pt-4" style={{ borderTop: "1px dashed var(--color-border-subtle)" }}>
+                    <CommentSection postId={post.id} />
+                  </div>
                 </article>
               ))}
             </div>
           ) : (
-            <div className="card p-6">
-              <p style={{ color: "var(--color-text-secondary)" }}>
+            <div className="card p-8 border-dashed border-2 rounded-xl flex flex-col items-center text-center">
+              <p className="font-semibold text-lg" style={{ color: "var(--color-text-secondary)" }}>
                 ブログ記事は0件です。まずは `src/config/blog.ts` に1件追加してください。
               </p>
-              <p className="mt-3 text-sm" style={{ color: "var(--color-text-muted)" }}>
-                createBlogPost で始まるテンプレを複製すれば、すぐ投稿できます。
+              <p className="mt-2 text-sm" style={{ color: "var(--color-text-muted)" }}>
+                <code>createBlogPost</code> で始まるテンプレを複製すれば、すぐ投稿できます。
               </p>
             </div>
           )}

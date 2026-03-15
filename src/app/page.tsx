@@ -1,12 +1,10 @@
 import Link from "next/link";
 import { SITE } from "@/config/site";
-import { WORKS } from "@/config/works";
 import { BLOG_POSTS } from "@/config/blog";
 import { formatJaDate } from "@/lib/date";
 import { ArrowRight } from "lucide-react";
 
 export default function HomePage() {
-  const featuredWorks = WORKS.slice(0, 4);
   const latestPosts = BLOG_POSTS.slice(0, 3);
 
   return (
@@ -20,8 +18,8 @@ export default function HomePage() {
           {SITE.name}
         </h1>
         <p
-          className="mt-4 text-lg sm:text-xl"
-          style={{ color: "var(--color-text-secondary)" }}
+          className="mt-4 text-lg sm:text-xl font-medium"
+          style={{ color: "var(--color-primary)" }}
         >
           {SITE.tagline}
         </p>
@@ -37,18 +35,18 @@ export default function HomePage() {
         </p>
         <div className="mt-8 flex items-center gap-4">
           <Link
-            href="/works"
-            className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white rounded-md transition-colors duration-150"
-            style={{ background: "var(--color-accent)" }}
+            href="/blog"
+            className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white rounded-lg transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+            style={{ background: "linear-gradient(135deg, var(--color-primary), #00008b)" }}
           >
-            作品を見る
+            ブログを読む
             <ArrowRight size={16} aria-hidden="true" />
           </Link>
           <Link
             href="/about"
-            className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium rounded-md transition-colors duration-150"
+            className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium rounded-lg transition-all duration-300 hover:bg-[var(--color-bg-secondary)]"
             style={{
-              color: "var(--color-text-secondary)",
+              color: "var(--color-text)",
               border: "1px solid var(--color-border)",
             }}
           >
@@ -57,121 +55,60 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Featured Works ── */}
-      <section className="pb-16 sm:pb-24">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="section-heading" style={{ marginBottom: 0 }}>
-            Featured Works
-          </h2>
-          <Link
-            href="/works"
-            className="text-sm font-medium transition-colors duration-150 hover:text-[var(--color-text)]"
-            style={{ color: "var(--color-text-secondary)" }}
-          >
-            すべて見る →
-          </Link>
-        </div>
-        {featuredWorks.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {featuredWorks.map((work) => (
-              <div key={work.id} className="card">
-                <div className="card-image-placeholder" aria-label={work.imageAlt}>
-                  {work.comingSoon ? "Coming Soon" : work.title}
-                </div>
-                <div className="card-body">
-                  <h3
-                    className="text-sm font-semibold"
-                    style={{ color: "var(--color-text)" }}
-                  >
-                    {work.title}
-                  </h3>
-                  <p
-                    className="mt-1 text-xs leading-relaxed"
-                    style={{ color: "var(--color-text-secondary)" }}
-                  >
-                    {work.description}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="card p-6">
-            <p style={{ color: "var(--color-text-secondary)" }}>
-              作品はまだありません。公開準備ができ次第追加されます。
-            </p>
-            <Link href="/contact" className="inline-flex mt-4 text-sm" style={{ color: "var(--color-link)" }}>
-              お問い合わせはこちら
-            </Link>
-          </div>
-        )}
-      </section>
-
       {/* ── Latest Blog ── */}
       <section className="pb-8">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="section-heading" style={{ marginBottom: 0 }}>
+          <h2 className="section-heading text-2xl font-bold" style={{ marginBottom: 0 }}>
             Latest Blog
           </h2>
           <Link
             href="/blog"
-            className="text-sm font-medium transition-colors duration-150 hover:text-[var(--color-text)]"
+            className="text-sm font-medium transition-colors duration-150 hover:text-[var(--color-primary)]"
             style={{ color: "var(--color-text-secondary)" }}
           >
             すべて見る →
           </Link>
         </div>
         {latestPosts.length > 0 ? (
-          <div className="flex flex-col gap-0">
+          <div className="flex flex-col gap-4">
             {latestPosts.map((post) => (
               <article
                 key={post.id}
-                className="py-5 transition-colors duration-150"
-                style={{ borderBottom: "1px solid var(--color-border-subtle)" }}
+                className="p-5 transition-all duration-300 rounded-xl hover:shadow-md group"
+                style={{ 
+                  border: "1px solid var(--color-border)",
+                  backgroundColor: "var(--color-bg-secondary)"
+                }}
               >
-                <time
-                  dateTime={post.date}
-                  className="text-xs"
-                  style={{ color: "var(--color-text-muted)" }}
-                >
-                  {formatJaDate(post.date)}
-                </time>
-                <h3
-                  className="mt-1 text-base font-semibold"
-                  style={{ color: "var(--color-text)" }}
-                >
-                  {post.title}
-                </h3>
-                <p
-                  className="mt-1 text-sm leading-relaxed"
-                  style={{ color: "var(--color-text-secondary)" }}
-                >
-                  {post.excerpt}
-                </p>
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {post.tags.map((tag) => (
-                    <span key={tag} className="tag">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
+                <Link href={`/blog#${post.id}`} className="block">
+                  <time
+                    dateTime={post.date}
+                    className="text-xs font-medium"
+                    style={{ color: "var(--color-primary-muted)" }}
+                  >
+                    {formatJaDate(post.date)}
+                  </time>
+                  <h3
+                    className="mt-2 text-lg font-semibold group-hover:text-[var(--color-primary)] transition-colors duration-200"
+                    style={{ color: "var(--color-text)" }}
+                  >
+                    {post.title}
+                  </h3>
+                  <p
+                    className="mt-2 text-sm leading-relaxed"
+                    style={{ color: "var(--color-text-secondary)" }}
+                  >
+                    {post.excerpt}
+                  </p>
+                </Link>
               </article>
             ))}
           </div>
         ) : (
-          <div className="card p-6">
-            <p style={{ color: "var(--color-text-secondary)" }}>
-              記事はまだありません。最新情報はXで更新します。
+          <div className="card p-8 border-dashed border-2 rounded-xl flex flex-col items-center justify-center transition-all duration-300 hover:bg-[var(--color-bg-secondary)]" style={{ borderColor: 'var(--color-border-subtle)' }}>
+            <p className="text-center font-medium" style={{ color: "var(--color-text-secondary)" }}>
+              まだ記事がありません。新しい記事の公開をお待ちください。
             </p>
-            <a
-              href={SITE.social.x}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex mt-4 text-sm"
-              style={{ color: "var(--color-link)" }}
-            >
-              Xを見る
-            </a>
           </div>
         )}
       </section>

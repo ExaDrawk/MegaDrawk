@@ -18,7 +18,6 @@ export const SITE = {
 /** ナビゲーションリンク */
 const PAGE_LINKS = [
   { label: "About", href: "/about" },
-  { label: "Works", href: "/works" },
   { label: "Blog", href: "/blog" },
   { label: "Contact", href: "/contact" },
 ] as const;
