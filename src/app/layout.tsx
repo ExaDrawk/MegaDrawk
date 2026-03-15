@@ -53,7 +53,6 @@ export const metadata: Metadata = {
     title: `${SITE.name} — ${SITE.tagline}`,
     description: SITE.description,
   },
-  icons: { icon: "/favicon.ico" },
 };
 
 function PersonJsonLd({ nonce }: { nonce?: string }) {
