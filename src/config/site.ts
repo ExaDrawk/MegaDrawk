@@ -1,9 +1,9 @@
 /** サイト全体の基本設定（単一の権威ある情報源） */
 export const SITE = {
-  name: "Drawk",
+  name: "MEGADRAWK",
   tagline: "大学生 / ジオラマ制作 / テクノロジー",
   description:
-    "Drawkのポートフォリオサイト。手のひらサイズのミニチュア世界を制作する大学生の作品と活動記録。",
+    "MEGADRAWKのポートフォリオサイト。手のひらサイズのミニチュア世界を制作する大学生の作品と活動記録。",
   domain: "megadrawk.com",
   url: "https://megadrawk.com",
   locale: "ja_JP",

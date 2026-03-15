@@ -18,13 +18,13 @@
   --color-border: #cbd5e1;
   --color-border-subtle: #e2e8f0;
 
-  --color-primary: #0000cd;
+  --color-primary: #0055ff;
   --color-primary-muted: #e0e7ff;
 
-  --color-accent: #0000cd;
-  --color-accent-hover: #0000aa;
-  --color-link: #0000cd;
-  --color-link-hover: #00008b;
+  --color-accent: #0055ff;
+  --color-accent-hover: #0044cc;
+  --color-link: #0055ff;
+  --color-link-hover: #0033aa;
 
   /* ── Layout ── */
   --header-height: 4.5rem;
@@ -38,10 +38,10 @@
   --radius-xl: 1.5rem;
 
   /* ── Shadows ── */
-  --shadow-xs: 0 1px 2px rgba(0, 0, 205, 0.05);
-  --shadow-sm: 0 1px 3px rgba(0, 0, 205, 0.08), 0 1px 2px rgba(0, 0, 205, 0.04);
-  --shadow-md: 0 10px 25px -5px rgba(0, 0, 205, 0.1),
-    0 8px 10px -6px rgba(0, 0, 205, 0.05);
+  --shadow-xs: 0 1px 2px rgba(0, 85, 255, 0.05);
+  --shadow-sm: 0 1px 3px rgba(0, 85, 255, 0.08), 0 1px 2px rgba(0, 85, 255, 0.04);
+  --shadow-md: 0 10px 25px -5px rgba(0, 85, 255, 0.1),
+    0 8px 10px -6px rgba(0, 85, 255, 0.05);
 
   /* ── Transitions ── */
   --duration-fast: 150ms;

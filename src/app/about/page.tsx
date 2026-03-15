@@ -27,7 +27,7 @@ export default function AboutPage() {
               className="text-base leading-relaxed"
               style={{ color: "var(--color-text-secondary)" }}
             >
-              Drawkは日本の大学生です。
+              MEGADRAWKは日本の大学生です。
               手のひらサイズのミニチュア世界——ジオラマの制作を趣味としています。
             </p>
           </div>
