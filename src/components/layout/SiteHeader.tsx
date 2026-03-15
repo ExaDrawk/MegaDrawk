@@ -40,11 +40,16 @@ export function SiteHeader() {
         {/* ── Logo ── */}
         <Link
           href="/"
-          className="transition-all duration-300 hover:opacity-80 flex items-center"
+          className="transition-all duration-300 hover:opacity-80 flex items-center gap-2 text-xl font-black tracking-tighter"
+          style={{
+            color: "var(--color-primary)",
+            textShadow: "0 2px 4px rgba(0, 85, 255, 0.15)"
+          }}
           aria-label={`${SITE.name} トップページ`}
           onClick={closeMenu}
         >
-          <img src="/logo.svg" alt={SITE.name} width={40} height={40} className="object-contain" />
+          <img src="/logo.svg" alt="" width={32} height={32} className="object-contain" aria-hidden="true" />
+          <span>{SITE.name}</span>
         </Link>
 
         {/* ── Desktop Navigation ── */}

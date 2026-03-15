@@ -20,10 +20,13 @@ export function SiteFooter() {
           <div>
             <Link
               href="/"
-              className="inline-flex items-center transition-opacity hover:opacity-80"
+              className="inline-flex items-center gap-2 transition-opacity hover:opacity-80"
               aria-label={SITE.name}
             >
-              <img src="/logo.svg" alt={SITE.name} width={32} height={32} />
+              <img src="/logo.svg" alt="" width={24} height={24} aria-hidden="true" />
+              <span className="text-base font-bold tracking-tight" style={{ color: "var(--color-text)" }}>
+                {SITE.name}
+              </span>
             </Link>
             <p className="mt-4 text-sm" style={{ color: "var(--color-text-muted)" }}>
               {SITE.tagline}
