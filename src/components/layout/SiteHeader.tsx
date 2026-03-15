@@ -41,9 +41,9 @@ export function SiteHeader() {
         <Link
           href="/"
           className="text-2xl font-black tracking-tighter transition-all duration-300 hover:opacity-80"
-          style={{ 
+          style={{
             color: "var(--color-primary)",
-            textShadow: "0 2px 4px rgba(0,0,205,0.15)"
+            textShadow: "0 2px 4px rgba(0, 85, 255, 0.15)"
           }}
           aria-label={`${SITE.name} トップページ`}
           onClick={closeMenu}

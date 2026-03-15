@@ -1,83 +1,23 @@
-"use client";
+﻿"use client";
 
-import { useMemo, useState } from "react";
-
-interface CommentItem {
-  id: string;
-  name: string;
-  message: string;
-  createdAt: string;
-}
+import { useState } from "react";
+import { useComments } from "@/hooks/useComments";
 
 interface CommentSectionProps {
   postId: string;
 }
 
-function storageKey(postId: string): string {
-  return `blog-comments:${postId}`;
-}
-
-function readStoredComments(key: string): CommentItem[] {
-  try {
-    if (typeof window === "undefined") {
-      return [];
-    }
-    const raw = localStorage.getItem(key);
-    if (!raw) {
-      return [];
-    }
-
-    const parsed = JSON.parse(raw) as CommentItem[];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
 export function CommentSection({ postId }: CommentSectionProps) {
-  const key = useMemo(() => storageKey(postId), [postId]);
-  const [comments, setComments] = useState<CommentItem[]>(() => readStoredComments(key));
+  const { comments, errorText, addComment } = useComments(postId);
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
-  const [errorText, setErrorText] = useState("");
-
-  function save(next: CommentItem[]) {
-    localStorage.setItem(key, JSON.stringify(next));
-    setComments(next);
-  }
 
   function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setErrorText("");
 
-    const trimmedName = name.trim();
-    const trimmedMessage = message.trim();
-
-    if (!trimmedName) {
-      setErrorText("名前を入力してください。");
-      return;
-    }
-
-    if (!trimmedMessage) {
-      setErrorText("コメント本文を入力してください。");
-      return;
-    }
-
-    const next: CommentItem[] = [
-      {
-        id: `${Date.now()}`,
-        name: trimmedName,
-        message: trimmedMessage,
-        createdAt: new Date().toISOString(),
-      },
-      ...comments,
-    ];
-
-    try {
-      save(next);
+    const success = addComment(name, message);
+    if (success) {
       setMessage("");
-    } catch {
-      setErrorText("コメントの保存に失敗しました。");
     }
   }
 
