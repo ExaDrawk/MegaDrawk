@@ -43,7 +43,7 @@ export function SiteHeader() {
           className="text-2xl font-black tracking-tighter transition-all duration-300 hover:opacity-80"
           style={{
             color: "var(--color-primary)",
-            textShadow: "0 2px 4px rgba(0, 85, 255, 0.15)"
+            textShadow: "0 2px 4px rgba(36, 80, 197, 0.18)",
           }}
           aria-label={`${SITE.name} トップページ`}
           onClick={closeMenu}

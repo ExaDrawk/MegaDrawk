@@ -37,7 +37,10 @@ export default function HomePage() {
           <Link
             href="/blog"
             className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white rounded-lg transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5"
-            style={{ background: "linear-gradient(135deg, var(--color-primary), #0033aa)" }}
+            style={{
+              background:
+                "linear-gradient(135deg, var(--color-primary), var(--color-accent-hover))",
+            }}
           >
             ブログを読む
             <ArrowRight size={16} aria-hidden="true" />

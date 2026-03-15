@@ -66,10 +66,10 @@ export default function BlogPage() {
           ) : (
             <div className="card p-8 border-dashed border-2 rounded-xl flex flex-col items-center text-center">
               <p className="font-semibold text-lg" style={{ color: "var(--color-text-secondary)" }}>
-                ブログ記事は0件です。まずは `src/config/blog.ts` に1件追加してください。
+                まだ公開中のブログ記事はありません。
               </p>
               <p className="mt-2 text-sm" style={{ color: "var(--color-text-muted)" }}>
-                <code>createBlogPost</code> で始まるテンプレを複製すれば、すぐ投稿できます。
+                最初の記事を準備中です。公開まで少しお待ちください。
               </p>
             </div>
           )}

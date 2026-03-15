@@ -1,11 +1,12 @@
 /** サイト全体の基本設定（単一の権威ある情報源） */
 export const SITE = {
-  name: "MEGADRAWK",
+  name: "logo.svg",
+  ownerName: "Drawk",
   tagline: "大学生 / ジオラマ制作 / テクノロジー",
   description:
-    "MEGADRAWKのポートフォリオサイト。手のひらサイズのミニチュア世界を制作する大学生の作品と活動記録。",
-  domain: "megadrawk.com",
-  url: "https://megadrawk.com",
+    "Drawkが運営するlogo.svg。手のひらサイズのミニチュア世界を制作する大学生の作品と活動記録。",
+  domain: "logo.svg.com",
+  url: "https://logo.svg.com",
   locale: "ja_JP",
   language: "ja",
   themeColor: "#ffffff",

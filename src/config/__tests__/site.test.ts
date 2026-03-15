@@ -4,6 +4,7 @@ import { SITE, NAV_LINKS, FOOTER_LINKS } from "@/config/site";
 describe("SITE config", () => {
   it("has all required fields", () => {
     expect(SITE.name).toBeDefined();
+    expect(SITE.ownerName).toBeDefined();
     expect(SITE.tagline).toBeDefined();
     expect(SITE.description).toBeDefined();
     expect(SITE.domain).toBeDefined();
@@ -38,6 +39,10 @@ describe("SITE config", () => {
 
   it("social X handle starts with @", () => {
     expect(SITE.social.xHandle).toMatch(/^@/);
+  });
+
+  it("distinguishes site name from owner name", () => {
+    expect(SITE.name).not.toBe(SITE.ownerName);
   });
 });
 
