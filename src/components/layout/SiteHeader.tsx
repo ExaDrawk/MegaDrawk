@@ -40,15 +40,11 @@ export function SiteHeader() {
         {/* ── Logo ── */}
         <Link
           href="/"
-          className="text-2xl font-black tracking-tighter transition-all duration-300 hover:opacity-80"
-          style={{
-            color: "var(--color-primary)",
-            textShadow: "0 2px 4px rgba(36, 80, 197, 0.18)",
-          }}
+          className="transition-all duration-300 hover:opacity-80 flex items-center"
           aria-label={`${SITE.name} トップページ`}
           onClick={closeMenu}
         >
-          {SITE.name}
+          <img src="/logo.svg" alt={SITE.name} width={40} height={40} className="object-contain" />
         </Link>
 
         {/* ── Desktop Navigation ── */}

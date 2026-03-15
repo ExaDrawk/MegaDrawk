@@ -1,4 +1,4 @@
-# logo.svg
+# MEGADRAWK
 
 Next.js 14 + TypeScript で構築したポートフォリオサイトです。
 

@@ -3,7 +3,7 @@ import { SITE } from "@/config/site";
 
 export const metadata: Metadata = {
   title: "About",
-  description: `${SITE.ownerName}について。大学生、ジオラマ制作、テクノロジーへの関心。`,
+  description: `${SITE.name}について。大学生、ジオラマ制作、テクノロジーへの関心。`,
 };
 
 export default function AboutPage() {
@@ -27,7 +27,7 @@ export default function AboutPage() {
               className="text-base leading-relaxed"
               style={{ color: "var(--color-text-secondary)" }}
             >
-              Drawkは日本の大学生です。
+              MEGADRAWKは日本の大学生です。
               手のひらサイズのミニチュア世界——ジオラマの制作を趣味としています。
             </p>
           </div>

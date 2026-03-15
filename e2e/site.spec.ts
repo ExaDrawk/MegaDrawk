@@ -5,7 +5,7 @@ test.describe('Site features', () => {
     await page.goto('/');
 
     // Expect a title "to contain" a substring.
-    await expect(page).toHaveTitle(/logo.svg/);
+    await expect(page).toHaveTitle(/MEGADRAWK/);
 
     // Verify navigation links
     await expect(page.getByRole('link', { name: 'About' }).first()).toBeVisible();
