@@ -1,26 +1,13 @@
 export default function Loading() {
   return (
     <div className="status-page">
-      <div className="flex flex-col items-center gap-4 animate-pulse">
-        <div
-          className="w-48 h-8 rounded-md"
-          style={{ background: "var(--color-bg-muted)" }}
-        />
-        <div
-          className="w-72 h-5 rounded-md"
-          style={{ background: "var(--color-bg-muted)" }}
-        />
-        <div
-          className="w-full max-w-lg h-20 mt-4 rounded-lg"
-          style={{ background: "var(--color-bg-muted)" }}
-        />
-        <div className="w-full max-w-3xl grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+      <div className="flex w-full max-w-3xl flex-col items-center gap-4">
+        <div className="skeleton h-8 w-48 rounded-md" />
+        <div className="skeleton h-5 w-72 max-w-full rounded-md" />
+        <div className="skeleton mt-4 h-20 w-full max-w-lg rounded-lg" />
+        <div className="mt-6 grid w-full grid-cols-1 gap-4 sm:grid-cols-3">
           {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="h-36 rounded-lg"
-              style={{ background: "var(--color-bg-muted)" }}
-            />
+            <div key={i} className="skeleton h-36 rounded-lg" />
           ))}
         </div>
       </div>

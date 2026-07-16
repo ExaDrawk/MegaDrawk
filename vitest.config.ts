@@ -8,7 +8,6 @@ export default defineConfig({
     exclude: ["node_modules", ".next", ".open-next"],
     globals: true,
     fileParallelism: false,
-    maxWorkers: 1,
   },
   resolve: {
     alias: {

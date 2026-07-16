@@ -2,9 +2,11 @@
 export const SITE = {
   name: "MEGADRAWK",
   ownerName: "Drawk",
-  tagline: "大学生 / ジオラマ制作 / テクノロジー",
+  tagline: "",
   description:
-    "Drawkが運営するMEGADRAWK。手のひらサイズのミニチュア世界を制作する大学生の作品と活動記録。",
+    "Drawkが運営するMEGADRAWK。作品と活動記録をまとめたサイト。",
+  heroCopy:
+    "大学生のDrawkが、日々の制作と学びを記録しています。",
   domain: "megadrawk.com",
   url: "https://megadrawk.com",
   locale: "ja_JP",
@@ -13,12 +15,9 @@ export const SITE = {
   keywords: [
     "MEGADRAWK",
     "Drawk",
-    "ジオラマ",
-    "ミニチュア",
     "ブログ",
     "ポートフォリオ",
-    "Unity",
-    "テクノロジー",
+    "制作記録",
   ],
   social: {
     x: "https://x.com/Drawk1234",

@@ -1,15 +1,20 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import Image from "next/image";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SITE, NAV_LINKS } from "@/config/site";
 import { Menu, X } from "lucide-react";
+import {
+  BrandLockup,
+  getBrandLockupContainerClassName,
+} from "@/components/layout/BrandLockup";
 
 export function SiteHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const firstMenuLinkRef = useRef<HTMLAnchorElement>(null);
 
   const toggleMenu = useCallback(() => {
     setIsMenuOpen((prev) => !prev);
@@ -19,51 +24,53 @@ export function SiteHeader() {
     setIsMenuOpen(false);
   }, []);
 
+  useEffect(() => {
+    if (!isMenuOpen) {
+      return;
+    }
+
+    firstMenuLinkRef.current?.focus();
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key !== "Escape") {
+        return;
+      }
+
+      setIsMenuOpen(false);
+      menuButtonRef.current?.focus();
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isMenuOpen]);
+
   return (
     <header
-      className="fixed top-0 left-0 right-0 z-50"
+      className="fixed inset-x-0 top-0 z-50"
       style={{
         height: "var(--header-height)",
-        background: "rgba(255, 255, 255, 0.85)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
-        borderBottom: "1px solid var(--color-border)",
+        background: "rgba(245, 247, 251, 0.86)",
+        backdropFilter: "blur(18px)",
+        WebkitBackdropFilter: "blur(18px)",
+        borderBottom: "1px solid var(--color-border-subtle)",
       }}
     >
       <div
-        className="mx-auto flex items-center justify-between h-full"
+        className="mx-auto flex h-full items-center justify-between"
         style={{
           maxWidth: "var(--max-width)",
-          paddingLeft: "1.5rem",
-          paddingRight: "1.5rem",
+          paddingInline: "var(--space-page-x)",
         }}
       >
-        {/* ── Logo ── */}
         <Link
           href="/"
-          className="transition-all duration-300 hover:opacity-80 flex items-center gap-2"
+          className={`${getBrandLockupContainerClassName("header")} min-h-11 rounded-lg transition-opacity duration-150 hover:opacity-80`}
           aria-label={`${SITE.name} トップページ`}
           onClick={closeMenu}
         >
-          <Image
-            src="/icon.svg"
-            alt=""
-            width={30}
-            height={30}
-            className="object-contain"
-            aria-hidden="true"
-          />
-          <Image
-            src="/logo.svg"
-            alt={SITE.name}
-            width={112}
-            height={24}
-            className="object-contain"
-            priority
-          />
+          <BrandLockup preset="header" priority />
         </Link>
 
-        {/* ── Desktop Navigation ── */}
         <nav className="hidden sm:block" aria-label="メインナビゲーション">
           <ul className="flex items-center gap-1">
             {NAV_LINKS.map((link) => {
@@ -72,12 +79,7 @@ export function SiteHeader() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className={`px-4 py-2 text-sm font-semibold rounded-full transition-all duration-300 ${isActive ? 'bg-[var(--color-primary-muted)] text-[var(--color-primary)]' : 'hover:bg-[var(--color-bg-muted)] hover:text-[var(--color-primary)]'}`}
-                    style={{
-                      color: isActive
-                        ? "var(--color-primary)"
-                        : "var(--color-text-secondary)",
-                    }}
+                    className="action action-ghost min-h-11 rounded-full px-4"
                     aria-current={isActive ? "page" : undefined}
                   >
                     {link.label}
@@ -88,13 +90,13 @@ export function SiteHeader() {
           </ul>
         </nav>
 
-        {/* ── Mobile Menu Button ── */}
         <button
+          ref={menuButtonRef}
           type="button"
-          className="sm:hidden p-2 -mr-2 rounded-md transition-colors duration-150"
-          style={{ color: "var(--color-text-secondary)" }}
+          className="site-menu-trigger action action-ghost -mr-2 min-h-11 min-w-11 p-2"
           onClick={toggleMenu}
           aria-expanded={isMenuOpen}
+          aria-haspopup="true"
           aria-controls="mobile-menu"
           aria-label={isMenuOpen ? "メニューを閉じる" : "メニューを開く"}
         >
@@ -106,32 +108,21 @@ export function SiteHeader() {
         </button>
       </div>
 
-      {/* ── Mobile Menu ── */}
       {isMenuOpen && (
         <nav
           id="mobile-menu"
-          className="sm:hidden"
-          style={{
-            background: "rgba(255, 255, 255, 0.98)",
-            backdropFilter: "blur(12px)",
-            borderBottom: "1px solid var(--color-border)",
-          }}
+          className="mobile-menu sm:hidden"
           aria-label="モバイルナビゲーション"
         >
-          <ul className="flex flex-col py-2 px-6">
-            {NAV_LINKS.map((link) => {
+          <ul className="flex flex-col p-2">
+            {NAV_LINKS.map((link, index) => {
               const isActive = pathname === link.href;
               return (
                 <li key={link.href}>
                   <Link
+                    ref={index === 0 ? firstMenuLinkRef : undefined}
                     href={link.href}
-                    className="block py-3 text-sm font-medium transition-colors duration-150"
-                    style={{
-                      color: isActive
-                        ? "var(--color-text)"
-                        : "var(--color-text-secondary)",
-                      borderBottom: "1px solid var(--color-border-subtle)",
-                    }}
+                    className="action action-ghost w-full justify-start px-3"
                     aria-current={isActive ? "page" : undefined}
                     onClick={closeMenu}
                   >

@@ -1,10 +1,10 @@
-import Link from "next/link";
 import { SITE } from "@/config/site";
+import { ActionLink } from "@/components/ui/Action";
 
 export default function NotFound() {
   return (
     <div className="status-page">
-      <main className="text-center">
+      <main className="status-page-content">
         <h1
           className="text-7xl font-extrabold mb-3 tracking-tight"
           style={{ color: "var(--color-text)" }}
@@ -17,9 +17,9 @@ export default function NotFound() {
         >
           お探しのページは見つかりませんでした。
         </p>
-        <Link href="/" className="status-page-btn">
+        <ActionLink href="/">
           {SITE.name} トップに戻る
-        </Link>
+        </ActionLink>
       </main>
     </div>
   );

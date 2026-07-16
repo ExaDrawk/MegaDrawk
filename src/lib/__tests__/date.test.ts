@@ -1,4 +1,4 @@
-﻿import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "vitest";
 import { formatJaDate } from "@/lib/date";
 
 describe("formatJaDate", () => {
@@ -13,6 +13,8 @@ describe("formatJaDate", () => {
   });
 
   it("throws an error on invalid date string", () => {
-    expect(() => formatJaDate("invalid-date")).toThrow("Invalid date string provided");
+    expect(() => formatJaDate("invalid-date")).toThrow(
+      "Invalid date string provided",
+    );
   });
 });

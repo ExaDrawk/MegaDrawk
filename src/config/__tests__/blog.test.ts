@@ -29,6 +29,16 @@ describe("createBlogPost", () => {
     expect(post.id).toBe("hello-world-2026");
   });
 
+  it("should keep non-latin tags while creating a post", () => {
+    const post = createBlogPost({
+      title: "Tagged",
+      body: "body",
+      tags: ["制作メモ", "展示"],
+    });
+
+    expect(post.tags).toEqual(["制作メモ", "展示"]);
+  });
+
   it("should throw an error if title is empty", () => {
     expect(() =>
       createBlogPost({ title: "   ", body: "body" })

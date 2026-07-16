@@ -3,71 +3,57 @@ import { SITE } from "@/config/site";
 import { getPublishedBlogPosts } from "@/config/blog";
 import { formatJaDate } from "@/lib/date";
 import { ArrowRight } from "lucide-react";
+import { ActionLink } from "@/components/ui/Action";
 
 export default function HomePage() {
   const latestPosts = getPublishedBlogPosts().slice(0, 3);
 
   return (
     <div className="animate-enter-up">
-      {/* ── Hero ── */}
-      <section className="pt-8 pb-16 sm:pt-16 sm:pb-24">
+      <section className="page-section">
         <h1
-          className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-tight"
+          className="text-4xl font-bold leading-[1.06] tracking-[-0.045em] text-balance sm:text-5xl md:text-6xl"
           style={{ color: "var(--color-text)" }}
         >
           {SITE.name}
         </h1>
+        {SITE.tagline ? (
+          <p
+            className="mt-4 text-lg sm:text-xl font-medium"
+            style={{ color: "var(--color-primary)" }}
+          >
+            {SITE.tagline}
+          </p>
+        ) : null}
         <p
-          className="mt-4 text-lg sm:text-xl font-medium"
-          style={{ color: "var(--color-primary)" }}
-        >
-          {SITE.tagline}
-        </p>
-        <p
-          className="mt-6 text-base leading-relaxed"
+          className="page-description mt-6"
           style={{
-            color: "var(--color-text-secondary)",
             maxWidth: "var(--content-width)",
           }}
         >
-          手のひらサイズのミニチュア世界を制作している大学生です。
-          最近はUnityへの初挑戦や、AIツールを使った実験にも取り組んでいます。
+          {SITE.heroCopy}
         </p>
-        <div className="mt-8 flex items-center gap-4">
-          <Link
+        <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+          <ActionLink
             href="/blog"
-            className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white rounded-lg transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5"
-            style={{
-              background:
-                "linear-gradient(135deg, var(--color-primary), var(--color-accent-hover))",
-            }}
           >
             ブログを読む
             <ArrowRight size={16} aria-hidden="true" />
-          </Link>
-          <Link
-            href="/about"
-            className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium rounded-lg transition-all duration-300 hover:bg-[var(--color-bg-secondary)]"
-            style={{
-              color: "var(--color-text)",
-              border: "1px solid var(--color-border)",
-            }}
-          >
+          </ActionLink>
+          <ActionLink href="/about" variant="secondary">
             プロフィール
-          </Link>
+          </ActionLink>
         </div>
       </section>
 
-      {/* ── Latest Blog ── */}
-      <section className="pb-8">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="section-heading text-2xl font-bold" style={{ marginBottom: 0 }}>
+      <section className="pb-8 sm:pb-12">
+        <div className="mb-6 flex items-center justify-between gap-4 sm:mb-8">
+          <h2 className="section-title">
             Latest Blog
           </h2>
           <Link
             href="/blog"
-            className="text-sm font-medium transition-colors duration-150 hover:text-[var(--color-primary)]"
-            style={{ color: "var(--color-text-secondary)" }}
+            className="text-link shrink-0"
           >
             すべて見る →
           </Link>
@@ -77,22 +63,21 @@ export default function HomePage() {
             {latestPosts.map((post) => (
               <article
                 key={post.id}
-                className="p-5 transition-all duration-300 rounded-xl hover:shadow-md group"
-                style={{
-                  border: "1px solid var(--color-border)",
-                  backgroundColor: "var(--color-bg-secondary)"
-                }}
+                className="surface surface-interactive group"
               >
-                <Link href={`/blog#${post.id}`} className="block">
+                <Link
+                  href={`/blog#${post.id}`}
+                  className="block rounded-[inherit] p-5 sm:p-6"
+                >
                   <time
                     dateTime={post.date}
-                    className="text-xs font-medium"
-                    style={{ color: "var(--color-primary-muted)" }}
+                    className="text-xs font-semibold"
+                    style={{ color: "var(--color-text-muted)" }}
                   >
                     {formatJaDate(post.date)}
                   </time>
                   <h3
-                    className="mt-2 text-lg font-semibold group-hover:text-[var(--color-primary)] transition-colors duration-200"
+                    className="mt-2 text-lg font-semibold transition-colors duration-150 group-hover:text-[var(--color-primary)]"
                     style={{ color: "var(--color-text)" }}
                   >
                     {post.title}
@@ -108,7 +93,7 @@ export default function HomePage() {
             ))}
           </div>
         ) : (
-          <div className="card p-8 border-dashed border-2 rounded-xl flex flex-col items-center justify-center transition-all duration-300 hover:bg-[var(--color-bg-secondary)]" style={{ borderColor: 'var(--color-border-subtle)' }}>
+          <div className="surface-muted flex min-h-32 items-center justify-center p-6 sm:p-8">
             <p className="text-center font-medium" style={{ color: "var(--color-text-secondary)" }}>
               まだ記事がありません。新しい記事の公開をお待ちください。
             </p>

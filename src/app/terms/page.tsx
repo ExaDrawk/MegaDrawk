@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SITE } from "@/config/site";
+import { XProfileLink } from "@/components/ui/XProfileLink";
 
 export const metadata: Metadata = {
   title: "利用規約",
@@ -12,25 +13,20 @@ export default function TermsPage() {
 
   return (
     <div className="animate-enter-up">
-      <article
-        className="pt-8 pb-16 sm:pt-16 sm:pb-24"
-        style={{ maxWidth: "var(--content-width)" }}
-      >
+      <article className="page-section content-column">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-sm mb-8 transition-colors duration-150"
-          style={{ color: "var(--color-text-secondary)" }}
+          className="text-link mb-7"
         >
           ← トップに戻る
         </Link>
 
         <h1
-          className="text-3xl sm:text-4xl font-bold tracking-tight mb-2"
-          style={{ color: "var(--color-text)" }}
+          className="page-title"
         >
           利用規約
         </h1>
-        <p className="text-sm mb-10" style={{ color: "var(--color-text-muted)" }}>
+        <p className="mb-10 mt-3 text-sm" style={{ color: "var(--color-text-muted)" }}>
           最終更新日: {lastUpdated}
         </p>
 
@@ -70,13 +66,12 @@ export default function TermsPage() {
           <h2>第6条（お問い合わせ）</h2>
           <p>
             本規約に関するお問い合わせは{" "}
-            <a
+            <XProfileLink
               href={SITE.social.x}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              X（{SITE.social.xHandle}）
-            </a>
+              label={`X（${SITE.social.xHandle}）`}
+              className="inline-flex items-center gap-1.5"
+              iconSize={14}
+            />
             {" "}までご連絡ください。
           </p>
         </div>

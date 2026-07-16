@@ -6,7 +6,7 @@ import { CommentSection } from "@/components/blog/CommentSection";
 
 export const metadata: Metadata = {
   title: "Blog",
-  description: `${SITE.name}のブログ。ジオラマ制作、Unity学習、AIツール実験の記録。`,
+  description: `${SITE.name}のブログ。制作記録とメモ。`,
 };
 
 export default function BlogPage() {
@@ -14,29 +14,27 @@ export default function BlogPage() {
 
   return (
     <div className="animate-enter-up">
-      <section className="pt-8 pb-16 sm:pt-16 sm:pb-24">
-        <h1 className="section-heading">Blog</h1>
-        <p className="section-description">
-          まずは短いメモから書けるようにしています。
-        </p>
+      <section className="page-section">
+        <header className="page-header">
+          <h1 className="page-title">Blog</h1>
+          <p className="page-description">
+            まずは短いメモから書けるようにしています。
+          </p>
+        </header>
 
-        <div className="mt-10" style={{ maxWidth: "var(--content-width)" }}>
+        <div style={{ maxWidth: "var(--content-width)" }}>
           {posts.length > 0 ? (
             <div className="flex flex-col gap-6">
               {posts.map((post) => (
                 <article
                   key={post.id}
-                  className="p-6 transition-all duration-300 rounded-xl"
-                  style={{
-                    border: "1px solid var(--color-border)",
-                    backgroundColor: "var(--color-bg-subtle)",
-                    boxShadow: "var(--shadow-sm)"
-                  }}
+                  id={post.id}
+                  className="surface scroll-mt-28 p-5 sm:p-6"
                 >
                   <time
                     dateTime={post.date}
                     className="text-xs font-semibold tracking-wide"
-                    style={{ color: "var(--color-primary-muted)" }}
+                    style={{ color: "var(--color-text-muted)" }}
                   >
                     {formatJaDate(post.date)}
                   </time>
@@ -62,19 +60,19 @@ export default function BlogPage() {
                   </p>
                   <div className="mt-4 flex flex-wrap gap-2">
                     {post.tags.map((tag) => (
-                      <span key={tag} className="tag bg-[var(--color-primary-muted)] text-[var(--color-primary)] font-medium">
+                      <span key={tag} className="tag">
                         {tag}
                       </span>
                     ))}
                   </div>
-                  <div className="mt-6 pt-4" style={{ borderTop: "1px dashed var(--color-border-subtle)" }}>
+                  <div className="mt-6 border-t border-[var(--color-border-subtle)] pt-5">
                     <CommentSection postId={post.id} />
                   </div>
                 </article>
               ))}
             </div>
           ) : (
-            <div className="card p-8 border-dashed border-2 rounded-xl flex flex-col items-center text-center">
+            <div className="surface-muted flex min-h-40 flex-col items-center justify-center p-6 text-center sm:p-8">
               <p className="font-semibold text-lg" style={{ color: "var(--color-text-secondary)" }}>
                 まだ公開中のブログ記事はありません。
               </p>

@@ -4,7 +4,7 @@
 
 ## 1. セットアップと起動
 
-本プロジェクトは Next.js 16 (App Router) + React 19 を採用しています。
+本プロジェクトは Next.js 16 (App Router) + React 19 + Tailwind CSS v4 を採用しています。
 
 ```bash
 # 依存関係のインストール
@@ -13,11 +13,18 @@ npm install
 # 開発サーバーの起動
 npm run dev
 
-# テストの実行
+# 単体テストの実行
 npm run test
+
+# E2Eテストの実行（初回はブラウザ導入が必要）
+npm run e2e:install
+npm run e2e
 
 # 本番ビルド
 npm run build
+
+# セキュリティ監査
+npm audit
 ```
 
 ## 2. アーキテクチャと設計意図
@@ -27,16 +34,19 @@ npm run build
 *   **UI層** (`src/app/`, `src/components/`)
     *   表示とユーザーインタラクションの責務を担います。
     *   ビジネスロジックは持たず、プレーンなコンポーネントとして実装されます。
-*   **ドメイン・設定層** (`src/config/`, `src/lib/`)
-    *   ブログの状態、定数定義、ユースケースなどのビジネスルールを持ちます。
+*   **ドメイン・設定層** (`src/domain/`, `src/config/`, `src/lib/`)
+    *   ブログの状態、コメント入力値の検証ルール、定数定義、ユースケースなどのビジネスルールを持ちます。
+    *   `src/domain/comment/types.ts` はコメントの文字数制限・空値検証をドメイン知識として一元管理します。
     *   （例: `createBlogPost` は最低限の入力で有効な投稿データを作るドメインルールの表現です）
-*   **インフラ層** (今回はLocalStorageやファイルシステムが代替)
-    *   `CommentSection` で利用している状態永続化 (`localStorage`) はインフラ層の簡易的な代替です。本格的なバックエンドへ移行する際はこれを分離します。
+*   **インフラ層** (`src/infra/`)
+    *   `CommentSection` で利用している状態永続化 (`localStorage`) はインフラ層の簡易的な代替です。本格的なバックエンドへ移行する際はこれを差し替えます。
 
 ### セキュリティと品質ゲート
 
 *   **Fail Fast:** 問題は発生源で即座に検知し、ビルドやLintの段階で不正なコードを弾きます (ESLint 9 + Flat Config 適用済み)。
 *   **ゼロトラスト:** セキュリティヘッダー (`middleware.ts`) により、XSS / Clickjacking 等を防ぐ堅牢なCSPを設定しています。
+*   **依存ライブラリの安全性:** `npm audit` で本番・開発依存ともに 0 vulnerabilities を維持します。
+*   **入力値検証の二重化:** コメント入力値は UI の `maxLength` 属性とドメイン層の `validateCommentInput` で二重に検証します（単一の情報源 `COMMENT_LIMITS` を共有）。
 
 ## 3. よくある変更手順
 
@@ -46,6 +56,8 @@ npm run build
     `src/app/globals.css` のCSS変数、および `src/config/theme.ts` を修正することでサイト全体の色合いを統制できます。
 *   **サイト名・運営者名の変更:**
     `src/config/site.ts` のみを更新します。公開名 (`name`) と運営者名 (`ownerName`) は別の知識として扱います。
+*   **コメント文字数制限の変更:**
+    `src/domain/comment/types.ts` の `COMMENT_LIMITS` のみを変更します。UI の `maxLength` 属性と検証ロジックは自動的に追従します。
 
 ## 4. 運用注意事項
 

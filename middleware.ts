@@ -40,6 +40,9 @@ function buildCsp(nonce: string): string {
   const directives: Record<string, string> = {
     "default-src": "'self'",
     "script-src": `'self' 'nonce-${nonce}' ${ADSENSE_SCRIPT_ORIGINS.join(" ")}`,
+    // TODO: 根本原因 [issue#csp-style-inline]
+    // Tailwind CSS v4 と既存スタイル運用の都合で暫定的に unsafe-inline を許可中。
+    // 将来的に nonce/hash ベースへ移行して unsafe-inline を除去する。
     "style-src": "'self' 'unsafe-inline'",
     "img-src": `'self' data: ${ADSENSE_IMG_ORIGINS.join(" ")}`,
     "font-src": "'self' data: https://fonts.gstatic.com",

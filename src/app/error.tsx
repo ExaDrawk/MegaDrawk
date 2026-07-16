@@ -1,5 +1,7 @@
 "use client";
 
+import { ActionButton } from "@/components/ui/Action";
+
 export default function GlobalError({
   reset,
 }: {
@@ -8,7 +10,7 @@ export default function GlobalError({
 }) {
   return (
     <div className="status-page">
-      <main className="text-center">
+      <main className="status-page-content">
         <h1
           className="text-2xl font-bold mb-4"
           style={{ color: "var(--color-text)" }}
@@ -21,9 +23,9 @@ export default function GlobalError({
         >
           予期しないエラーが発生しました。再度お試しください。
         </p>
-        <button type="button" onClick={reset} className="status-page-btn">
+        <ActionButton onClick={reset}>
           再試行
-        </button>
+        </ActionButton>
       </main>
     </div>
   );

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { SITE } from "@/config/site";
-import { ExternalLink } from "lucide-react";
+import { XProfileLink } from "@/components/ui/XProfileLink";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -10,8 +10,10 @@ export const metadata: Metadata = {
 export default function ContactPage() {
   return (
     <div className="animate-enter-up">
-      <section className="pt-8 pb-16 sm:pt-16 sm:pb-24">
-        <h1 className="section-heading">Contact</h1>
+      <section className="page-section">
+        <header className="page-header">
+          <h1 className="page-title">Contact</h1>
+        </header>
         <div style={{ maxWidth: "var(--content-width)" }}>
           <p
             className="text-base leading-relaxed"
@@ -21,24 +23,18 @@ export default function ContactPage() {
           </p>
 
           <div className="mt-8">
-            <a
+            <XProfileLink
               href={SITE.social.x}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2.5 px-6 py-3 text-sm font-semibold text-white rounded-md transition-colors duration-150"
-              style={{ background: "var(--color-accent)" }}
-            >
-              X（{SITE.social.xHandle}）
-              <ExternalLink size={15} aria-hidden="true" />
-            </a>
+              label={SITE.social.xHandle}
+              ariaLabel={`X（${SITE.social.xHandle}）`}
+              className="action action-primary"
+              iconSize={15}
+              showExternalIcon
+            />
           </div>
 
           <div
-            className="mt-10 p-5 rounded-lg"
-            style={{
-              background: "var(--color-bg-subtle)",
-              border: "1px solid var(--color-border-subtle)",
-            }}
+            className="notice mt-10 p-5 sm:p-6"
           >
             <p
               className="text-sm leading-relaxed"

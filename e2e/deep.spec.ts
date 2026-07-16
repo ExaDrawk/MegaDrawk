@@ -2,24 +2,20 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Deep interactive tests', () => {
   test('Mobile menu toggles correctly', async ({ page }) => {
-    // Navigate and set viewport to mobile size
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
 
-    // Check if mobile menu button is visible
-    const menuButton = page.getByRole('button', { name: /メニューを開く|Menu/i });
-    if (await menuButton.isVisible()) {
-      await menuButton.click();
-      
-      // Assume navigation menu becomes visible
-      const mobileNav = page.getByRole('navigation', { name: /モバイルナビゲーション/i });
-      await expect(mobileNav).toBeVisible();
+    const menuButton = page.getByRole('button', { name: /メニューを開く|メニューを閉じる/i });
+    await expect(menuButton).toBeVisible();
+    await menuButton.click();
 
-      // Click close or overlay
-      const closeButton = page.getByRole('button', { name: /メニューを閉じる|Menu/i });
-      await closeButton.click();
-      await expect(mobileNav).toBeHidden();
-    }
+    const mobileNav = page.getByRole('navigation', { name: 'モバイルナビゲーション' });
+    await expect(mobileNav).toBeVisible();
+    await expect(mobileNav.getByRole('link', { name: 'About' })).toBeFocused();
+
+    await page.keyboard.press('Escape');
+    await expect(mobileNav).toBeHidden();
+    await expect(menuButton).toBeFocused();
   });
 
   test('X/Twitter link on contact page opens correctly or has valid href', async ({ page }) => {
@@ -27,36 +23,50 @@ test.describe('Deep interactive tests', () => {
     const xLink = page.getByRole('link', { name: /X（/i });
     await expect(xLink).toHaveAttribute('href', /x\.com/);
     await expect(xLink).toHaveAttribute('target', '_blank');
+    await expect(xLink).toHaveAttribute('rel', 'noopener noreferrer');
   });
 
-  test('Can submit a blog comment or validation blocks empty submit', async ({ page }) => {
+  test('Comment form validates empty name and message on blog page', async ({ page }) => {
     await page.goto('/blog');
-    
-    // Check if there's an article to click
-    const firstArticleLink = page.locator('article a').first();
-    if (await firstArticleLink.isVisible()) {
-      await firstArticleLink.click();
-      await page.waitForLoadState('networkidle');
-      
-      // Look for comment form
-      const nameInput = page.getByPlaceholder('名前');
-      const messageInput = page.getByPlaceholder('コメントを書く');
-      const submitButton = page.getByRole('button', { name: '送信' });
 
-      if (await nameInput.isVisible()) {
-        // Try submitting empty
-        await submitButton.click();
-        
-        // Wait and check if there's an error message or form validation
-        const errorMessage = page.locator('text=名前とメッセージを入力してください').first();
-        // Since we don't know the exact error, let's just make sure we can type
-        await nameInput.fill('Test User');
-        await messageInput.fill('This is a test comment from Playwright.');
-        await submitButton.click();
-        
-        // Ensure comment appears
-        await expect(page.getByText('This is a test comment from Playwright.')).toBeVisible();
-      }
+    // The blog page always renders a comment form per article.
+    // With no articles the page shows an empty state, so we only test
+    // when the comment form is present.
+    const nameInput = page.getByPlaceholder('名前');
+    const messageInput = page.getByPlaceholder('コメントを書く');
+    const submitButton = page.getByRole('button', { name: '送信' });
+
+    if (await nameInput.isVisible()) {
+      // Submit empty → should show name validation error
+      await submitButton.click();
+      await expect(page.getByText('名前を入力してください。')).toBeVisible();
+
+      // Fill name but leave message empty → should show message validation error
+      await nameInput.fill('Test User');
+      await submitButton.click();
+      await expect(page.getByText('コメント本文を入力してください。')).toBeVisible();
+
+      // Fill both → comment should appear
+      await messageInput.fill('This is a test comment from Playwright.');
+      await submitButton.click();
+      await expect(page.getByText('This is a test comment from Playwright.')).toBeVisible();
     }
+  });
+
+  test('Security headers are present', async ({ page }) => {
+    const response = await page.goto('/');
+    const headers = response?.headers() ?? {};
+
+    expect(headers['content-security-policy']).toBeTruthy();
+    expect(headers['x-content-type-options']).toBe('nosniff');
+    expect(headers['x-frame-options']).toBe('DENY');
+    expect(headers['referrer-policy']).toBe('strict-origin-when-cross-origin');
+    expect(headers['strict-transport-security']).toContain('max-age=');
+  });
+
+  test('Admin pages are not indexed by search engines', async ({ page }) => {
+    await page.goto('/admin');
+    const metaRobots = page.locator('meta[name="robots"]');
+    await expect(metaRobots).toHaveAttribute('content', /noindex/i);
   });
 });
