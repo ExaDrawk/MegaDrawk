@@ -5,15 +5,13 @@ function storageKey(postId: string): string {
   return `blog-comments:${postId}`;
 }
 
-function assertBrowserEnvironment(): void {
-  if (typeof window === "undefined") {
-    throw new Error("Comment storage is only available in the browser.");
-  }
-}
-
 export const commentStorageRepository: CommentRepository = {
   getComments: (postId: string): CommentItem[] => {
-    assertBrowserEnvironment();
+    // SSR / Cloudflare Worker 環境では安全に空配列を返す。
+    // localStorage の読み込みは useComments フックの useEffect 内（クライアントのみ）で行う。
+    if (typeof window === "undefined") {
+      return [];
+    }
 
     const raw = window.localStorage.getItem(storageKey(postId));
     if (!raw) {
@@ -29,7 +27,9 @@ export const commentStorageRepository: CommentRepository = {
   },
 
   saveComments: (postId: string, comments: CommentItem[]): void => {
-    assertBrowserEnvironment();
+    if (typeof window === "undefined") {
+      return;
+    }
 
     window.localStorage.setItem(storageKey(postId), JSON.stringify(comments));
   },
