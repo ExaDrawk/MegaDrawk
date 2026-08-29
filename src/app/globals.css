@@ -72,8 +72,7 @@ body {
     radial-gradient(circle at 12% -8%, rgb(36 80 197 / 0.08), transparent 28rem),
     var(--color-canvas);
   color: var(--color-text);
-  font-family: var(--font-sans), var(--font-jp), system-ui, -apple-system,
-    sans-serif;
+  font-family: system-ui, -apple-system, "Segoe UI", "Noto Sans JP", sans-serif;
   font-size: 1rem;
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;

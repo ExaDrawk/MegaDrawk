@@ -1,9 +1,7 @@
-import type { Metadata } from "next";
-import Link from "next/link";
 import { SITE } from "@/config/site";
 import { XProfileLink } from "@/components/ui/XProfileLink";
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "利用規約",
   description: `${SITE.name}の利用規約。`,
 };
@@ -14,12 +12,12 @@ export default function TermsPage() {
   return (
     <div className="animate-enter-up">
       <article className="page-section content-column">
-        <Link
+        <a
           href="/"
           className="text-link mb-7"
         >
           ← トップに戻る
-        </Link>
+        </a>
 
         <h1
           className="page-title"

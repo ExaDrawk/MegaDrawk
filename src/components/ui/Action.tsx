@@ -1,7 +1,6 @@
-import Link from "next/link";
 import type {
+  AnchorHTMLAttributes,
   ButtonHTMLAttributes,
-  ComponentPropsWithoutRef,
   ReactNode,
 } from "react";
 
@@ -14,8 +13,7 @@ function actionClassName(
   return ["action", `action-${variant}`, className].filter(Boolean).join(" ");
 }
 
-interface ActionLinkProps
-  extends Omit<ComponentPropsWithoutRef<typeof Link>, "className"> {
+interface ActionLinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
   readonly children: ReactNode;
   readonly className?: string;
   readonly variant?: ActionVariant;
@@ -28,9 +26,9 @@ export function ActionLink({
   ...props
 }: ActionLinkProps) {
   return (
-    <Link className={actionClassName(variant, className)} {...props}>
+    <a className={actionClassName(variant, className)} {...props}>
       {children}
-    </Link>
+    </a>
   );
 }
 

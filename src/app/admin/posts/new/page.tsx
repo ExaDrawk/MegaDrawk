@@ -1,7 +1,6 @@
-import type { Metadata } from "next";
 import { BlogPostEditor } from "@/components/admin/BlogPostEditor";
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "Admin Post Draft",
   description:
     "MEGADRAWK の管理用記事追加画面。記事草案を検証し、createBlogPost 用コードを生成します。",

@@ -1,7 +1,6 @@
-import type { Metadata } from "next";
 import { SITE } from "@/config/site";
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "About",
   description: `${SITE.ownerName}について。プロフィールと活動記録。`,
 };

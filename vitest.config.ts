@@ -5,7 +5,7 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     include: ["src/**/*.test.{ts,tsx}", "tests/**/*.test.{ts,tsx}"],
-    exclude: ["node_modules", ".next", ".open-next"],
+    exclude: ["node_modules", "dist", ".astro"],
     globals: true,
     fileParallelism: false,
   },

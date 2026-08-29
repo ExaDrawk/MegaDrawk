@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import {
   useCallback,
   useDeferredValue,
@@ -168,12 +167,12 @@ export function BlogPostEditor() {
             >
               Admin
             </p>
-            <Link
+            <a
               href="/admin"
               className="text-link min-h-0 text-xs"
             >
               管理メニューへ戻る
-            </Link>
+            </a>
           </div>
           <h2 className="section-title">
             記事草案を入力

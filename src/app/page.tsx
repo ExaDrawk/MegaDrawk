@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { SITE } from "@/config/site";
 import { getPublishedBlogPosts } from "@/config/blog";
 import { formatJaDate } from "@/lib/date";
@@ -51,12 +50,12 @@ export default function HomePage() {
           <h2 className="section-title">
             Latest Blog
           </h2>
-          <Link
+          <a
             href="/blog"
             className="text-link shrink-0"
           >
             すべて見る →
-          </Link>
+          </a>
         </div>
         {latestPosts.length > 0 ? (
           <div className="flex flex-col gap-4">
@@ -65,7 +64,7 @@ export default function HomePage() {
                 key={post.id}
                 className="surface surface-interactive group"
               >
-                <Link
+                <a
                   href={`/blog#${post.id}`}
                   className="block rounded-[inherit] p-5 sm:p-6"
                 >
@@ -88,7 +87,7 @@ export default function HomePage() {
                   >
                     {post.excerpt}
                   </p>
-                </Link>
+                </a>
               </article>
             ))}
           </div>

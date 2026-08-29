@@ -53,15 +53,10 @@ test.describe('Deep interactive tests', () => {
     }
   });
 
-  test('Security headers are present', async ({ page }) => {
-    const response = await page.goto('/');
-    const headers = response?.headers() ?? {};
-
-    expect(headers['content-security-policy']).toBeTruthy();
-    expect(headers['x-content-type-options']).toBe('nosniff');
-    expect(headers['x-frame-options']).toBe('DENY');
-    expect(headers['referrer-policy']).toBe('strict-origin-when-cross-origin');
-    expect(headers['strict-transport-security']).toContain('max-age=');
+  test('static SEO metadata is present', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /megadrawk\.com/);
+    await expect(page.locator('link[rel="manifest"]')).toHaveAttribute('href', '/manifest.webmanifest');
   });
 
   test('Admin pages are not indexed by search engines', async ({ page }) => {

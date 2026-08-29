@@ -1,34 +1,25 @@
-import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
-import nextTypeScript from "eslint-config-next/typescript";
+import tsParser from "@typescript-eslint/parser";
+import tsPlugin from "@typescript-eslint/eslint-plugin";
 
 export default [
   {
-    ignores: [
-      ".next/**",
-      ".open-next/**",
-      ".wrangler/**",
-      "node_modules/**",
-      "coverage/**",
-    ],
+    ignores: ["dist/**", ".astro/**", "node_modules/**", "coverage/**"],
   },
-  ...nextCoreWebVitals,
-  ...nextTypeScript,
   {
+    files: ["**/*.{ts,tsx,mjs}"],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: { ecmaVersion: "latest", sourceType: "module", ecmaFeatures: { jsx: true } },
+    },
+    plugins: { "@typescript-eslint": tsPlugin },
     rules: {
-      "no-console": "warn",
       "no-debugger": "error",
       "no-alert": "error",
       "prefer-const": "error",
       "no-var": "error",
       eqeqeq: ["error", "always"],
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
-      ],
-      "@typescript-eslint/consistent-type-imports": [
-        "error",
-        { prefer: "type-imports" },
-      ],
+      "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
+      "@typescript-eslint/consistent-type-imports": ["error", { prefer: "type-imports" }],
     },
   },
 ];

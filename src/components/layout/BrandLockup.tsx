@@ -1,4 +1,3 @@
-import Image from "next/image";
 import type { CSSProperties } from "react";
 import { SITE } from "@/config/site";
 
@@ -16,13 +15,11 @@ const BRAND_LOCKUP_PRESETS = {
 } as const;
 
 interface BrandLockupProps {
-  readonly priority?: boolean;
   readonly preset: keyof typeof BRAND_LOCKUP_PRESETS;
 }
 
 export function BrandLockup({
   preset,
-  priority = false,
 }: BrandLockupProps) {
   const config = BRAND_LOCKUP_PRESETS[preset];
   const iconStyle: CSSProperties = {
@@ -36,7 +33,7 @@ export function BrandLockup({
 
   return (
     <>
-      <Image
+      <img
         src="/icon.svg"
         alt=""
         width={42}
@@ -44,15 +41,15 @@ export function BrandLockup({
         className="object-contain shrink-0"
         style={iconStyle}
         aria-hidden="true"
+        loading="eager"
       />
-      <Image
+      <img
         src="/logo.svg"
         alt={SITE.name}
         width={241}
         height={77}
         className="object-contain shrink-0"
         style={logoStyle}
-        priority={priority}
       />
     </>
   );

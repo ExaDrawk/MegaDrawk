@@ -1,8 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { SITE, NAV_LINKS } from "@/config/site";
 import { Menu, X } from "lucide-react";
 import {
@@ -10,9 +8,8 @@ import {
   getBrandLockupContainerClassName,
 } from "@/components/layout/BrandLockup";
 
-export function SiteHeader() {
+export function SiteHeader({ pathname }: { pathname: string }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const pathname = usePathname();
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const firstMenuLinkRef = useRef<HTMLAnchorElement>(null);
 
@@ -62,14 +59,14 @@ export function SiteHeader() {
           paddingInline: "var(--space-page-x)",
         }}
       >
-        <Link
+        <a
           href="/"
           className={`${getBrandLockupContainerClassName("header")} min-h-11 rounded-lg transition-opacity duration-150 hover:opacity-80`}
           aria-label={`${SITE.name} トップページ`}
           onClick={closeMenu}
         >
-          <BrandLockup preset="header" priority />
-        </Link>
+          <BrandLockup preset="header" />
+        </a>
 
         <nav className="hidden sm:block" aria-label="メインナビゲーション">
           <ul className="flex items-center gap-1">
@@ -77,13 +74,13 @@ export function SiteHeader() {
               const isActive = pathname === link.href;
               return (
                 <li key={link.href}>
-                  <Link
+                  <a
                     href={link.href}
                     className="action action-ghost min-h-11 rounded-full px-4"
                     aria-current={isActive ? "page" : undefined}
                   >
                     {link.label}
-                  </Link>
+                  </a>
                 </li>
               );
             })}
@@ -119,7 +116,7 @@ export function SiteHeader() {
               const isActive = pathname === link.href;
               return (
                 <li key={link.href}>
-                  <Link
+                  <a
                     ref={index === 0 ? firstMenuLinkRef : undefined}
                     href={link.href}
                     className="action action-ghost w-full justify-start px-3"
@@ -127,7 +124,7 @@ export function SiteHeader() {
                     onClick={closeMenu}
                   >
                     {link.label}
-                  </Link>
+                  </a>
                 </li>
               );
             })}

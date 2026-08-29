@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { SITE, FOOTER_LINKS } from "@/config/site";
 import {
   BrandLockup,
@@ -26,13 +25,13 @@ export function SiteFooter() {
       >
         <div className="grid grid-cols-1 gap-9 sm:grid-cols-3 sm:gap-8">
           <div className="flex flex-col items-start">
-            <Link
+            <a
               href="/"
               className={`${getBrandLockupContainerClassName("footer")} min-h-11 rounded-lg transition-opacity duration-150 hover:opacity-80`}
               aria-label={SITE.name}
             >
               <BrandLockup preset="footer" />
-            </Link>
+            </a>
             {SITE.tagline ? (
               <p className="mt-4 text-sm" style={{ color: "var(--color-text-muted)" }}>
                 {SITE.tagline}
@@ -59,12 +58,12 @@ export function SiteFooter() {
               <ul className="flex flex-col">
                 {group.links.map((link) => (
                   <li key={link.href}>
-                    <Link
+                    <a
                       href={link.href}
                       className="text-link"
                     >
                       {link.label}
-                    </Link>
+                    </a>
                   </li>
                 ))}
               </ul>

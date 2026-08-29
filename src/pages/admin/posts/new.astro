@@ -1,0 +1,8 @@
+---
+import SiteLayout from "@/layouts/SiteLayout.astro";
+import AdminPostPage from "@/app/admin/posts/new/page";
+---
+
+<SiteLayout title="Admin Post Draft" noindex>
+  <AdminPostPage client:load />
+</SiteLayout>

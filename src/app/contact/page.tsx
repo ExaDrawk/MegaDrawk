@@ -1,8 +1,7 @@
-import type { Metadata } from "next";
 import { SITE } from "@/config/site";
 import { XProfileLink } from "@/components/ui/XProfileLink";
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "Contact",
   description: `${SITE.name}への連絡先。X（Twitter）からお気軽にお声がけください。`,
 };

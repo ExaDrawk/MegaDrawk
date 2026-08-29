@@ -1,0 +1,50 @@
+---
+import "@/app/globals.css";
+import { SITE } from "@/config/site";
+import { SiteHeader } from "@/components/layout/SiteHeader";
+import { SiteFooter } from "@/components/layout/SiteFooter";
+import { SkipNav } from "@/components/ui/SkipNav";
+
+interface Props {
+  title?: string;
+  description?: string;
+  noindex?: boolean;
+}
+
+const { title, description = SITE.description, noindex = false } = Astro.props;
+const pageTitle = title ? `${title} | ${SITE.name}` : SITE.name;
+const canonical = new URL(Astro.url.pathname, SITE.url).toString();
+const adsenseClient = import.meta.env.PUBLIC_ADSENSE_CLIENT?.trim();
+---
+
+<!doctype html>
+<html lang={SITE.language}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="theme-color" content={SITE.themeColor} />
+    <meta name="description" content={description} />
+    <meta name="robots" content={noindex ? "noindex,nofollow" : "index,follow"} />
+    <link rel="canonical" href={canonical} />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <title>{pageTitle}</title>
+    {adsenseClient ? (
+      <script
+        async
+        src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
+        crossorigin="anonymous"
+      />
+    ) : null}
+  </head>
+  <body>
+    <SkipNav />
+    <div class="page-container">
+      <SiteHeader client:load pathname={Astro.url.pathname} />
+      <main id="main-content" class="page-main">
+        <slot />
+      </main>
+      <SiteFooter />
+    </div>
+  </body>
+</html>

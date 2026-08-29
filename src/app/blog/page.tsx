@@ -1,10 +1,9 @@
-import type { Metadata } from "next";
 import { SITE } from "@/config/site";
 import { getPublishedBlogPosts } from "@/config/blog";
 import { formatJaDate } from "@/lib/date";
 import { CommentSection } from "@/components/blog/CommentSection";
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "Blog",
   description: `${SITE.name}のブログ。制作記録とメモ。`,
 };

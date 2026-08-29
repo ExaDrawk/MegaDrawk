@@ -1,7 +1,6 @@
-import type { Metadata } from "next";
 import { ActionLink } from "@/components/ui/Action";
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "Admin",
   description: "MEGADRAWK の管理導線一覧です。",
   robots: {
