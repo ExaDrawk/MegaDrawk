@@ -4,6 +4,7 @@ test.describe('Deep interactive tests', () => {
   test('Mobile menu toggles correctly', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
+    await expect(page.locator('astro-island').first()).not.toHaveAttribute('ssr', '');
 
     const menuButton = page.getByRole('button', { name: /メニューを開く|メニューを閉じる/i });
     await expect(menuButton).toBeVisible();
