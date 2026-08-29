@@ -12,18 +12,11 @@ export default function TermsPage() {
   return (
     <div className="animate-enter-up">
       <article className="page-section content-column">
-        <a
-          href="/"
-          className="text-link mb-7"
-        >
+        <a href="/" className="text-link mb-7">
           ← トップに戻る
         </a>
 
-        <h1
-          className="page-title"
-        >
-          利用規約
-        </h1>
+        <h1 className="page-title">利用規約</h1>
         <p className="mb-10 mt-3 text-sm" style={{ color: "var(--color-text-muted)" }}>
           最終更新日: {lastUpdated}
         </p>
@@ -69,8 +62,8 @@ export default function TermsPage() {
               label={`X（${SITE.social.xHandle}）`}
               className="inline-flex items-center gap-1.5"
               iconSize={14}
-            />
-            {" "}までご連絡ください。
+            />{" "}
+            までご連絡ください。
           </p>
         </div>
       </article>

@@ -3,10 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { SITE, NAV_LINKS } from "@/config/site";
 import { Menu, X } from "lucide-react";
-import {
-  BrandLockup,
-  getBrandLockupContainerClassName,
-} from "@/components/layout/BrandLockup";
+import { BrandLockup, getBrandLockupContainerClassName } from "@/components/layout/BrandLockup";
 
 export function SiteHeader({ pathname }: { pathname: string }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -97,20 +94,12 @@ export function SiteHeader({ pathname }: { pathname: string }) {
           aria-controls="mobile-menu"
           aria-label={isMenuOpen ? "メニューを閉じる" : "メニューを開く"}
         >
-          {isMenuOpen ? (
-            <X size={20} aria-hidden="true" />
-          ) : (
-            <Menu size={20} aria-hidden="true" />
-          )}
+          {isMenuOpen ? <X size={20} aria-hidden="true" /> : <Menu size={20} aria-hidden="true" />}
         </button>
       </div>
 
       {isMenuOpen && (
-        <nav
-          id="mobile-menu"
-          className="mobile-menu sm:hidden"
-          aria-label="モバイルナビゲーション"
-        >
+        <nav id="mobile-menu" className="mobile-menu sm:hidden" aria-label="モバイルナビゲーション">
           <ul className="flex flex-col p-2">
             {NAV_LINKS.map((link, index) => {
               const isActive = pathname === link.href;

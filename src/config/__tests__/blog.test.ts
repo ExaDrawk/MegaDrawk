@@ -1,9 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  createBlogPost,
-  getLatestBlogUpdateDate,
-  getPublishedBlogPosts,
-} from "../blog";
+import { createBlogPost, getLatestBlogUpdateDate, getPublishedBlogPosts } from "../blog";
 
 describe("createBlogPost", () => {
   it("should create a blog post with minimum input", () => {
@@ -40,15 +36,15 @@ describe("createBlogPost", () => {
   });
 
   it("should throw an error if title is empty", () => {
-    expect(() =>
-      createBlogPost({ title: "   ", body: "body" })
-    ).toThrowError("Blog post title is required.");
+    expect(() => createBlogPost({ title: "   ", body: "body" })).toThrowError(
+      "Blog post title is required.",
+    );
   });
 
   it("should throw an error if body is empty", () => {
-    expect(() =>
-      createBlogPost({ title: "title", body: "   " })
-    ).toThrowError("Blog post body is required.");
+    expect(() => createBlogPost({ title: "title", body: "   " })).toThrowError(
+      "Blog post body is required.",
+    );
   });
 });
 

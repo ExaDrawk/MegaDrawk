@@ -5,10 +5,11 @@ import { SITE } from "@/config/site";
 export const prerender = true;
 
 function escapeXml(value: string): string {
-  return value.replace(/[<>&'\"]/g, (character) =>
-    ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "'": "&apos;", '"': "&quot;" })[
-      character
-    ] ?? character,
+  return value.replace(
+    /[<>&'\"]/g,
+    (character) =>
+      ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "'": "&apos;", '"': "&quot;" })[character] ??
+      character,
   );
 }
 
@@ -22,13 +23,17 @@ export const GET: APIRoute = () => {
     [`${SITE.url}/contact`, fallbackDate],
     [`${SITE.url}/privacy`, fallbackDate],
     [`${SITE.url}/terms`, fallbackDate],
-    ...getPublishedBlogPosts().map(
-      (post): [string, string] => [`${SITE.url}/blog#${post.id}`, post.updatedAt],
-    ),
+    ...getPublishedBlogPosts().map((post): [string, string] => [
+      `${SITE.url}/blog#${post.id}`,
+      post.updatedAt,
+    ]),
   ];
 
   const body = routes
-    .map(([url, lastModified]) => `<url><loc>${escapeXml(url)}</loc><lastmod>${lastModified}</lastmod></url>`)
+    .map(
+      ([url, lastModified]) =>
+        `<url><loc>${escapeXml(url)}</loc><lastmod>${lastModified}</lastmod></url>`,
+    )
     .join("");
 
   return new Response(

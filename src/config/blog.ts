@@ -16,9 +16,7 @@ export { createBlogPost } from "@/domain/blog/post";
 export const BLOG_POSTS: readonly BlogPost[] = [] as const;
 
 export function getPublishedBlogPosts(): readonly BlogPost[] {
-  return [...BLOG_POSTS].sort((left, right) =>
-    right.date.localeCompare(left.date)
-  );
+  return [...BLOG_POSTS].sort((left, right) => right.date.localeCompare(left.date));
 }
 
 export function getLatestBlogUpdateDate(): string | null {

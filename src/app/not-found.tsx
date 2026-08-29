@@ -17,9 +17,7 @@ export default function NotFound() {
         >
           お探しのページは見つかりませんでした。
         </p>
-        <ActionLink href="/">
-          {SITE.name} トップに戻る
-        </ActionLink>
+        <ActionLink href="/">{SITE.name} トップに戻る</ActionLink>
       </main>
     </div>
   );

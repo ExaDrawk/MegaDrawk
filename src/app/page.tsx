@@ -33,9 +33,7 @@ export default function HomePage() {
           {SITE.heroCopy}
         </p>
         <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-          <ActionLink
-            href="/blog"
-          >
+          <ActionLink href="/blog">
             ブログを読む
             <ArrowRight size={16} aria-hidden="true" />
           </ActionLink>
@@ -47,27 +45,16 @@ export default function HomePage() {
 
       <section className="pb-8 sm:pb-12">
         <div className="mb-6 flex items-center justify-between gap-4 sm:mb-8">
-          <h2 className="section-title">
-            Latest Blog
-          </h2>
-          <a
-            href="/blog"
-            className="text-link shrink-0"
-          >
+          <h2 className="section-title">Latest Blog</h2>
+          <a href="/blog" className="text-link shrink-0">
             すべて見る →
           </a>
         </div>
         {latestPosts.length > 0 ? (
           <div className="flex flex-col gap-4">
             {latestPosts.map((post) => (
-              <article
-                key={post.id}
-                className="surface surface-interactive group"
-              >
-                <a
-                  href={`/blog#${post.id}`}
-                  className="block rounded-[inherit] p-5 sm:p-6"
-                >
+              <article key={post.id} className="surface surface-interactive group">
+                <a href={`/blog#${post.id}`} className="block rounded-[inherit] p-5 sm:p-6">
                   <time
                     dateTime={post.date}
                     className="text-xs font-semibold"

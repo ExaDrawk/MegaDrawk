@@ -18,6 +18,24 @@ test.describe('Deep interactive tests', () => {
     await expect(menuButton).toBeFocused();
   });
 
+  test('Astro hydration runs without CSP violations', async ({ page }) => {
+    const cspViolations: string[] = [];
+    page.on('console', (message) => {
+      if (message.type() === 'error' && /Content Security Policy|CSP/i.test(message.text())) {
+        cspViolations.push(message.text());
+      }
+    });
+
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto('/');
+    await expect(page.locator('astro-island').first()).not.toHaveAttribute('ssr', '');
+
+    const menuButton = page.getByRole('button', { name: 'メニューを開く' });
+    await menuButton.click();
+    await expect(page.getByRole('navigation', { name: 'モバイルナビゲーション' })).toBeVisible();
+    expect(cspViolations).toEqual([]);
+  });
+
   test('X/Twitter link on contact page opens correctly or has valid href', async ({ page }) => {
     await page.goto('/contact');
     const xLink = page.getByRole('link', { name: /X（/i });

@@ -1,8 +1,4 @@
-import {
-  createBlogPost,
-  type BlogPost,
-  type BlogPostInput,
-} from "@/domain/blog/post";
+import { createBlogPost, type BlogPost, type BlogPostInput } from "@/domain/blog/post";
 
 export interface BlogPostDraftInput {
   readonly title: string;
@@ -41,9 +37,7 @@ function escapeMultilineString(value: string): string {
   return JSON.stringify(value);
 }
 
-export function buildBlogPostDraft(
-  input: BlogPostDraftInput,
-): BlogPostDraftResult {
+export function buildBlogPostDraft(input: BlogPostDraftInput): BlogPostDraftResult {
   const normalizedInput: BlogPostInput = {
     title: input.title.trim(),
     body: input.body.trim(),
@@ -91,9 +85,7 @@ export function getInitialBlogPostDraftInput(): BlogPostDraftInput {
   };
 }
 
-export function isBlogPostDraftInput(
-  candidate: unknown,
-): candidate is BlogPostDraftInput {
+export function isBlogPostDraftInput(candidate: unknown): candidate is BlogPostDraftInput {
   if (!candidate || typeof candidate !== "object") {
     return false;
   }
@@ -109,16 +101,12 @@ export function isBlogPostDraftInput(
   );
 }
 
-export function isStoredBlogPostDraft(
-  candidate: unknown,
-): candidate is StoredBlogPostDraft {
+export function isStoredBlogPostDraft(candidate: unknown): candidate is StoredBlogPostDraft {
   if (!candidate || typeof candidate !== "object") {
     return false;
   }
 
   const value = candidate as Record<string, unknown>;
 
-  return (
-    isBlogPostDraftInput(value.draft) && typeof value.savedAt === "string"
-  );
+  return isBlogPostDraftInput(value.draft) && typeof value.savedAt === "string";
 }

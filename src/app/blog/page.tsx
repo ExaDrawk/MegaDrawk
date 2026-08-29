@@ -16,20 +16,14 @@ export default function BlogPage() {
       <section className="page-section">
         <header className="page-header">
           <h1 className="page-title">Blog</h1>
-          <p className="page-description">
-            まずは短いメモから書けるようにしています。
-          </p>
+          <p className="page-description">まずは短いメモから書けるようにしています。</p>
         </header>
 
         <div style={{ maxWidth: "var(--content-width)" }}>
           {posts.length > 0 ? (
             <div className="flex flex-col gap-6">
               {posts.map((post) => (
-                <article
-                  key={post.id}
-                  id={post.id}
-                  className="surface scroll-mt-28 p-5 sm:p-6"
-                >
+                <article key={post.id} id={post.id} className="surface scroll-mt-28 p-5 sm:p-6">
                   <time
                     dateTime={post.date}
                     className="text-xs font-semibold tracking-wide"
@@ -38,17 +32,11 @@ export default function BlogPage() {
                     {formatJaDate(post.date)}
                   </time>
                   {post.updatedAt !== post.date ? (
-                    <p
-                      className="mt-1 text-xs"
-                      style={{ color: "var(--color-text-muted)" }}
-                    >
+                    <p className="mt-1 text-xs" style={{ color: "var(--color-text-muted)" }}>
                       更新: {formatJaDate(post.updatedAt)}
                     </p>
                   ) : null}
-                  <h2
-                    className="mt-1.5 text-xl font-bold"
-                    style={{ color: "var(--color-text)" }}
-                  >
+                  <h2 className="mt-1.5 text-xl font-bold" style={{ color: "var(--color-text)" }}>
                     {post.title}
                   </h2>
                   <p

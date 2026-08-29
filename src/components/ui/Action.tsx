@@ -1,15 +1,8 @@
-import type {
-  AnchorHTMLAttributes,
-  ButtonHTMLAttributes,
-  ReactNode,
-} from "react";
+import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from "react";
 
 type ActionVariant = "primary" | "secondary" | "ghost" | "dark";
 
-function actionClassName(
-  variant: ActionVariant,
-  className?: string,
-): string {
+function actionClassName(variant: ActionVariant, className?: string): string {
   return ["action", `action-${variant}`, className].filter(Boolean).join(" ");
 }
 
@@ -42,11 +35,5 @@ export function ActionButton({
   variant = "primary",
   ...props
 }: ActionButtonProps) {
-  return (
-    <button
-      className={actionClassName(variant, className)}
-      type={type}
-      {...props}
-    />
-  );
+  return <button className={actionClassName(variant, className)} type={type} {...props} />;
 }

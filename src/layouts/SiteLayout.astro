@@ -29,13 +29,15 @@ const adsenseClient = import.meta.env.PUBLIC_ADSENSE_CLIENT?.trim();
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/icon.svg" type="image/svg+xml" />
     <title>{pageTitle}</title>
-    {adsenseClient ? (
-      <script
-        async
-        src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
-        crossorigin="anonymous"
-      />
-    ) : null}
+    {
+      adsenseClient ? (
+        <script
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
+          crossorigin="anonymous"
+        />
+      ) : null
+    }
   </head>
   <body>
     <SkipNav />

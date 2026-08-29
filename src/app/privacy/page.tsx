@@ -12,18 +12,11 @@ export default function PrivacyPolicyPage() {
   return (
     <div className="animate-enter-up">
       <article className="page-section content-column">
-        <a
-          href="/"
-          className="text-link mb-7"
-        >
+        <a href="/" className="text-link mb-7">
           ← トップに戻る
         </a>
 
-        <h1
-          className="page-title"
-        >
-          プライバシーポリシー
-        </h1>
+        <h1 className="page-title">プライバシーポリシー</h1>
         <p className="mb-10 mt-3 text-sm" style={{ color: "var(--color-text-muted)" }}>
           最終更新日: {lastUpdated}
         </p>
@@ -32,8 +25,7 @@ export default function PrivacyPolicyPage() {
           <h2>はじめに</h2>
           <p>
             当サイト（{SITE.domain}）の運営者（以下「運営者」）は、
-            当サイトをご利用いただくお客様のプライバシーを尊重し、
-            個人情報の保護に努めています。
+            当サイトをご利用いただくお客様のプライバシーを尊重し、 個人情報の保護に努めています。
           </p>
 
           <h2>収集する情報</h2>
@@ -55,21 +47,16 @@ export default function PrivacyPolicyPage() {
 
           <h2>第三者広告配信（Google AdSense）</h2>
           <p>
-            当サイトでは、Google
-            AdSenseを利用して広告を配信しています。Googleは、
+            当サイトでは、Google AdSenseを利用して広告を配信しています。Googleは、
             お客様のウェブサイトへのアクセス情報に基づきCookieを使用して
             パーソナライズされた広告を配信する場合があります。
           </p>
           <p>
             パーソナライズド広告の無効化は{" "}
-            <a
-              href="https://www.google.com/settings/ads"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener noreferrer">
               Googleの広告設定
-            </a>
-            {" "}から行えます。
+            </a>{" "}
+            から行えます。
           </p>
 
           <h2>お問い合わせ</h2>

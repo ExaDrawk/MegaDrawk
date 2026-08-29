@@ -27,17 +27,13 @@ const FIELD_LABELS: Record<keyof BlogPostDraftInput, string> = {
 };
 
 export function BlogPostEditor() {
-  const [draftInput, setDraftInput] = useState<BlogPostDraftInput>(
-    getInitialBlogPostDraftInput(),
-  );
+  const [draftInput, setDraftInput] = useState<BlogPostDraftInput>(getInitialBlogPostDraftInput());
   const [result, setResult] = useState<BlogPostDraftResult | null>(null);
   const [errorText, setErrorText] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [isCopying, setIsCopying] = useState(false);
   const [savedAt, setSavedAt] = useState<string | null>(null);
-  const [storageState, setStorageState] = useState<"loading" | "ready">(
-    "loading",
-  );
+  const [storageState, setStorageState] = useState<"loading" | "ready">("loading");
   const [isPending, startTransition] = useTransition();
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const deferredBody = useDeferredValue(draftInput.body);
@@ -51,10 +47,7 @@ export function BlogPostEditor() {
     [deferredBody],
   );
 
-  function updateField<K extends keyof BlogPostDraftInput>(
-    key: K,
-    value: BlogPostDraftInput[K],
-  ) {
+  function updateField<K extends keyof BlogPostDraftInput>(key: K, value: BlogPostDraftInput[K]) {
     setDraftInput((current) => ({
       ...current,
       [key]: value,
@@ -83,9 +76,7 @@ export function BlogPostEditor() {
       }
     } catch (error) {
       setErrorText(
-        error instanceof Error
-          ? error.message
-          : "保存済み草案の読み込みに失敗しました。",
+        error instanceof Error ? error.message : "保存済み草案の読み込みに失敗しました。",
       );
     } finally {
       setStorageState("ready");
@@ -103,11 +94,7 @@ export function BlogPostEditor() {
         const nextSavedAt = blogDraftStorageRepository.saveDraft(draftInput);
         setSavedAt(nextSavedAt);
       } catch (error) {
-        setErrorText(
-          error instanceof Error
-            ? error.message
-            : "記事草案の保存に失敗しました。",
-        );
+        setErrorText(error instanceof Error ? error.message : "記事草案の保存に失敗しました。");
       } finally {
         saveTimerRef.current = null;
       }
@@ -126,11 +113,7 @@ export function BlogPostEditor() {
         setResult(nextResult);
       } catch (error) {
         setResult(null);
-        setErrorText(
-          error instanceof Error
-            ? error.message
-            : "記事草案の生成に失敗しました。",
-        );
+        setErrorText(error instanceof Error ? error.message : "記事草案の生成に失敗しました。");
       }
     });
   }
@@ -156,9 +139,7 @@ export function BlogPostEditor() {
 
   return (
     <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-8">
-      <section
-        className="surface p-5 sm:p-7"
-      >
+      <section className="surface p-5 sm:p-7">
         <div className="flex flex-col gap-2">
           <div className="flex flex-wrap items-center gap-3">
             <p
@@ -167,19 +148,14 @@ export function BlogPostEditor() {
             >
               Admin
             </p>
-            <a
-              href="/admin"
-              className="text-link min-h-0 text-xs"
-            >
+            <a href="/admin" className="text-link min-h-0 text-xs">
               管理メニューへ戻る
             </a>
           </div>
-          <h2 className="section-title">
-            記事草案を入力
-          </h2>
+          <h2 className="section-title">記事草案を入力</h2>
           <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
-            公開ページとは分離した管理UIです。ここでは保存せず、
-            `createBlogPost(...)` に貼れるコードを生成します。
+            公開ページとは分離した管理UIです。ここでは保存せず、 `createBlogPost(...)`
+            に貼れるコードを生成します。
           </p>
           <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
             {savedAt
@@ -249,11 +225,7 @@ export function BlogPostEditor() {
           </label>
 
           <div className="flex flex-wrap gap-3 pt-2">
-            <ActionButton
-              type="submit"
-              disabled={isPending}
-              aria-busy={isPending}
-            >
+            <ActionButton type="submit" disabled={isPending} aria-busy={isPending}>
               {isPending ? "生成中..." : "記事コードを生成"}
             </ActionButton>
             <ActionButton
@@ -269,9 +241,7 @@ export function BlogPostEditor() {
                   setSavedAt(null);
                 } catch (error) {
                   setErrorText(
-                    error instanceof Error
-                      ? error.message
-                      : "保存済み草案の削除に失敗しました。",
+                    error instanceof Error ? error.message : "保存済み草案の削除に失敗しました。",
                   );
                 }
               }}
@@ -287,9 +257,7 @@ export function BlogPostEditor() {
                   setSavedAt(null);
                 } catch (error) {
                   setErrorText(
-                    error instanceof Error
-                      ? error.message
-                      : "保存済み草案の削除に失敗しました。",
+                    error instanceof Error ? error.message : "保存済み草案の削除に失敗しました。",
                   );
                 }
               }}
@@ -301,32 +269,16 @@ export function BlogPostEditor() {
       </section>
 
       <section className="grid gap-5" aria-live="polite">
-        <article
-          className="surface p-5 sm:p-7"
-        >
+        <article className="surface p-5 sm:p-7">
           <h2 className="section-title text-xl">画面状態</h2>
           {storageState === "loading" || isPending ? (
-            <div
-              className="mt-5 grid gap-3"
-              aria-live="polite"
-              aria-busy="true"
-            >
-              <div
-                className="skeleton h-6 w-32 rounded-full"
-              />
-              <div
-                className="skeleton h-20 rounded-xl"
-              />
-              <div
-                className="skeleton h-40 rounded-xl"
-              />
+            <div className="mt-5 grid gap-3" aria-live="polite" aria-busy="true">
+              <div className="skeleton h-6 w-32 rounded-full" />
+              <div className="skeleton h-20 rounded-xl" />
+              <div className="skeleton h-40 rounded-xl" />
             </div>
           ) : errorText ? (
-            <div
-              className="status-panel mt-5"
-              data-status="error"
-              role="alert"
-            >
+            <div className="status-panel mt-5" data-status="error" role="alert">
               <p className="text-sm font-semibold">入力内容を確認してください</p>
               <p className="mt-1 text-sm leading-6">{errorText}</p>
               <p className="mt-2 text-sm">
@@ -334,10 +286,7 @@ export function BlogPostEditor() {
               </p>
             </div>
           ) : result ? (
-            <div
-              className="status-panel mt-5"
-              data-status="success"
-            >
+            <div className="status-panel mt-5" data-status="success">
               <p className="text-sm font-semibold">コードを生成しました</p>
               <p className="mt-1 text-sm leading-6">
                 `src/config/blog.ts` の `BLOG_POSTS` に追加できるコードを生成しました。
@@ -349,9 +298,7 @@ export function BlogPostEditor() {
               ) : null}
             </div>
           ) : (
-            <div
-              className="surface-muted mt-5 px-5 py-8 text-center"
-            >
+            <div className="surface-muted mt-5 px-5 py-8 text-center">
               <p className="mt-2 text-sm leading-6">
                 まず左側で記事草案を入力し、コード生成を実行してください。
               </p>
@@ -359,9 +306,7 @@ export function BlogPostEditor() {
           )}
         </article>
 
-        <article
-          className="surface p-5 sm:p-7"
-        >
+        <article className="surface p-5 sm:p-7">
           <div className="flex items-center justify-between gap-4">
             <h2 className="section-title text-xl">プレビュー</h2>
             {result ? (
@@ -379,9 +324,7 @@ export function BlogPostEditor() {
               >
                 Summary
               </p>
-              <h3 className="mt-2 text-2xl font-bold">
-                {result?.post.title || "タイトル未入力"}
-              </h3>
+              <h3 className="mt-2 text-2xl font-bold">{result?.post.title || "タイトル未入力"}</h3>
               <p className="mt-2 text-sm" style={{ color: "var(--color-text-secondary)" }}>
                 {result
                   ? `${result.post.date}${result.post.updatedAt !== result.post.date ? ` / 更新 ${result.post.updatedAt}` : ""}`
@@ -436,7 +379,7 @@ export function BlogPostEditor() {
           </div>
 
           <pre className="mt-5 overflow-x-auto rounded-2xl bg-black/25 p-5 text-sm leading-7">
-            <code>{result?.code ?? "createBlogPost({\n  title: \"...\",\n  body: \"...\"\n})"}</code>
+            <code>{result?.code ?? 'createBlogPost({\n  title: "...",\n  body: "..."\n})'}</code>
           </pre>
         </article>
       </section>

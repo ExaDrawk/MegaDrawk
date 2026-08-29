@@ -40,10 +40,7 @@ export const blogDraftStorageRepository = {
       savedAt,
     };
 
-    window.localStorage.setItem(
-      BLOG_DRAFT_STORAGE_KEY,
-      JSON.stringify(payload),
-    );
+    window.localStorage.setItem(BLOG_DRAFT_STORAGE_KEY, JSON.stringify(payload));
 
     return savedAt;
   },

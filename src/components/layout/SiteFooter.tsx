@@ -1,8 +1,5 @@
 import { SITE, FOOTER_LINKS } from "@/config/site";
-import {
-  BrandLockup,
-  getBrandLockupContainerClassName,
-} from "@/components/layout/BrandLockup";
+import { BrandLockup, getBrandLockupContainerClassName } from "@/components/layout/BrandLockup";
 import { XProfileLink } from "@/components/ui/XProfileLink";
 
 export function SiteFooter() {
@@ -58,10 +55,7 @@ export function SiteFooter() {
               <ul className="flex flex-col">
                 {group.links.map((link) => (
                   <li key={link.href}>
-                    <a
-                      href={link.href}
-                      className="text-link"
-                    >
+                    <a href={link.href} className="text-link">
                       {link.label}
                     </a>
                   </li>
@@ -75,7 +69,9 @@ export function SiteFooter() {
           className="mt-10 pt-6 text-xs leading-6"
           style={{ borderTop: "1px solid var(--color-border-subtle)" }}
         >
-          <p>&copy; {year} {SITE.name}. All rights reserved.</p>
+          <p>
+            &copy; {year} {SITE.name}. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>

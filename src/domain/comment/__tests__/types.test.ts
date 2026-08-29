@@ -1,9 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  COMMENT_LIMITS,
-  isCommentItemArray,
-  validateCommentInput,
-} from "@/domain/comment/types";
+import { COMMENT_LIMITS, isCommentItemArray, validateCommentInput } from "@/domain/comment/types";
 
 describe("validateCommentInput", () => {
   it("returns null for valid input", () => {
@@ -54,11 +50,7 @@ describe("isCommentItemArray", () => {
   });
 
   it("returns false for an array with a malformed item", () => {
-    expect(
-      isCommentItemArray([
-        { id: "1", name: "Drawk", message: "こんにちは" },
-      ]),
-    ).toBe(false);
+    expect(isCommentItemArray([{ id: "1", name: "Drawk", message: "こんにちは" }])).toBe(false);
   });
 
   it("returns false for non-array values", () => {

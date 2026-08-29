@@ -13,8 +13,6 @@ describe("formatJaDate", () => {
   });
 
   it("throws an error on invalid date string", () => {
-    expect(() => formatJaDate("invalid-date")).toThrow(
-      "Invalid date string provided",
-    );
+    expect(() => formatJaDate("invalid-date")).toThrow("Invalid date string provided");
   });
 });

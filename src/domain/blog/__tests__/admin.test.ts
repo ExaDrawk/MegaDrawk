@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  buildBlogPostDraft,
-  getInitialBlogPostDraftInput,
-} from "@/domain/blog/admin";
+import { buildBlogPostDraft, getInitialBlogPostDraftInput } from "@/domain/blog/admin";
 
 describe("buildBlogPostDraft", () => {
   it("normalizes input and generates createBlogPost code", () => {

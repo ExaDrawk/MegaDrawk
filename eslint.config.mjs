@@ -1,10 +1,12 @@
 import tsParser from "@typescript-eslint/parser";
 import tsPlugin from "@typescript-eslint/eslint-plugin";
+import astroPlugin from "eslint-plugin-astro";
 
 export default [
   {
     ignores: ["dist/**", ".astro/**", "node_modules/**", "coverage/**"],
   },
+  ...astroPlugin.configs.recommended,
   {
     files: ["**/*.{ts,tsx,mjs}"],
     languageOptions: {

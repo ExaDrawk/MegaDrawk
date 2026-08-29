@@ -1,6 +1,6 @@
 # MEGADRAWK
 
-Astro 7 + React islands + Tailwind CSS 4で構成した静的ポートフォリオ／ブログサイトです。生成物はCloudflare Pagesへ直接配信します。
+Astro 7 + React islands + Tailwind CSS 4で構成した静的ポートフォリオ／ブログサイトです。生成物はCloudflare Pagesへ直接配信します。Node.js 22.12以上を使用します。
 
 ## セットアップ
 
@@ -18,6 +18,7 @@ AdSenseを使う場合は`.env`の`PUBLIC_ADSENSE_CLIENT`を設定します。
 npm run lint
 npm run typecheck
 npm run test
+npm run test:coverage
 npm run build
 npm run e2e
 ```
@@ -30,9 +31,9 @@ Pagesのビルド設定は次のとおりです。
 
 - Build command: `npm run build`
 - Build output directory: `dist`
-- Node.js: 20以上
+- Node.js: `.node-version`で固定
 
-`public/_headers`が静的セキュリティヘッダーの正本です。Pagesがデプロイ時に適用します。
+`public/_headers`が静的セキュリティヘッダーの正本です。Astroが生成するhash付きCSPと組み合わせ、Pagesがデプロイ時に適用します。
 
 ## 構成
 

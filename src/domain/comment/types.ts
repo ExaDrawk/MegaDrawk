@@ -17,15 +17,9 @@ export const COMMENT_LIMITS = {
 } as const;
 
 export type CommentValidationError =
-  | "name-empty"
-  | "name-too-long"
-  | "message-empty"
-  | "message-too-long";
+  "name-empty" | "name-too-long" | "message-empty" | "message-too-long";
 
-export function validateCommentInput(
-  name: string,
-  message: string,
-): CommentValidationError | null {
+export function validateCommentInput(name: string, message: string): CommentValidationError | null {
   const trimmedName = name.trim();
   const trimmedMessage = message.trim();
 

@@ -28,9 +28,7 @@ describe("CommentSection", () => {
   });
 
   it("prevents duplicate comments from a rapid double submit", async () => {
-    const setItem = vi
-      .spyOn(Storage.prototype, "setItem")
-      .mockImplementation(() => {});
+    const setItem = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {});
     render(<CommentSection postId="test-post" />);
 
     fireEvent.change(screen.getByPlaceholderText("名前"), {

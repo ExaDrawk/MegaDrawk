@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, type SubmitEvent } from "react";
 import { useComments } from "@/hooks/useComments";
 import { COMMENT_LIMITS } from "@/domain/comment/types";
 import { ActionButton } from "@/components/ui/Action";
@@ -16,7 +16,7 @@ export function CommentSection({ postId }: CommentSectionProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const submitLockRef = useRef(false);
 
-  function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+  function onSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (submitLockRef.current) {
@@ -43,9 +43,7 @@ export function CommentSection({ postId }: CommentSectionProps) {
 
   return (
     <section className="mt-5" aria-label="コメント欄">
-      <h3 className="section-title text-base">
-        コメント
-      </h3>
+      <h3 className="section-title text-base">コメント</h3>
 
       <form className="mt-4 grid gap-3" onSubmit={onSubmit}>
         <label className="form-field">
@@ -95,10 +93,7 @@ export function CommentSection({ postId }: CommentSectionProps) {
         {isLoading ? (
           <div aria-busy="true" aria-label="コメント読み込み中" className="flex flex-col gap-3">
             {[0, 1].map((skeletonIndex) => (
-              <div
-                key={skeletonIndex}
-                className="surface p-4"
-              >
+              <div key={skeletonIndex} className="surface p-4">
                 <div className="skeleton mb-3 h-3 w-24 rounded" />
                 <div className="skeleton h-4 w-full rounded" />
               </div>
@@ -115,10 +110,7 @@ export function CommentSection({ postId }: CommentSectionProps) {
           </div>
         ) : (
           comments.map((comment) => (
-            <article
-              key={comment.id}
-              className="surface p-4"
-            >
+            <article key={comment.id} className="surface p-4">
               <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-xs font-semibold" style={{ color: "var(--color-text)" }}>
                   {comment.name}
@@ -131,7 +123,10 @@ export function CommentSection({ postId }: CommentSectionProps) {
                   {new Date(comment.createdAt).toLocaleString("ja-JP")}
                 </time>
               </div>
-              <p className="mt-2 whitespace-pre-wrap break-words text-sm" style={{ color: "var(--color-text-secondary)" }}>
+              <p
+                className="mt-2 whitespace-pre-wrap break-words text-sm"
+                style={{ color: "var(--color-text-secondary)" }}
+              >
                 {comment.message}
               </p>
             </article>

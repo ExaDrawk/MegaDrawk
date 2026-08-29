@@ -18,9 +18,7 @@ interface BrandLockupProps {
   readonly preset: keyof typeof BRAND_LOCKUP_PRESETS;
 }
 
-export function BrandLockup({
-  preset,
-}: BrandLockupProps) {
+export function BrandLockup({ preset }: BrandLockupProps) {
   const config = BRAND_LOCKUP_PRESETS[preset];
   const iconStyle: CSSProperties = {
     height: `${config.iconHeight}px`,
