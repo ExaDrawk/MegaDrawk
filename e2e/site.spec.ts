@@ -16,6 +16,13 @@ test.describe('Site features', () => {
   test('about page loads', async ({ page }) => {
     await page.goto('/about');
     await expect(page.getByRole('heading', { name: /About/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'どこでも六法' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Multi-Subtitles for YouTube' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: '条文スコープ' })).toBeVisible();
+    await expect(
+      page.getByRole('link', { name: /Google Play（テスト公開）/ })
+    ).toHaveAttribute('href', 'https://play.google.com/apps/testing/com.drawk.roppo');
+    await expect(page.getByRole('link', { name: 'Chrome ウェブストア' })).toHaveCount(2);
   });
 
   test('blog page loads', async ({ page }) => {
