@@ -28,12 +28,6 @@ export default function ContactPage() {
               showExternalIcon
             />
           </div>
-
-          <div className="notice mt-10 p-5 sm:p-6">
-            <p className="text-sm leading-relaxed" style={{ color: "var(--color-text-secondary)" }}>
-              同じ高安動脈炎の方は、お気軽に声をかけてください。
-            </p>
-          </div>
         </div>
       </section>
     </div>
