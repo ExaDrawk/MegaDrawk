@@ -18,7 +18,7 @@ const adsenseClient = import.meta.env.PUBLIC_ADSENSE_CLIENT?.trim();
 ---
 
 <!doctype html>
-<html lang={SITE.language}>
+<html lang={SITE.language} data-theme="cobalt">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
@@ -28,6 +28,12 @@ const adsenseClient = import.meta.env.PUBLIC_ADSENSE_CLIENT?.trim();
     <link rel="canonical" href={canonical} />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"
+    />
     <title>{pageTitle}</title>
     {
       adsenseClient ? (
@@ -39,7 +45,7 @@ const adsenseClient = import.meta.env.PUBLIC_ADSENSE_CLIENT?.trim();
       ) : null
     }
   </head>
-  <body>
+  <body class="site-body">
     <SkipNav />
     <div class="page-container">
       <SiteHeader client:load pathname={Astro.url.pathname} />

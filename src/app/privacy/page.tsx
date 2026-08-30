@@ -16,10 +16,9 @@ export default function PrivacyPolicyPage() {
           ← トップに戻る
         </a>
 
+        <p className="eyebrow">Legal / privacy</p>
         <h1 className="page-title">プライバシーポリシー</h1>
-        <p className="mb-10 mt-3 text-sm" style={{ color: "var(--color-text-muted)" }}>
-          最終更新日: {lastUpdated}
-        </p>
+        <p className="document-meta">最終更新日: {lastUpdated}</p>
 
         <div className="prose-content">
           <h2>はじめに</h2>

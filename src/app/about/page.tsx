@@ -35,69 +35,49 @@ const PROJECTS = [
 export default function AboutPage() {
   return (
     <div className="animate-enter-up">
-      <section className="page-section">
-        <header className="page-header">
-          <h1 className="page-title">About</h1>
-        </header>
-        <div className="content-stack" style={{ maxWidth: "var(--content-width)" }}>
-          {/* ── 基本プロフィール ── */}
+      <section className="page-section" aria-labelledby="about-title">
+        <div className="about-intro">
           <div>
-            <h2 className="section-title text-lg" style={{ color: "var(--color-text)" }}>
-              プロフィール
-            </h2>
-            <p
-              className="text-base leading-relaxed"
-              style={{ color: "var(--color-text-secondary)" }}
-            >
-              Drawkは日本の大学生です。
+            <p className="eyebrow">About / Drawk</p>
+            <h1 id="about-title" className="page-title">
+              About
+            </h1>
+            <p className="about-intro__statement">つくる人の、現在地。</p>
+            <p className="page-description">
+              MEGADRAWKは、{SITE.ownerName}の作品と活動記録をまとめたサイトです。
             </p>
           </div>
+          <aside className="about-intro__aside" aria-label="プロフィール">
+            <p>Profile</p>
+            <p>日本の大学生 / 個人開発</p>
+          </aside>
+        </div>
 
-          <section aria-labelledby="projects-heading">
-            <h2
-              id="projects-heading"
-              className="section-title text-lg"
-              style={{ color: "var(--color-text)" }}
-            >
-              個人開発
-            </h2>
-            <p className="section-description">
-              法律学習と日々の学びを支えるアプリ・拡張機能を作っています。
-            </p>
-            <div className="content-stack" style={{ gap: "1rem", marginTop: "1.5rem" }}>
-              {PROJECTS.map((project) => (
-                <article
-                  key={project.name}
-                  className="surface surface-interactive"
-                  style={{ padding: "1.25rem 1.375rem" }}
+        <div className="project-index" aria-labelledby="projects-heading">
+          <p className="project-index__head" id="projects-heading">
+            Selected builds / 個人開発
+          </p>
+          {PROJECTS.map((project) => (
+            <article key={project.name} className="project-entry">
+              <div className="project-entry__body">
+                <h2>{project.name}</h2>
+                <p className="project-entry__description">
+                  {project.platform}。{project.description}
+                </p>
+              </div>
+              <div className="project-entry__meta">
+                <a
+                  className="project-entry__link"
+                  href={project.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  <span className="tag">{project.platform}</span>
-                  <h3
-                    className="section-title text-lg"
-                    style={{ marginTop: "0.875rem", color: "var(--color-text)" }}
-                  >
-                    {project.name}
-                  </h3>
-                  <p
-                    className="text-base leading-relaxed"
-                    style={{ margin: "0.75rem 0 0", color: "var(--color-text-secondary)" }}
-                  >
-                    {project.description}
-                  </p>
-                  <a
-                    className="text-link"
-                    href={project.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ marginTop: "0.75rem" }}
-                  >
-                    {project.linkLabel}
-                    <span aria-hidden="true">↗</span>
-                  </a>
-                </article>
-              ))}
-            </div>
-          </section>
+                  {project.linkLabel}
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </div>
+            </article>
+          ))}
         </div>
       </section>
     </div>

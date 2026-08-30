@@ -13,59 +13,48 @@ export default function BlogPage() {
 
   return (
     <div className="animate-enter-up">
-      <section className="page-section">
+      <section className="page-section" aria-labelledby="blog-title">
         <header className="page-header">
-          <h1 className="page-title">Blog</h1>
-          <p className="page-description">まずは短いメモから書けるようにしています。</p>
+          <p className="eyebrow">Blog / working notes</p>
+          <h1 id="blog-title" className="page-title">
+            Blog
+          </h1>
+          <p className="blog-intro__statement">公開ログ。</p>
+          <p className="page-description">
+            制作、学び、公開までの途中経過を短いメモで残しています。
+          </p>
         </header>
 
-        <div style={{ maxWidth: "var(--content-width)" }}>
+        <div className="blog-index">
           {posts.length > 0 ? (
-            <div className="flex flex-col gap-6">
-              {posts.map((post) => (
-                <article key={post.id} id={post.id} className="surface scroll-mt-28 p-5 sm:p-6">
-                  <time
-                    dateTime={post.date}
-                    className="text-xs font-semibold tracking-wide"
-                    style={{ color: "var(--color-text-muted)" }}
-                  >
-                    {formatJaDate(post.date)}
-                  </time>
-                  {post.updatedAt !== post.date ? (
-                    <p className="mt-1 text-xs" style={{ color: "var(--color-text-muted)" }}>
-                      更新: {formatJaDate(post.updatedAt)}
-                    </p>
-                  ) : null}
-                  <h2 className="mt-1.5 text-xl font-bold" style={{ color: "var(--color-text)" }}>
-                    {post.title}
-                  </h2>
-                  <p
-                    className="mt-2 text-base leading-relaxed"
-                    style={{ color: "var(--color-text-secondary)" }}
-                  >
-                    {post.excerpt}
-                  </p>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {post.tags.map((tag) => (
-                      <span key={tag} className="tag">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="mt-6 border-t border-[var(--color-border-subtle)] pt-5">
-                    <CommentSection postId={post.id} />
-                  </div>
-                </article>
-              ))}
-            </div>
+            posts.map((post) => (
+              <article key={post.id} id={post.id} className="blog-entry">
+                <h2 className="blog-entry__title">{post.title}</h2>
+                <p className="blog-entry__excerpt">{post.excerpt}</p>
+                <div className="blog-entry__tags" aria-label="タグ">
+                  {post.tags.map((tag) => (
+                    <span key={tag} className="tag">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+                <p className="note-meta blog-entry__date">
+                  <time dateTime={post.date}>{formatJaDate(post.date)}</time>
+                  {post.updatedAt !== post.date ? ` / 更新 ${formatJaDate(post.updatedAt)}` : null}
+                </p>
+                <div className="blog-entry__comments">
+                  <CommentSection postId={post.id} />
+                </div>
+              </article>
+            ))
           ) : (
-            <div className="surface-muted flex min-h-40 flex-col items-center justify-center p-6 text-center sm:p-8">
-              <p className="font-semibold text-lg" style={{ color: "var(--color-text-secondary)" }}>
-                まだ公開中のブログ記事はありません。
-              </p>
-              <p className="mt-2 text-sm" style={{ color: "var(--color-text-muted)" }}>
-                最初の記事を準備中です。公開まで少しお待ちください。
-              </p>
+            <div className="surface-muted empty-state">
+              <div>
+                <p>まだ公開中のブログ記事はありません。</p>
+                <p className="empty-state__hint">
+                  最初の記事を準備中です。公開まで少しお待ちください。
+                </p>
+              </div>
             </div>
           )}
         </div>

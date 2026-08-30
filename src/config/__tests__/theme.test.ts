@@ -7,7 +7,7 @@ describe("LAYOUT tokens", () => {
   });
 
   it("contentWidth is a valid CSS dimension", () => {
-    expect(LAYOUT.contentWidth).toMatch(/^\d+(\.\d+)?(rem|px|em)$/);
+    expect(LAYOUT.contentWidth).toMatch(/^\d+(\.\d+)?(rem|px|em|ch)$/);
   });
 
   it("headerHeight is a valid CSS dimension", () => {

@@ -1,6 +1,6 @@
-/** レイアウトトークン */
+/** レイアウトトークン（tokens.cssと同じ正本値） */
 export const LAYOUT = {
-  maxWidth: "70rem",
-  contentWidth: "44rem",
-  headerHeight: "4.5rem",
+  maxWidth: "84rem",
+  contentWidth: "65ch",
+  headerHeight: "5.25rem",
 } as const;

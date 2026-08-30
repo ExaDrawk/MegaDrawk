@@ -6,72 +6,48 @@ export function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer
-      style={{
-        borderTop: "1px solid var(--color-border-subtle)",
-        color: "var(--color-text-muted)",
-        background: "var(--color-surface)",
-      }}
-    >
-      <div
-        className="mx-auto py-12 sm:py-14"
-        style={{
-          maxWidth: "var(--max-width)",
-          paddingInline: "var(--space-page-x)",
-        }}
-      >
-        <div className="grid grid-cols-1 gap-9 sm:grid-cols-3 sm:gap-8">
-          <div className="flex flex-col items-start">
+    <footer className="site-footer">
+      <div className="site-footer__inner">
+        <div className="site-footer__top">
+          <div className="site-footer__identity">
             <a
               href="/"
-              className={`${getBrandLockupContainerClassName("footer")} min-h-11 rounded-lg transition-opacity duration-150 hover:opacity-80`}
-              aria-label={SITE.name}
+              className={`${getBrandLockupContainerClassName("footer")} site-brand`}
+              aria-label={`${SITE.name} トップページ`}
             >
               <BrandLockup preset="footer" />
             </a>
-            {SITE.tagline ? (
-              <p className="mt-4 text-sm" style={{ color: "var(--color-text-muted)" }}>
-                {SITE.tagline}
-              </p>
-            ) : null}
+            <p className="site-footer__tagline">作品と活動記録を、ひとつの場所に。</p>
             <XProfileLink
               href={SITE.social.x}
               label={SITE.social.xHandle}
               ariaLabel="X (Twitter)"
-              className="action action-secondary mt-4 rounded-full"
+              className="action action-dark"
               iconSize={14}
               showExternalIcon
             />
           </div>
 
-          {Object.values(FOOTER_LINKS).map((group) => (
-            <div key={group.label}>
-              <h3
-                className="text-xs font-semibold uppercase tracking-wider mb-3"
-                style={{ color: "var(--color-text-secondary)" }}
-              >
-                {group.label}
-              </h3>
-              <ul className="flex flex-col">
+          <nav className="site-footer__nav" aria-label="フッターナビゲーション">
+            <p className="site-footer__nav-title">Index</p>
+            {Object.values(FOOTER_LINKS).map((group) => (
+              <div key={group.label}>
+                <p className="mono-label site-footer__group-label">{group.label}</p>
                 {group.links.map((link) => (
-                  <li key={link.href}>
-                    <a href={link.href} className="text-link">
-                      {link.label}
-                    </a>
-                  </li>
+                  <a key={link.href} href={link.href} className="site-footer__link">
+                    {link.label}
+                  </a>
                 ))}
-              </ul>
-            </div>
-          ))}
+              </div>
+            ))}
+          </nav>
         </div>
 
-        <div
-          className="mt-10 pt-6 text-xs leading-6"
-          style={{ borderTop: "1px solid var(--color-border-subtle)" }}
-        >
-          <p>
+        <div className="site-footer__bottom">
+          <span>{SITE.domain}</span>
+          <span>
             &copy; {year} {SITE.name}. All rights reserved.
-          </p>
+          </span>
         </div>
       </div>
     </footer>

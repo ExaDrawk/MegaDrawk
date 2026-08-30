@@ -36,7 +36,7 @@ export function BrandLockup({ preset }: BrandLockupProps) {
         alt=""
         width={42}
         height={42}
-        className="object-contain shrink-0"
+        className="brand-lockup__icon object-contain shrink-0"
         style={iconStyle}
         aria-hidden="true"
         loading="eager"
@@ -46,7 +46,7 @@ export function BrandLockup({ preset }: BrandLockupProps) {
         alt={SITE.name}
         width={241}
         height={77}
-        className="object-contain shrink-0"
+        className="brand-lockup__wordmark object-contain shrink-0"
         style={logoStyle}
       />
     </>
@@ -56,5 +56,5 @@ export function BrandLockup({ preset }: BrandLockupProps) {
 export function getBrandLockupContainerClassName(
   preset: keyof typeof BRAND_LOCKUP_PRESETS,
 ): string {
-  return `inline-flex items-center ${BRAND_LOCKUP_PRESETS[preset].gapClassName}`;
+  return `brand-lockup inline-flex items-center ${BRAND_LOCKUP_PRESETS[preset].gapClassName}`;
 }

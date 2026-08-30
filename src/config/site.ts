@@ -9,7 +9,7 @@ export const SITE = {
   url: "https://megadrawk.com",
   locale: "ja_JP",
   language: "ja",
-  themeColor: "#ffffff",
+  themeColor: "#f5f6f8",
   keywords: ["MEGADRAWK", "Drawk", "ブログ", "ポートフォリオ", "制作記録"],
   social: {
     x: "https://x.com/Drawk1234",

@@ -1,0 +1,22 @@
+{
+  "scannedAt": "2026-08-30",
+  "fontStack": "system-ui before redesign; Bricolage Grotesque + IBM Plex Sans + IBM Plex Mono introduced in SiteLayout.astro",
+  "palette": "cool paper / graphite / cobalt tokens in tokens.css",
+  "motion": "motion-cut with one restrained page-entry transition; reduced-motion fallback included",
+  "spacing": "named 4-point scale in tokens.css",
+  "framework": "Astro 7 with React islands and Tailwind CSS 4",
+  "preserved": [
+    "Astro route tree",
+    "existing logo assets",
+    "blog/comment behavior",
+    "About project facts and external destinations",
+    "security headers and SEO endpoints"
+  ],
+  "introduced": [
+    "shared flagship design system",
+    "split-studio home hero",
+    "index-first content rhythm",
+    "letter-close footer",
+    "responsive and reduced-motion rules"
+  ]
+}

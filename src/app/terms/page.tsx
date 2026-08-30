@@ -16,10 +16,9 @@ export default function TermsPage() {
           ← トップに戻る
         </a>
 
+        <p className="eyebrow">Legal / terms</p>
         <h1 className="page-title">利用規約</h1>
-        <p className="mb-10 mt-3 text-sm" style={{ color: "var(--color-text-muted)" }}>
-          最終更新日: {lastUpdated}
-        </p>
+        <p className="document-meta">最終更新日: {lastUpdated}</p>
 
         <div className="prose-content">
           <h2>第1条（適用）</h2>

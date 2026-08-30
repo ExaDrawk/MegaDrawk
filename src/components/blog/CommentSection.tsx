@@ -42,10 +42,10 @@ export function CommentSection({ postId }: CommentSectionProps) {
   }
 
   return (
-    <section className="mt-5" aria-label="コメント欄">
-      <h3 className="section-title text-base">コメント</h3>
+    <section className="comment-section" aria-label="コメント欄">
+      <h3 className="comment-section__title">コメント</h3>
 
-      <form className="mt-4 grid gap-3" onSubmit={onSubmit}>
+      <form className="comment-form" onSubmit={onSubmit}>
         <label className="form-field">
           <span className="sr-only">名前</span>
           <input
@@ -89,7 +89,7 @@ export function CommentSection({ postId }: CommentSectionProps) {
         ) : null}
       </form>
 
-      <div className="mt-5 flex flex-col gap-3" aria-live="polite">
+      <div className="comment-list" aria-live="polite">
         {isLoading ? (
           <div aria-busy="true" aria-label="コメント読み込み中" className="flex flex-col gap-3">
             {[0, 1].map((skeletonIndex) => (

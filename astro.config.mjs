@@ -39,6 +39,7 @@ export default defineConfig({
         resources: [
           { resource: "'self'", kind: "element" },
           { resource: "'unsafe-inline'", kind: "attribute" },
+          { resource: "https://fonts.googleapis.com", kind: "element" },
         ],
       },
     },
