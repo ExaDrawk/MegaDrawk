@@ -30,7 +30,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
-    default: SITE.tagline ? `${SITE.name} — ${SITE.tagline}` : SITE.name,
+    default: SITE.name,
     template: `%s | ${SITE.name}`,
   },
   description: SITE.description,
@@ -56,13 +56,13 @@ export const metadata: Metadata = {
     locale: SITE.locale,
     url: SITE.url,
     siteName: SITE.name,
-    title: SITE.tagline ? `${SITE.name} — ${SITE.tagline}` : SITE.name,
+    title: SITE.name,
     description: SITE.description,
   },
   twitter: {
     card: "summary",
     site: SITE.social.xHandle,
-    title: SITE.tagline ? `${SITE.name} — ${SITE.tagline}` : SITE.name,
+    title: SITE.name,
     description: SITE.description,
   },
 };

@@ -33,16 +33,11 @@ export function SiteFooter() {
             >
               <BrandLockup preset="footer" />
             </Link>
-            {SITE.tagline ? (
-              <p className="mt-4 text-sm" style={{ color: "var(--color-text-muted)" }}>
-                {SITE.tagline}
-              </p>
-            ) : null}
             <XProfileLink
               href={SITE.social.x}
               label={SITE.social.xHandle}
               ariaLabel="X (Twitter)"
-              className="action action-secondary mt-4 rounded-full"
+              className="action action-secondary mt-4"
               iconSize={14}
               showExternalIcon
             />
@@ -51,7 +46,7 @@ export function SiteFooter() {
           {Object.values(FOOTER_LINKS).map((group) => (
             <div key={group.label}>
               <h3
-                className="text-xs font-semibold uppercase tracking-wider mb-3"
+                className="mb-3 text-xs font-semibold"
                 style={{ color: "var(--color-text-secondary)" }}
               >
                 {group.label}

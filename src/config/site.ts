@@ -2,7 +2,6 @@
 export const SITE = {
   name: "MEGADRAWK",
   ownerName: "Drawk",
-  tagline: "",
   description:
     "Drawkが運営するMEGADRAWK。作品と活動記録をまとめたサイト。",
   heroCopy:

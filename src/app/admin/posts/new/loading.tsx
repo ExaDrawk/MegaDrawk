@@ -1,6 +1,6 @@
 export default function AdminPostNewLoading() {
   return (
-    <div className="animate-enter-fade page-section">
+    <div className="page-section">
       <div>
         <div className="space-y-5">
           <div className="skeleton h-4 w-40 max-w-full rounded-full" />

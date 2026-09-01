@@ -49,9 +49,7 @@ export function SiteHeader() {
       className="fixed inset-x-0 top-0 z-50"
       style={{
         height: "var(--header-height)",
-        background: "rgba(245, 247, 251, 0.86)",
-        backdropFilter: "blur(18px)",
-        WebkitBackdropFilter: "blur(18px)",
+        background: "var(--color-surface)",
         borderBottom: "1px solid var(--color-border-subtle)",
       }}
     >
@@ -79,7 +77,7 @@ export function SiteHeader() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="action action-ghost min-h-11 rounded-full px-4"
+                    className="action action-ghost min-h-11 px-4"
                     aria-current={isActive ? "page" : undefined}
                   >
                     {link.label}

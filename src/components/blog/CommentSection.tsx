@@ -105,12 +105,9 @@ export function CommentSection({ postId }: CommentSectionProps) {
             ))}
           </div>
         ) : comments.length === 0 ? (
-          <div className="surface-muted flex flex-col items-center gap-1 py-5 text-center">
+          <div className="surface-muted flex items-center justify-center py-5 text-center">
             <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
               まだコメントはありません。
-            </p>
-            <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
-              最初のコメントを書いてみましょう！
             </p>
           </div>
         ) : (

@@ -9,7 +9,7 @@ export default function HomePage() {
   const latestPosts = getPublishedBlogPosts().slice(0, 3);
 
   return (
-    <div className="animate-enter-up">
+    <div>
       <section className="page-section">
         <h1
           className="text-4xl font-bold leading-[1.06] tracking-[-0.045em] text-balance sm:text-5xl md:text-6xl"
@@ -17,14 +17,6 @@ export default function HomePage() {
         >
           {SITE.name}
         </h1>
-        {SITE.tagline ? (
-          <p
-            className="mt-4 text-lg sm:text-xl font-medium"
-            style={{ color: "var(--color-primary)" }}
-          >
-            {SITE.tagline}
-          </p>
-        ) : null}
         <p
           className="page-description mt-6"
           style={{
@@ -49,13 +41,13 @@ export default function HomePage() {
       <section className="pb-8 sm:pb-12">
         <div className="mb-6 flex items-center justify-between gap-4 sm:mb-8">
           <h2 className="section-title">
-            Latest Blog
+            最近の記事
           </h2>
           <Link
             href="/blog"
             className="text-link shrink-0"
           >
-            すべて見る →
+            すべて見る
           </Link>
         </div>
         {latestPosts.length > 0 ? (
@@ -63,7 +55,7 @@ export default function HomePage() {
             {latestPosts.map((post) => (
               <article
                 key={post.id}
-                className="surface surface-interactive group"
+                className="surface group"
               >
                 <Link
                   href={`/blog#${post.id}`}
@@ -95,7 +87,7 @@ export default function HomePage() {
         ) : (
           <div className="surface-muted flex min-h-32 items-center justify-center p-6 sm:p-8">
             <p className="text-center font-medium" style={{ color: "var(--color-text-secondary)" }}>
-              まだ記事がありません。新しい記事の公開をお待ちください。
+              まだ記事がありません。
             </p>
           </div>
         )}

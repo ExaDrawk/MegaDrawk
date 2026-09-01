@@ -12,7 +12,7 @@ export default function PrivacyPolicyPage() {
   const lastUpdated = "2026年2月9日";
 
   return (
-    <div className="animate-enter-up">
+    <div>
       <article className="page-section content-column">
         <Link
           href="/"

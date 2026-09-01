@@ -161,13 +161,10 @@ export function BlogPostEditor() {
         className="surface p-5 sm:p-7"
       >
         <div className="flex flex-col gap-2">
-          <div className="flex flex-wrap items-center gap-3">
-            <p
-              className="text-xs font-semibold uppercase tracking-[0.24em]"
-              style={{ color: "var(--color-primary)" }}
-            >
-              Admin
-            </p>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="section-title">
+              記事草案を入力
+            </h2>
             <Link
               href="/admin"
               className="text-link min-h-0 text-xs"
@@ -175,12 +172,8 @@ export function BlogPostEditor() {
               管理メニューへ戻る
             </Link>
           </div>
-          <h2 className="section-title">
-            記事草案を入力
-          </h2>
           <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
-            公開ページとは分離した管理UIです。ここでは保存せず、
-            `createBlogPost(...)` に貼れるコードを生成します。
+            入力内容から、`src/config/blog.ts` に貼り付けるコードを生成します。
           </p>
           <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
             {savedAt
@@ -374,13 +367,7 @@ export function BlogPostEditor() {
 
           <div className="mt-5 space-y-4">
             <div>
-              <p
-                className="text-xs font-semibold uppercase tracking-[0.24em]"
-                style={{ color: "var(--color-text-muted)" }}
-              >
-                Summary
-              </p>
-              <h3 className="mt-2 text-2xl font-bold">
+              <h3 className="text-2xl font-bold">
                 {result?.post.title || "タイトル未入力"}
               </h3>
               <p className="mt-2 text-sm" style={{ color: "var(--color-text-secondary)" }}>
@@ -388,14 +375,11 @@ export function BlogPostEditor() {
                   ? `${result.post.date}${result.post.updatedAt !== result.post.date ? ` / 更新 ${result.post.updatedAt}` : ""}`
                   : "本文の冒頭120文字が excerpt として使われます。"}
               </p>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {(result?.post.tags.length ? result.post.tags : ["タグ未設定"]).map((tag) => (
-                <span key={tag} className="tag">
-                  {tag}
-                </span>
-              ))}
+              {result && result.post.tags.length > 0 ? (
+                <p className="mt-2 text-sm" style={{ color: "var(--color-text-muted)" }}>
+                  {result.post.tags.map((tag) => `#${tag}`).join(" ")}
+                </p>
+              ) : null}
             </div>
 
             <div className="surface p-5 shadow-none">
@@ -407,7 +391,7 @@ export function BlogPostEditor() {
                 </div>
               ) : (
                 <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
-                  本文を入力すると、ここに段落ごとの読み味を確認できます。
+                  本文を入力すると、ここにプレビューが表示されます。
                 </p>
               )}
             </div>

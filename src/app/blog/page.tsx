@@ -13,7 +13,7 @@ export default function BlogPage() {
   const posts = getPublishedBlogPosts();
 
   return (
-    <div className="animate-enter-up">
+    <div>
       <section className="page-section">
         <header className="page-header">
           <h1 className="page-title">Blog</h1>
@@ -58,13 +58,14 @@ export default function BlogPage() {
                   >
                     {post.excerpt}
                   </p>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {post.tags.map((tag) => (
-                      <span key={tag} className="tag">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
+                  {post.tags.length > 0 ? (
+                    <p
+                      className="mt-3 text-sm"
+                      style={{ color: "var(--color-text-muted)" }}
+                    >
+                      {post.tags.map((tag) => `#${tag}`).join(" ")}
+                    </p>
+                  ) : null}
                   <div className="mt-6 border-t border-[var(--color-border-subtle)] pt-5">
                     <CommentSection postId={post.id} />
                   </div>
@@ -72,12 +73,9 @@ export default function BlogPage() {
               ))}
             </div>
           ) : (
-            <div className="surface-muted flex min-h-40 flex-col items-center justify-center p-6 text-center sm:p-8">
+            <div className="surface-muted flex min-h-40 items-center justify-center p-6 text-center sm:p-8">
               <p className="font-semibold text-lg" style={{ color: "var(--color-text-secondary)" }}>
-                まだ公開中のブログ記事はありません。
-              </p>
-              <p className="mt-2 text-sm" style={{ color: "var(--color-text-muted)" }}>
-                最初の記事を準備中です。公開まで少しお待ちください。
+                まだ記事はありません。
               </p>
             </div>
           )}

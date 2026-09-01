@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="animate-enter-up">
+    <div>
       <section className="page-section">
         <header className="page-header">
           <h1 className="page-title">About</h1>

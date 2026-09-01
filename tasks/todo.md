@@ -40,3 +40,15 @@
 - [x] DEVELOPER.md アーキテクチャ記述更新
 - [x] commentStorage.ts のブラウザ環境チェック統一（blogDraftStorage と同じパターン）
 - [x] Lint・型・テスト（48件）・ビルド 全通過確認
+
+## 2026-09-02 UI簡素化（AIスロップ排除）
+
+- [x] 旧Astro環境の残骸 `dist/`・`.astro/` を削除（「independent / builder's index」等の旧文言はここにのみ残存していた）
+- [x] 空 `tagline` フィールドと全分岐（site.ts / layout / footer / page）を削除
+- [x] 装飾キックラベル削除（`.eyebrow`、"Admin / Posts / New"、"Summary"、大文字トラッキングラベル）
+- [x] 実装解説メタ文言削除（管理画面の「将来の拡張余地」カード、アーキテクチャ解説文）
+- [x] 装飾排除: body放射グラデーション、ヘッダー/メニューのbackdrop-blur、カード浮遊hover、enter系ページアニメ、青ピルタグチップ、ボタンhoverリフト
+- [x] 死蔵トークン削除（`--ease-emphasized` `--duration-normal` `--duration-slow` `--radius-pill` `--shadow-md`）
+- [x] 空状態文言を1行に簡潔化（home / blog / comments）
+- [x] ホーム「Latest Blog」→「最近の記事」、「すべて見る →」→「すべて見る」
+- [x] 品質ゲート: Lint / 型 / 単体48件 / ビルド / E2E16件 全通過、BOM・U+FFFDなし
