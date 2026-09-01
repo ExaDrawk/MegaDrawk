@@ -52,3 +52,12 @@
 - [x] 空状態文言を1行に簡潔化（home / blog / comments）
 - [x] ホーム「Latest Blog」→「最近の記事」、「すべて見る →」→「すべて見る」
 - [x] 品質ゲート: Lint / 型 / 単体48件 / ビルド / E2E16件 全通過、BOM・U+FFFDなし
+
+## 2026-09-02 公開（mainプッシュ + Cloudflare Pages）
+
+- [x] mainにコミットし、Astro時代のコミットを履歴に残したまま `-s ours` マージでNext.jsツリーを正本化、origin/mainへプッシュ
+- [x] Git連携ビルドのFailureを特定： Next 16.2.10のprefetch-hintsマニフェストに@opennextjs/cloudflare 1.17.1が未対応で、Worker起動時に1101例外
+- [x] next 16.2.10 → 16.3.4、@opennextjs/cloudflare → 1.20.5（peer要件 >=16.3.3）、eslint-config-next 同期
+- [x] wrangler pages dev（workerd）でローカル検証後に `wrangler pages deploy` で本番反映を確認（200・新UI配信）
+- [x] 全品質ゲート再実行: Lint / 型 / 単体48件 / E2E16件
+- [ ] 残課題: Cloudflareダッシュボードのビルド設定を `npm run deploy` + 出力 `.open-next` に変更（Git連携ビルドは旧Astro設定のままで失敗するため。直接アップロード運用なら不要）
