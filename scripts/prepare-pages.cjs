@@ -39,19 +39,24 @@ if (fs.existsSync(workerPath)) {
   throw new Error("worker.js not found in .open-next output.");
 }
 
+// Only paths that exist as static files in the deployment may be excluded
+// from the worker. Dynamic routes (robots.txt, sitemap.xml, manifest, pages)
+// must keep hitting the worker, or Pages serves 404 / its default robots.txt.
+const staticExcludes = fs
+  .readdirSync(assetsDir, { withFileTypes: true })
+  .flatMap((entry) => {
+    if (entry.isFile()) {
+      return [`/${entry.name}`];
+    }
+    return entry.name === "_next"
+      ? ["/_next/*"]
+      : [`/${entry.name}`, `/${entry.name}/*`];
+  });
+
 const routes = {
   version: 1,
   include: ["/*"],
-  exclude: [
-    "/_next/static/*",
-    "/_next/image/*",
-    "/favicon.ico",
-    "/robots.txt",
-    "/sitemap.xml",
-    "/ads.txt",
-    "/manifest.webmanifest",
-    "/.well-known/*",
-  ],
+  exclude: staticExcludes,
 };
 
 fs.writeFileSync(routesPath, JSON.stringify(routes, null, 2));

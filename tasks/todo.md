@@ -60,4 +60,5 @@
 - [x] next 16.2.10 → 16.3.4、@opennextjs/cloudflare → 1.20.5（peer要件 >=16.3.3）、eslint-config-next 同期
 - [x] wrangler pages dev（workerd）でローカル検証後に `wrangler pages deploy` で本番反映を確認（200・新UI配信）
 - [x] 全品質ゲート再実行: Lint / 型 / 単体48件 / E2E16件
+- [x] `/logo.svg` 404修正: `_routes.json` が実在しない静的パスまでexcludeし動的ルート(robots.txt/sitemap.xml/manifest)も壊していたため、prepare-pages.cjs を「assets内の実在ファイルのみexclude」方式に変更。production全パス200を確認
 - [ ] 残課題: Cloudflareダッシュボードのビルド設定を `npm run deploy` + 出力 `.open-next` に変更（Git連携ビルドは旧Astro設定のままで失敗するため。直接アップロード運用なら不要）
