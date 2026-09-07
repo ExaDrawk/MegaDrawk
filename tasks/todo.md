@@ -76,3 +76,16 @@
 - [x] Step 5: 自己レビュー・修正
 - [x] Step 6: Gitコミット & origin/main プッシュ
 
+## 2026-09-07 メインルール厳罰化 & ユーザー製作物（どこでも六法他）の復元
+
+- [x] AGENTS.md の絶対に守るべきルールに「既存成果物・データの破壊的消去の絶対禁止（破壊的マージ・強制上書きの厳禁）」を刻印
+- [x] tasks/lessons.md に過去の `-s ours` によるデータ喪失の教訓と再発防止ルールを追記
+- [x] コミット `0649aa7` よりユーザーの製作物データ（どこでも六法、Multi-Subtitles for YouTube、条文スコープ）を完全復元
+- [x] `src/config/projects.ts` を単一の権威ある情報源として新設
+- [x] `src/app/about/page.tsx` にプロジェクト一覧セクションを現在のデザインシステムに沿って再配置
+- [x] `src/config/__tests__/projects.test.ts` 単体テストを追加
+- [x] `e2e/site.spec.ts` にプロジェクト表示・外部リンクのアサーションを追加
+- [x] 全品質ゲート通過（型・Lint・単体テスト52件・ビルド・E2Eテスト16件）
+- [x] Gitコミット & origin/main プッシュ & Cloudflare Pages 本番反映
+
+

@@ -17,6 +17,14 @@ test.describe('Site features', () => {
     await page.goto('/about');
     await expect(page.getByRole('heading', { name: /About/i })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'プロフィール' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: '個人開発' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'どこでも六法' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Multi-Subtitles for YouTube' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: '条文スコープ' })).toBeVisible();
+    await expect(
+      page.getByRole('link', { name: /Google Play（テスト公開）/ })
+    ).toHaveAttribute('href', 'https://play.google.com/apps/testing/com.drawk.roppo');
+    await expect(page.getByRole('link', { name: /Chrome ウェブストア/ })).toHaveCount(2);
     await expect(page.getByRole('heading', { name: '目標' })).toBeVisible();
 
     const content = await page.content();
