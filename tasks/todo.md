@@ -120,7 +120,8 @@
   - [x] 2-6: `src/app/privacy/page.tsx`, `terms/page.tsx`, `not-found.tsx`, `error.tsx`, `admin/`（`.eyebrow` 削除、簡潔化）
   - [x] 2-7: `src/app/globals.css`（角丸・シャドウ・アニメーションのAIスロップ排斥、4px端正エッジ・1pxボーダー調整）
 - [x] Step 3: 品質ゲート通過（型・Lint・単体テスト52件・ビルド・E2Eテスト16件・BOM検証）
-- [ ] Step 4: 本番反映（Gitプッシュ・Cloudflare Pages デプロイ・実機検証）
+- [x] Step 4: 本番反映（Gitプッシュ・Cloudflare Pages デプロイ・実機検証）
+
 
 
 
