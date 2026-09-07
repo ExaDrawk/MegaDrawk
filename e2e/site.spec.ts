@@ -11,6 +11,15 @@ test.describe('Site features', () => {
     await expect(page.getByRole('link', { name: 'About' }).first()).toBeVisible();
     await expect(page.getByRole('link', { name: 'Blog' }).first()).toBeVisible();
     await expect(page.getByRole('link', { name: 'Contact' }).first()).toBeVisible();
+
+    // Verify featured projects on home page
+    await expect(page.getByRole('heading', { name: 'どこでも六法' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Multi-Subtitles for YouTube' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: '条文スコープ' })).toBeVisible();
+
+    // Verify extra prose / poetic tagline is completely eliminated
+    const homeContent = await page.content();
+    expect(homeContent).not.toMatch(/作品と活動記録を、ひとつの場所に/);
   });
 
   test('about page loads and contains no medical or illness history', async ({ page }) => {

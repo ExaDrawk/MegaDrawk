@@ -21,7 +21,6 @@ export function SiteFooter() {
             >
               <BrandLockup preset="footer" />
             </Link>
-            <p className="site-footer__tagline">作品と活動記録を、ひとつの場所に。</p>
             <XProfileLink
               href={SITE.social.x}
               label={SITE.social.xHandle}

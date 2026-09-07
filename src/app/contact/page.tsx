@@ -3,7 +3,7 @@ import { XProfileLink } from "@/components/ui/XProfileLink";
 
 export const metadata = {
   title: "Contact",
-  description: `${SITE.name}への連絡先。X（Twitter）からお気軽にお声がけください。`,
+  description: `${SITE.name}への連絡先。`,
 };
 
 export default function ContactPage() {
@@ -15,7 +15,7 @@ export default function ContactPage() {
             Contact
           </h1>
           <p className="page-description mt-3 text-base leading-relaxed" style={{ color: "var(--color-text-secondary)" }}>
-            ご連絡はXからお気軽にどうぞ。制作や個人開発についてのメッセージを歓迎します。
+            ご連絡はX（{SITE.social.xHandle}）のDMまで。
           </p>
         </header>
 

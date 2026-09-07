@@ -18,9 +18,6 @@ export default function BlogPage() {
           <h1 id="blog-title" className="page-title text-3xl sm:text-4xl font-bold tracking-tight">
             Blog
           </h1>
-          <p className="page-description mt-3 text-base leading-relaxed" style={{ color: "var(--color-text-secondary)" }}>
-            制作記録とメモ。
-          </p>
         </header>
 
         <div className="mt-8 max-w-3xl">
