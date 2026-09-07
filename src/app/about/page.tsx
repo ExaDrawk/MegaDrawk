@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SITE } from "@/config/site";
 import { PROJECTS } from "@/config/projects";
+import { ProjectIcon } from "@/components/ui/ProjectIcon";
 
 export const metadata: Metadata = {
   title: "About",
@@ -41,39 +42,47 @@ export default function AboutPage() {
 
           <div className="mt-6 divide-y divide-[var(--color-border-subtle)]">
             {PROJECTS.map((project) => (
-              <article key={project.name} className="py-6 first:pt-0 last:pb-0">
-                <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-2">
-                  <h3 className="text-lg font-bold tracking-tight">
+              <article key={project.name} className="py-6 first:pt-0 last:pb-0 flex flex-col sm:flex-row items-start gap-4 sm:gap-5">
+                <ProjectIcon
+                  src={project.imageSrc}
+                  alt={project.name}
+                  href={project.href}
+                  size="md"
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-2">
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <h3 className="text-lg font-bold tracking-tight">
+                        <a
+                          href={project.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="hover:text-[var(--color-accent)] transition-colors"
+                        >
+                          {project.name}
+                        </a>
+                      </h3>
+                      <span
+                        className="inline-block px-2 py-0.5 text-xs font-mono rounded border border-[var(--color-border-subtle)]"
+                        style={{ color: "var(--color-text-muted)" }}
+                      >
+                        {project.platform}
+                      </span>
+                    </div>
                     <a
+                      className="text-link text-xs sm:text-sm font-mono inline-flex items-center gap-1 shrink-0"
                       href={project.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hover:text-[var(--color-accent)] transition-colors"
                     >
-                      {project.name}
+                      {project.linkLabel}
+                      <span aria-hidden="true">&rarr;</span>
                     </a>
-                  </h3>
-                  <a
-                    className="text-link text-xs sm:text-sm font-mono inline-flex items-center gap-1 shrink-0"
-                    href={project.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {project.linkLabel}
-                    <span aria-hidden="true">&rarr;</span>
-                  </a>
+                  </div>
+                  <p className="mt-2.5 text-sm leading-relaxed max-w-3xl" style={{ color: "var(--color-text-secondary)" }}>
+                    {project.description}
+                  </p>
                 </div>
-                <div className="mt-2">
-                  <span
-                    className="inline-block px-2 py-0.5 text-xs font-mono rounded border border-[var(--color-border-subtle)]"
-                    style={{ color: "var(--color-text-muted)" }}
-                  >
-                    {project.platform}
-                  </span>
-                </div>
-                <p className="mt-3 text-sm leading-relaxed max-w-3xl" style={{ color: "var(--color-text-secondary)" }}>
-                  {project.description}
-                </p>
               </article>
             ))}
           </div>

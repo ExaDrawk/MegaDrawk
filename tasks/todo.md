@@ -154,6 +154,18 @@
 - [x] Step 3: 品質ゲート通過（BOM・型・Lint・単体52件・E2E17件・ビルドすべて完全パス）
 - [x] Step 4: 本番反映（Gitプッシュ・Cloudflare Pages デプロイ・実機検証: https://megadrawk.com/ にて反映確認済み）
 
+## 2026-09-08 個人開発紹介の画像リンク表示（AAAクラス）
+
+- [x] Step 1: 仮定・スコープの明示
+  - 公式ストアアセット（どこでも六法、Multi-Subtitles for YouTube、条文スコープ）の確保
+  - `public/images/projects/` 配下への静的画像配置
+  - `src/config/projects.ts` への `imageSrc` 追加
+- [x] Step 2: UI層実装（`ProjectIcon.tsx` 作成、`page.tsx` および `about/page.tsx` への画像リンク配置）
+- [x] Step 3: 品質ゲート通過（BOM・型・Lint・単体52件・E2E17件・ビルド全件完全パス）
+- [x] Step 4: 視覚確認（スクリーンショット検証: デスクトップ・モバイル双方の美麗表示を確認）
+- [ ] Step 5: 本番反映（Gitプッシュ・Cloudflare Pages デプロイ・実機検証）
+
+
 
 
 

@@ -5,6 +5,7 @@ import { getPublishedBlogPosts } from "@/config/blog";
 import { formatJaDate } from "@/lib/date";
 import { ArrowUpRight, ExternalLink } from "lucide-react";
 import { ActionLink } from "@/components/ui/Action";
+import { ProjectIcon } from "@/components/ui/ProjectIcon";
 import {
   BrandLockup,
   getBrandLockupContainerClassName,
@@ -68,24 +69,33 @@ export default function HomePage() {
               className="surface p-5 rounded-md border border-[var(--color-border-subtle)] flex flex-col justify-between hover:border-[var(--color-accent)] transition-colors"
             >
               <div>
-                <div className="flex items-center justify-between gap-2">
-                  <span
-                    className="inline-block px-2 py-0.5 text-xs font-mono rounded border border-[var(--color-border-subtle)]"
-                    style={{ color: "var(--color-text-muted)" }}
-                  >
-                    {project.platform}
-                  </span>
-                  <a
+                <div className="flex items-start justify-between gap-3">
+                  <ProjectIcon
+                    src={project.imageSrc}
+                    alt={project.name}
                     href={project.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition-colors"
-                    aria-label={`${project.name}（外部リンク）`}
-                  >
-                    <ExternalLink size={14} aria-hidden="true" />
-                  </a>
+                    size="sm"
+                  />
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="inline-block px-2 py-0.5 text-xs font-mono rounded border border-[var(--color-border-subtle)]"
+                      style={{ color: "var(--color-text-muted)" }}
+                    >
+                      {project.platform}
+                    </span>
+                    <a
+                      href={project.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[var(--color-text-muted)] hover:text-[var(--color-accent)] transition-colors"
+                      aria-label={`${project.name}（外部リンク）`}
+                    >
+                      <ExternalLink size={14} aria-hidden="true" />
+                    </a>
+                  </div>
                 </div>
-                <h3 className="text-base font-bold tracking-tight mt-3">
+
+                <h3 className="text-base font-bold tracking-tight mt-4">
                   <a
                     href={project.href}
                     target="_blank"

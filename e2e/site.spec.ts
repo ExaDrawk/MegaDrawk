@@ -20,6 +20,11 @@ test.describe('Site features', () => {
     await expect(page.getByRole('heading', { name: 'Multi-Subtitles for YouTube' })).toBeVisible();
     await expect(page.getByRole('heading', { name: '条文スコープ' })).toBeVisible();
 
+    // Verify project image links on home page
+    await expect(page.getByRole('link', { name: 'どこでも六法（アプリアイコン）' })).toHaveAttribute('href', 'https://play.google.com/apps/testing/com.drawk.roppo');
+    await expect(page.getByRole('link', { name: 'Multi-Subtitles for YouTube（アプリアイコン）' })).toHaveAttribute('href', /chromewebstore\.google\.com/);
+    await expect(page.getByRole('link', { name: '条文スコープ（アプリアイコン）' })).toHaveAttribute('href', /chromewebstore\.google\.com/);
+
     // Verify extra prose / poetic tagline is completely eliminated
     const homeContent = await page.content();
     expect(homeContent).not.toMatch(/作品と活動記録を、ひとつの場所に/);
@@ -33,6 +38,12 @@ test.describe('Site features', () => {
     await expect(page.getByRole('heading', { name: 'どこでも六法' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Multi-Subtitles for YouTube' })).toBeVisible();
     await expect(page.getByRole('heading', { name: '条文スコープ' })).toBeVisible();
+
+    // Verify project image links on about page
+    await expect(page.getByRole('link', { name: 'どこでも六法（アプリアイコン）' })).toHaveAttribute('href', 'https://play.google.com/apps/testing/com.drawk.roppo');
+    await expect(page.getByRole('link', { name: 'Multi-Subtitles for YouTube（アプリアイコン）' })).toHaveAttribute('href', /chromewebstore\.google\.com/);
+    await expect(page.getByRole('link', { name: '条文スコープ（アプリアイコン）' })).toHaveAttribute('href', /chromewebstore\.google\.com/);
+
     await expect(
       page.getByRole('link', { name: /Google Play（テスト公開）/ })
     ).toHaveAttribute('href', 'https://play.google.com/apps/testing/com.drawk.roppo');
