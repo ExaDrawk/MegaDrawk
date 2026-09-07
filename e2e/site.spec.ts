@@ -13,9 +13,14 @@ test.describe('Site features', () => {
     await expect(page.getByRole('link', { name: 'Contact' }).first()).toBeVisible();
   });
 
-  test('about page loads', async ({ page }) => {
+  test('about page loads and contains no medical or illness history', async ({ page }) => {
     await page.goto('/about');
     await expect(page.getByRole('heading', { name: /About/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'プロフィール' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: '目標' })).toBeVisible();
+
+    const content = await page.content();
+    expect(content).not.toMatch(/病歴|高安動脈炎|Bentall|ベントール|機械弁|身体障害|リンヴォック|プレドニン|闘病/);
   });
 
   test('blog page loads', async ({ page }) => {
@@ -26,9 +31,12 @@ test.describe('Site features', () => {
     ).toHaveCount(0);
   });
 
-  test('contact page loads', async ({ page }) => {
+  test('contact page loads and contains no medical references', async ({ page }) => {
     await page.goto('/contact');
     await expect(page.getByRole('heading', { name: /Contact/i })).toBeVisible();
+
+    const content = await page.content();
+    expect(content).not.toMatch(/高安動脈炎|闘病|疾患/);
   });
 
   test('privacy page loads', async ({ page }) => {

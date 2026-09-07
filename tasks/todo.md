@@ -62,3 +62,17 @@
 - [x] 全品質ゲート再実行: Lint / 型 / 単体48件 / E2E16件
 - [x] `/logo.svg` 404修正: `_routes.json` が実在しない静的パスまでexcludeし動的ルート(robots.txt/sitemap.xml/manifest)も壊していたため、prepare-pages.cjs を「assets内の実在ファイルのみexclude」方式に変更。production全パス200を確認
 - [ ] 残課題: Cloudflareダッシュボードのビルド設定を `npm run deploy` + 出力 `.open-next` に変更（Git連携ビルドは旧Astro設定のままで失敗するため。直接アップロード運用なら不要）
+
+## 2026-09-07 個人医療情報・病歴の完全削除とプライバシー強化
+
+- [x] Step 1: 仮定・スコープの明示
+- [x] Step 2: アーキテクチャ設計（層境界・データフロー・採用原則）
+- [x] Step 3: 実装
+  - [x] 3-1: `src/app/about/page.tsx` から病歴セクション（持病、手術名、薬剤名、障害等級等）および闘病noticeを完全削除
+  - [x] 3-2: `src/app/contact/page.tsx` から病気関連noticeを完全削除
+  - [x] 3-3: プロジェクト全体のテキスト走査で病気・個人医療情報がゼロであることを検証
+  - [x] 3-4: `e2e/site.spec.ts` に病気情報非存在のアサーションを追加
+- [x] Step 4: 品質ゲート（Lint・型・テスト・ビルド・E2E）
+- [x] Step 5: 自己レビュー・修正
+- [x] Step 6: Gitコミット & origin/main プッシュ
+
