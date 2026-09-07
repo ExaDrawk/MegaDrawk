@@ -37,4 +37,12 @@ test.describe('Take Screenshots', () => {
       await page.screenshot({ path: 'screenshots/mobile-menu-open.png' });
     }
   });
+
+  test('Capture Mobile Homepage', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+    await page.screenshot({ path: 'screenshots/home-mobile.png', fullPage: true });
+  });
 });
+

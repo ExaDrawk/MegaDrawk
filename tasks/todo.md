@@ -144,6 +144,17 @@
 - [x] Step 5: 品質ゲート（BOM・Lint・型・単体52件・E2E16件・ビルド）
 - [x] Step 6: Gitコミット & origin/main プッシュ & Cloudflare Pages デプロイ & 実機URL確認
 
+## 2026-09-08 トップページHero見出しのMEGADRAWKマーク（大型ロゴ）化
+
+- [x] Step 1: 仮定・スコープの明示
+  - `src/components/layout/BrandLockup.tsx` に `hero` プリセットを追加（大型サイズ: デスクトップで高さ約80px〜100px相当、モバイルで自然にレスポンシブ縮小）
+  - `src/app/page.tsx` の `h1` テキストを大型MEGADRAWKマーク（`BrandLockup preset="hero"`）に置き換え
+  - SEO / a11y のため `<span className="sr-only">MEGADRAWK</span>` を内包
+- [x] Step 2: 実装 & 視覚確認（スクリーンショット検証: デスクトップ・モバイル共に完全な美しさを確認）
+- [x] Step 3: 品質ゲート通過（BOM・型・Lint・単体52件・E2E17件・ビルドすべて完全パス）
+- [ ] Step 4: 本番反映（Gitプッシュ・Cloudflare Pages デプロイ・実機検証）
+
+
 
 
 

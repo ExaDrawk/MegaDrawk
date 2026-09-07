@@ -5,6 +5,10 @@ import { getPublishedBlogPosts } from "@/config/blog";
 import { formatJaDate } from "@/lib/date";
 import { ArrowUpRight, ExternalLink } from "lucide-react";
 import { ActionLink } from "@/components/ui/Action";
+import {
+  BrandLockup,
+  getBrandLockupContainerClassName,
+} from "@/components/layout/BrandLockup";
 
 export default function HomePage() {
   const latestPosts = getPublishedBlogPosts().slice(0, 3);
@@ -16,9 +20,10 @@ export default function HomePage() {
         <div className="max-w-2xl">
           <h1
             id="home-title"
-            className="page-title text-4xl sm:text-6xl font-bold tracking-tight"
+            className={`page-title ${getBrandLockupContainerClassName("hero")}`}
           >
-            {SITE.name}
+            <span className="sr-only">{SITE.name}</span>
+            <BrandLockup preset="hero" priority hideAlt />
           </h1>
           <p
             className="mt-5 text-base sm:text-lg leading-relaxed"

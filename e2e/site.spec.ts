@@ -7,6 +7,9 @@ test.describe('Site features', () => {
     // Expect a title "to contain" a substring.
     await expect(page).toHaveTitle(/MEGADRAWK/);
 
+    // Verify h1 hero heading has accessible name MEGADRAWK
+    await expect(page.getByRole('heading', { level: 1, name: 'MEGADRAWK' })).toBeVisible();
+
     // Verify navigation links
     await expect(page.getByRole('link', { name: 'About' }).first()).toBeVisible();
     await expect(page.getByRole('link', { name: 'Blog' }).first()).toBeVisible();
