@@ -88,4 +88,21 @@
 - [x] 全品質ゲート通過（型・Lint・単体テスト52件・ビルド・E2Eテスト16件）
 - [x] Gitコミット & origin/main プッシュ & Cloudflare Pages 本番反映
 
+## 2026-09-07 フラグシップデザインシステム完全復元・全ファイル検証・大規模改善
+
+- [x] Step 1: 仮定・スコープの明示
+- [x] Step 2: アーキテクチャ設計（層境界・データフロー・採用原則）
+- [x] Step 3: 実装・復元
+  - [x] 3-1: `src/app/blog/page.tsx` のフラグシップスタイル復元（`blog-index`, `blog-entry`, `tag`, `empty-state`）
+  - [x] 3-2: `src/app/contact/page.tsx` のフラグシップスタイル復元（`contact-layout`, `contact-detail`、病歴完全排除維持）
+  - [x] 3-3: `src/app/privacy/page.tsx`, `src/app/terms/page.tsx` のスタイル復元（`eyebrow`, `document-meta`, `animate-enter-up`）
+  - [x] 3-4: `src/app/not-found.tsx`, `src/app/error.tsx` のステータスページスタイル復元
+  - [x] 3-5: `src/components/ui/SkipNav.tsx` を `.skip-nav` クラス利用へ復元
+  - [x] 3-6: `src/app/admin/page.tsx`, `src/app/admin/posts/new/page.tsx`, `src/components/admin/BlogPostEditor.tsx` の整理・デザイン整合
+  - [x] 3-7: 不要ファイル・一時ファイルの完全削除とファイル走査
+  - [x] 3-8: 文字コード（UTF-8 BOMなし、U+FFFDなし）の全ファイル検証
+- [x] Step 4: 品質ゲート（Lint・型・テスト・ビルド・E2E 全通過）
+- [x] Step 5: 自己レビュー・修正
+- [ ] Step 6: Gitコミット & origin/main プッシュ & Cloudflare Pages 本番反映・URL確認
+
 

@@ -16,7 +16,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "e2e": "playwright test",
-    "e2e:install": "playwright install --with-deps chromium"
+    "e2e:install": "playwright install --with-deps chromium",
+    "check:encoding": "node scripts/check-encoding.cjs"
   },
   "dependencies": {
     "lucide-react": "^0.563.0",

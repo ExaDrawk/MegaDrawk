@@ -9,101 +9,55 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <div>
-      <section className="page-section">
-        <header className="page-header">
-          <h1 className="page-title">About</h1>
-        </header>
-        <div
-          className="content-stack"
-          style={{ maxWidth: "var(--content-width)" }}
-        >
-          {/* ── 基本プロフィール ── */}
+    <div className="animate-enter-up">
+      <section className="page-section" aria-labelledby="about-title">
+        <div className="about-intro">
           <div>
-            <h2
-              className="section-title text-lg"
-              style={{ color: "var(--color-text)" }}
-            >
-              プロフィール
-            </h2>
-            <p
-              className="text-base leading-relaxed"
-              style={{ color: "var(--color-text-secondary)" }}
-            >
-              Drawkは日本の大学生です。
+            <p className="eyebrow">About / Drawk</p>
+            <h1 id="about-title" className="page-title">
+              About
+            </h1>
+            <p className="about-intro__statement">つくる人の、現在地。</p>
+            <p className="page-description">
+              MEGADRAWKは、{SITE.ownerName}の作品と活動記録をまとめたサイトです。
             </p>
           </div>
-
-          {/* ── 個人開発 ── */}
-          <section aria-labelledby="projects-heading">
-            <h2
-              id="projects-heading"
-              className="section-title text-lg"
-              style={{ color: "var(--color-text)" }}
-            >
-              個人開発
-            </h2>
-            <p
-              className="mt-1 text-sm"
-              style={{ color: "var(--color-text-secondary)" }}
-            >
-              法律学習と日々の学びを支えるアプリ・拡張機能を作っています。
-            </p>
-            <div className="mt-4 flex flex-col gap-4">
-              {PROJECTS.map((project) => (
-                <article
-                  key={project.name}
-                  className="surface p-5 sm:p-6"
-                >
-                  <span
-                    className="text-xs font-semibold tracking-wide"
-                    style={{ color: "var(--color-text-muted)" }}
-                  >
-                    {project.platform}
-                  </span>
-                  <h3
-                    className="mt-2 text-lg font-semibold"
-                    style={{ color: "var(--color-text)" }}
-                  >
-                    {project.name}
-                  </h3>
-                  <p
-                    className="mt-2 text-sm leading-relaxed"
-                    style={{ color: "var(--color-text-secondary)" }}
-                  >
-                    {project.description}
-                  </p>
-                  <div className="mt-4">
-                    <a
-                      className="text-link inline-flex items-center gap-1"
-                      href={project.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {project.linkLabel}
-                      <span aria-hidden="true">↗</span>
-                    </a>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </section>
-
-          {/* ── 目標 ── */}
-          <div>
-            <h2
-              className="section-title text-lg"
-              style={{ color: "var(--color-text)" }}
-            >
-              目標
-            </h2>
-            <p
-              className="text-base leading-relaxed"
-              style={{ color: "var(--color-text-secondary)" }}
-            >
+          <aside className="about-intro__aside" aria-label="プロフィール">
+            <h2 className="mono-label mb-1">プロフィール</h2>
+            <p>日本の大学生 / 個人開発</p>
+            <h2 className="mono-label mt-3 mb-1">目標</h2>
+            <p className="text-xs" style={{ color: "var(--color-muted)" }}>
               AGIまで生きるのが第一目標。
             </p>
-          </div>
+          </aside>
+        </div>
+
+        <div className="project-index" aria-labelledby="projects-heading">
+          <h2 className="project-index__head" id="projects-heading">
+            個人開発
+          </h2>
+          {PROJECTS.map((project) => (
+            <article key={project.name} className="project-entry">
+              <div className="project-entry__body">
+                <h2>{project.name}</h2>
+                <p className="project-entry__description">
+                  {project.platform}。{project.description}
+                </p>
+              </div>
+              <div className="project-entry__meta">
+                <span className="project-entry__platform">{project.platform}</span>
+                <a
+                  className="project-entry__link"
+                  href={project.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {project.linkLabel}
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </div>
+            </article>
+          ))}
         </div>
       </section>
     </div>

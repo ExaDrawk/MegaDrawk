@@ -12,23 +12,15 @@ export default function PrivacyPolicyPage() {
   const lastUpdated = "2026年2月9日";
 
   return (
-    <div>
+    <div className="animate-enter-up">
       <article className="page-section content-column">
-        <Link
-          href="/"
-          className="text-link mb-7"
-        >
+        <Link href="/" className="text-link mb-7">
           ← トップに戻る
         </Link>
 
-        <h1
-          className="page-title"
-        >
-          プライバシーポリシー
-        </h1>
-        <p className="mb-10 mt-3 text-sm" style={{ color: "var(--color-text-muted)" }}>
-          最終更新日: {lastUpdated}
-        </p>
+        <p className="eyebrow">Legal / privacy</p>
+        <h1 className="page-title">プライバシーポリシー</h1>
+        <p className="document-meta">最終更新日: {lastUpdated}</p>
 
         <div className="prose-content">
           <h2>はじめに</h2>

@@ -1,5 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Noto_Sans_JP } from "next/font/google";
+import {
+  Bricolage_Grotesque,
+  IBM_Plex_Sans,
+  IBM_Plex_Mono,
+  Noto_Sans_JP,
+} from "next/font/google";
 import { headers } from "next/headers";
 import Script from "next/script";
 import { SITE } from "@/config/site";
@@ -8,10 +13,25 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SkipNav } from "@/components/ui/SkipNav";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-sans",
+const fontDisplay = Bricolage_Grotesque({
+  variable: "--font-display",
   subsets: ["latin"],
   display: "swap",
+  weight: ["400", "500", "600", "700", "800"],
+});
+
+const fontBody = IBM_Plex_Sans({
+  variable: "--font-body",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+});
+
+const fontMono = IBM_Plex_Mono({
+  variable: "--font-mono",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400", "500", "600"],
 });
 
 const notoSansJP = Noto_Sans_JP({
@@ -94,7 +114,7 @@ export default async function RootLayout({
   const adsenseClient = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim();
 
   return (
-    <html lang={SITE.language}>
+    <html lang={SITE.language} data-theme="cobalt">
       <head>
         {adsenseClient ? (
           <Script
@@ -107,7 +127,9 @@ export default async function RootLayout({
           />
         ) : null}
       </head>
-      <body className={`${inter.variable} ${notoSansJP.variable} antialiased`}>
+      <body
+        className={`${fontDisplay.variable} ${fontBody.variable} ${fontMono.variable} ${notoSansJP.variable} site-body antialiased`}
+      >
         <PersonJsonLd nonce={nonce} />
         <SkipNav />
         <div className="page-container">

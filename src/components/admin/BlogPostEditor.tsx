@@ -376,9 +376,13 @@ export function BlogPostEditor() {
                   : "本文の冒頭120文字が excerpt として使われます。"}
               </p>
               {result && result.post.tags.length > 0 ? (
-                <p className="mt-2 text-sm" style={{ color: "var(--color-text-muted)" }}>
-                  {result.post.tags.map((tag) => `#${tag}`).join(" ")}
-                </p>
+                <div className="mt-3 flex flex-wrap gap-2" aria-label="タグ">
+                  {result.post.tags.map((tag) => (
+                    <span key={tag} className="tag">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
               ) : null}
             </div>
 

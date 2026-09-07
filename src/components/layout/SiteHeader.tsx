@@ -45,39 +45,30 @@ export function SiteHeader() {
   }, [isMenuOpen]);
 
   return (
-    <header
-      className="fixed inset-x-0 top-0 z-50"
-      style={{
-        height: "var(--header-height)",
-        background: "var(--color-surface)",
-        borderBottom: "1px solid var(--color-border-subtle)",
-      }}
-    >
-      <div
-        className="mx-auto flex h-full items-center justify-between"
-        style={{
-          maxWidth: "var(--max-width)",
-          paddingInline: "var(--space-page-x)",
-        }}
-      >
+    <header className="site-header">
+      <div className="site-header__inner">
         <Link
           href="/"
-          className={`${getBrandLockupContainerClassName("header")} min-h-11 rounded-lg transition-opacity duration-150 hover:opacity-80`}
+          className={`${getBrandLockupContainerClassName("header")} site-brand`}
           aria-label={`${SITE.name} トップページ`}
           onClick={closeMenu}
         >
           <BrandLockup preset="header" priority />
         </Link>
 
-        <nav className="hidden sm:block" aria-label="メインナビゲーション">
-          <ul className="flex items-center gap-1">
+        <p className="site-header__mark" aria-hidden="true">
+          independent / builder&apos;s index
+        </p>
+
+        <nav className="site-nav" aria-label="メインナビゲーション">
+          <ul className="site-nav__list">
             {NAV_LINKS.map((link) => {
               const isActive = pathname === link.href;
               return (
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="action action-ghost min-h-11 px-4"
+                    className="site-nav__link"
                     aria-current={isActive ? "page" : undefined}
                   >
                     {link.label}
@@ -91,7 +82,7 @@ export function SiteHeader() {
         <button
           ref={menuButtonRef}
           type="button"
-          className="site-menu-trigger action action-ghost -mr-2 min-h-11 min-w-11 p-2"
+          className="site-menu-trigger"
           onClick={toggleMenu}
           aria-expanded={isMenuOpen}
           aria-haspopup="true"
@@ -109,10 +100,10 @@ export function SiteHeader() {
       {isMenuOpen && (
         <nav
           id="mobile-menu"
-          className="mobile-menu sm:hidden"
+          className="mobile-menu"
           aria-label="モバイルナビゲーション"
         >
-          <ul className="flex flex-col p-2">
+          <ul className="site-nav__list">
             {NAV_LINKS.map((link, index) => {
               const isActive = pathname === link.href;
               return (
@@ -120,7 +111,7 @@ export function SiteHeader() {
                   <Link
                     ref={index === 0 ? firstMenuLinkRef : undefined}
                     href={link.href}
-                    className="action action-ghost w-full justify-start px-3"
+                    className="site-nav__link"
                     aria-current={isActive ? "page" : undefined}
                     onClick={closeMenu}
                   >
