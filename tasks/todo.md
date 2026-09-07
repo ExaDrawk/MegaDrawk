@@ -103,6 +103,6 @@
   - [x] 3-8: 文字コード（UTF-8 BOMなし、U+FFFDなし）の全ファイル検証
 - [x] Step 4: 品質ゲート（Lint・型・テスト・ビルド・E2E 全通過）
 - [x] Step 5: 自己レビュー・修正
-- [ ] Step 6: Gitコミット & origin/main プッシュ & Cloudflare Pages 本番反映・URL確認
+- [x] Step 6: Gitコミット & origin/main プッシュ & Cloudflare Pages 本番反映・URL確認
 
 
