@@ -152,7 +152,8 @@
   - SEO / a11y のため `<span className="sr-only">MEGADRAWK</span>` を内包
 - [x] Step 2: 実装 & 視覚確認（スクリーンショット検証: デスクトップ・モバイル共に完全な美しさを確認）
 - [x] Step 3: 品質ゲート通過（BOM・型・Lint・単体52件・E2E17件・ビルドすべて完全パス）
-- [ ] Step 4: 本番反映（Gitプッシュ・Cloudflare Pages デプロイ・実機検証）
+- [x] Step 4: 本番反映（Gitプッシュ・Cloudflare Pages デプロイ・実機検証: https://megadrawk.com/ にて反映確認済み）
+
 
 
 
