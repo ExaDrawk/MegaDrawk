@@ -163,7 +163,8 @@
 - [x] Step 2: UI層実装（`ProjectIcon.tsx` 作成、`page.tsx` および `about/page.tsx` への画像リンク配置）
 - [x] Step 3: 品質ゲート通過（BOM・型・Lint・単体52件・E2E17件・ビルド全件完全パス）
 - [x] Step 4: 視覚確認（スクリーンショット検証: デスクトップ・モバイル双方の美麗表示を確認）
-- [ ] Step 5: 本番反映（Gitプッシュ・Cloudflare Pages デプロイ・実機検証）
+- [x] Step 5: 本番反映（Gitプッシュ・Cloudflare Pages デプロイ・実機検証: https://megadrawk.com/ および /about にて配信確認完了）
+
 
 
 
