@@ -142,7 +142,7 @@
   - [x] 3-6: Privacy & Terms & Status（端正なドキュメントレイアウト）
 - [x] Step 4: スクリーンショットによる視覚的検証（デスクトップ・モバイル）
 - [x] Step 5: 品質ゲート（BOM・Lint・型・単体52件・E2E16件・ビルド）
-- [ ] Step 6: Gitコミット & origin/main プッシュ & Cloudflare Pages デプロイ & 実機URL確認
+- [x] Step 6: Gitコミット & origin/main プッシュ & Cloudflare Pages デプロイ & 実機URL確認
 
 
 
