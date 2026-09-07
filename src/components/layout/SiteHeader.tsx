@@ -56,10 +56,6 @@ export function SiteHeader() {
           <BrandLockup preset="header" priority />
         </Link>
 
-        <p className="site-header__mark" aria-hidden="true">
-          independent / builder&apos;s index
-        </p>
-
         <nav className="site-nav" aria-label="メインナビゲーション">
           <ul className="site-nav__list">
             {NAV_LINKS.map((link) => {

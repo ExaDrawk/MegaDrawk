@@ -13,12 +13,11 @@ export const metadata: Metadata = {
 
 export default function AdminPostNewPage() {
   return (
-    <div className="animate-enter-up">
+    <div>
       <section className="page-section">
         <header className="page-header">
-          <p className="eyebrow">Admin / Posts / New</p>
-          <h1 className="page-title">記事追加の管理画面</h1>
-          <p className="page-description">
+          <h1 className="page-title text-3xl font-bold tracking-tight">記事追加の管理画面</h1>
+          <p className="page-description mt-2">
             記事草案の作成、入力検証、および設定ファイル用コードの生成を行います。
           </p>
         </header>

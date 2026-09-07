@@ -9,15 +9,16 @@ export default function HomePage() {
   const latestPosts = getPublishedBlogPosts().slice(0, 3);
 
   return (
-    <div className="animate-enter-up">
-      <section className="home-hero" aria-labelledby="home-title">
-        <div className="home-hero__copy">
-          <p className="eyebrow">Field notes / independent build</p>
-          <h1 id="home-title" className="home-hero__title">
+    <div>
+      <section className="page-section" aria-labelledby="home-title">
+        <div className="max-w-2xl">
+          <h1 id="home-title" className="page-title text-4xl sm:text-5xl font-bold tracking-tight">
             {SITE.name}
           </h1>
-          <p className="home-hero__lede">{SITE.heroCopy}</p>
-          <div className="home-hero__actions">
+          <p className="mt-4 text-base sm:text-lg leading-relaxed" style={{ color: "var(--color-text-secondary)" }}>
+            {SITE.heroCopy}
+          </p>
+          <div className="mt-8 flex flex-wrap gap-4">
             <ActionLink href="/blog">
               ブログを読む
               <ArrowUpRight size={16} aria-hidden="true" />
@@ -27,77 +28,47 @@ export default function HomePage() {
             </ActionLink>
           </div>
         </div>
-
-        <aside className="hero-plate" aria-label="MEGADRAWKのステートメント">
-          <div className="hero-plate__top">
-            <span className="hero-plate__label">Current / open notes</span>
-            <span className="hero-plate__status">live</span>
-          </div>
-          <div className="hero-plate__mark" aria-hidden="true">
-            M/
-          </div>
-          <div className="hero-plate__bottom">
-            <p className="hero-plate__statement">法律と制作を、同じ机で。</p>
-            <span className="hero-plate__label" aria-hidden="true">
-              01
-            </span>
-          </div>
-        </aside>
       </section>
 
-      <section className="home-rail" aria-labelledby="latest-heading">
-        <div className="home-rail__intro">
-          <p className="eyebrow">01 / notes</p>
-          <h2 id="latest-heading" className="section-title">
-            Latest notes
+      <section className="page-section" aria-labelledby="latest-heading">
+        <div className="flex items-center justify-between pb-4 border-b border-[var(--color-border-subtle)]">
+          <h2 id="latest-heading" className="text-xl font-bold tracking-tight">
+            最近の記事
           </h2>
-          <p className="section-description">
-            制作、学び、公開までの途中経過を短い記録にしています。
-          </p>
+          <Link href="/blog" className="text-link text-sm inline-flex items-center gap-1">
+            すべて見る
+            <span aria-hidden="true">&rarr;</span>
+          </Link>
         </div>
 
-        <div>
+        <div className="mt-6">
           {latestPosts.length > 0 ? (
-            <div className="notes-list">
+            <div className="divide-y divide-[var(--color-border-subtle)]">
               {latestPosts.map((post) => (
-                <article key={post.id} className="note-row">
-                  <time dateTime={post.date} className="note-meta">
-                    {formatJaDate(post.date)}
-                  </time>
-                  <Link href={`/blog#${post.id}`} className="note-row__link">
-                    <h3 className="note-row__title">{post.title}</h3>
-                    <p className="note-row__excerpt">{post.excerpt}</p>
-                  </Link>
+                <article key={post.id} className="py-4 first:pt-0 last:pb-0">
+                  <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1">
+                    <Link href={`/blog#${post.id}`} className="group">
+                      <h3 className="text-base font-semibold group-hover:text-[var(--color-primary)] transition-colors">
+                        {post.title}
+                      </h3>
+                    </Link>
+                    <time dateTime={post.date} className="text-xs font-mono" style={{ color: "var(--color-text-muted)" }}>
+                      {formatJaDate(post.date)}
+                    </time>
+                  </div>
+                  <p className="mt-1 text-sm line-clamp-2" style={{ color: "var(--color-text-secondary)" }}>
+                    {post.excerpt}
+                  </p>
                 </article>
               ))}
             </div>
           ) : (
-            <div className="surface-muted empty-state">
-              <p>まだ記事がありません。新しい記事の公開をお待ちください。</p>
+            <div className="surface-muted p-8 text-center">
+              <p className="text-sm" style={{ color: "var(--color-text-secondary)" }}>
+                まだ記事がありません。
+              </p>
             </div>
           )}
-        </div>
-      </section>
-
-      <section className="home-brief" aria-labelledby="brief-heading">
-        <div>
-          <p className="eyebrow">02 / the brief</p>
-          <h2 id="brief-heading" className="section-title">
-            つくる。記録する。次へ進む。
-          </h2>
-          <p className="section-description">
-            MEGADRAWKは、作品と活動記録をまとめた場所です。個人開発の現在地はAboutに、更新のログはBlogに残しています。
-          </p>
-        </div>
-        <div className="home-brief__links">
-          <Link className="home-brief__link" href="/about">
-            <span>個人開発の一覧</span>
-            <span aria-hidden="true">↗</span>
-          </Link>
-          <Link className="home-brief__link" href="/contact">
-            <span>連絡先</span>
-            <span aria-hidden="true">↗</span>
-          </Link>
         </div>
       </section>
     </div>

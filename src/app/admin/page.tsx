@@ -12,12 +12,11 @@ export const metadata: Metadata = {
 
 export default function AdminPage() {
   return (
-    <div className="animate-enter-up">
+    <div>
       <section className="page-section">
         <header className="page-header">
-          <p className="eyebrow">Admin / console</p>
-          <h1 className="page-title">管理メニュー</h1>
-          <p className="page-description">
+          <h1 className="page-title text-3xl font-bold tracking-tight">管理メニュー</h1>
+          <p className="page-description mt-2">
             記事草案の作成とコード生成を行います。
           </p>
         </header>

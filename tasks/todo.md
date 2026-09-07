@@ -105,4 +105,22 @@
 - [x] Step 5: 自己レビュー・修正
 - [x] Step 6: Gitコミット & origin/main プッシュ & Cloudflare Pages 本番反映・URL確認
 
+## 2026-09-07 AIスロップ完全排斥 & ソリッド・シンプルUIへの再構築
+
+- [x] Step 1: `anti-ai-slop-design` スキルに基づく排斥項目の特定
+  - 余計な文言（`.eyebrow`、装飾キックラベル、ポエム文言、`hero-plate`の装飾）の完全削除
+  - 過剰な角丸（pill, rounded-2xl等）の排斥 → 4px〜6px の端正なエッジへ統一
+  - 浮遊シャドウ・もっさりアニメーション（`animate-enter-up`）の排斥 → 1px 境界線とソリッドな表示
+- [x] Step 2: 各画面の簡素化・ソリッド化
+  - [x] 2-1: `src/app/page.tsx`（hero-plate/home-brief等の装飾とポエム文言を削除、シンプルなトップへ）
+  - [x] 2-2: `src/app/about/page.tsx`（ポエム文言削除、端正なプロフィールと製作物3件のソリッドリスト表示）
+  - [x] 2-3: `src/app/blog/page.tsx`（装飾キックラベル・ポエム削除、シンプルな記事一覧/空状態）
+  - [x] 2-4: `src/app/contact/page.tsx`（装飾ラベル削除、簡潔な連絡先表示）
+  - [x] 2-5: `src/components/layout/SiteHeader.tsx`（`builder's index` 等の装飾ラベル削除、シンプルなブランド+ナビへ）
+  - [x] 2-6: `src/app/privacy/page.tsx`, `terms/page.tsx`, `not-found.tsx`, `error.tsx`, `admin/`（`.eyebrow` 削除、簡潔化）
+  - [x] 2-7: `src/app/globals.css`（角丸・シャドウ・アニメーションのAIスロップ排斥、4px端正エッジ・1pxボーダー調整）
+- [x] Step 3: 品質ゲート通過（型・Lint・単体テスト52件・ビルド・E2Eテスト16件・BOM検証）
+- [ ] Step 4: 本番反映（Gitプッシュ・Cloudflare Pages デプロイ・実機検証）
+
+
 

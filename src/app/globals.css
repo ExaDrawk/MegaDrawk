@@ -82,7 +82,7 @@ a {
 
 .animate-enter-up,
 .animate-enter-fade {
-  animation: enter-page var(--duration-slow) var(--ease-emphasized) both;
+  animation: none;
 }
 
 .page-container {
