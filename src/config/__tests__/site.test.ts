@@ -8,6 +8,7 @@ describe("SITE config", () => {
     expect(SITE.description).toBeDefined();
     expect(SITE.domain).toBeDefined();
     expect(SITE.url).toBeDefined();
+    expect(SITE.email).toBeDefined();
     expect(SITE.locale).toBeDefined();
     expect(SITE.language).toBeDefined();
     expect(SITE.themeColor).toBeDefined();
@@ -15,6 +16,11 @@ describe("SITE config", () => {
     expect(SITE.social).toBeDefined();
     expect(SITE.social.x).toBeDefined();
     expect(SITE.social.xHandle).toBeDefined();
+  });
+
+  it("email is a valid address on the site domain", () => {
+    expect(SITE.email).toMatch(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+    expect(SITE.email.endsWith(`@${SITE.domain}`)).toBe(true);
   });
 
   it("url starts with https://", () => {

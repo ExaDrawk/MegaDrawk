@@ -165,15 +165,6 @@
 - [x] Step 4: 視覚確認（スクリーンショット検証: デスクトップ・モバイル双方の美麗表示を確認）
 - [x] Step 5: 本番反映（Gitプッシュ・Cloudflare Pages デプロイ・実機検証: https://megadrawk.com/ および /about にて配信確認完了）
 
-
-
-
-
-
-
-
-
-
 ## 2026-10-22 Astro完全移行
 
 - [x] 静的生成・層境界・URLとコンテンツの保持
@@ -182,3 +173,19 @@
 - [x] ハッシュCSP・HTTPヘッダー・保存データ保護
 - [x] 自動品質ゲート・ブラウザ検証・証拠確認
 - [x] READMEと開発者ガイド更新
+
+## 2026-10-22 contact@megadrawk.com 対外主要アドレス化（Brevo完全対応）
+
+- [x] 仮定・スコープの明示（受信: Cloudflare Email Routing / 送信: Brevo SMTP / 正本: SITE.email）
+- [x] src/config/site.ts に email を追加し Contact ページへ反映（DRY・単一情報源）
+- [x] 単体テスト（メール形式・ドメイン整合）とE2E（mailto表示・href）追加
+- [x] 死蔵デザイントークン20個削除（tokens.css全トークンの使用数を機械監査）
+- [x] e2e/migration.spec.ts → e2e/static.spec.ts リネーム（現役回帰テストの名称実態化）
+- [x] Cloudflare DNS: Brevo認証レコード7件追加（brevo-code / DKIM×2 / DMARC / ブランド×3）
+- [x] Cloudflare Email Routing: security@ 転送ルール新規作成（security.txtの死んだ宛先を修復）
+- [x] Brevo: megadrawk.com ドメイン認証完了・送信者 Drawk <contact@megadrawk.com> Verified
+- [x] DNS反映検証（8.8.8.8でDMARC / DKIM×2 / brevo-code / mailブランド確認）
+- [x] DEVELOPER.md にメール構成セクション追加（Gmail Send as手順・DMARC強化計画・運用注意）
+- [x] 品質ゲート（BOM・Prettier・ESLint・astro check・Vitest・ビルド・audit・E2E）
+- [x] 未使用設定の全数調査（ローカル全リポジトリgrep・Cloudflare全Pages/Workers環境変数・DNS全レコード）→ Resend/SESレコードはlawdrawk問い合わせ送信（RESEND_API_KEY）が使用中のため保持。削除対象は0件と判定
+- [ ] ユーザー作業: Brevo SMTPキー生成 → Gmail「Send mail as」設定（DEVELOPER.md参照）

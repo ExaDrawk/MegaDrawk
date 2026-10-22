@@ -6,6 +6,7 @@ export const SITE = {
   heroCopy: "大学生のDrawkが、日々の制作と学びを記録しています。",
   domain: "megadrawk.com",
   url: "https://megadrawk.com",
+  email: "contact@megadrawk.com",
   locale: "ja_JP",
   language: "ja",
   themeColor: "#ffffff",

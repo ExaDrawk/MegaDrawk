@@ -1,4 +1,6 @@
+import { Mail } from "lucide-react";
 import { SITE } from "@/config/site";
+import { ActionLink } from "@/components/ui/Action";
 import { XProfileLink } from "@/components/ui/XProfileLink";
 
 export const metadata = {
@@ -21,16 +23,24 @@ export default function ContactPage() {
             className="page-description mt-3 text-base leading-relaxed"
             data-color="color-text-secondary"
           >
-            ご連絡はX（{SITE.social.xHandle}）のDMまで。
+            ご連絡はメール（{SITE.email}）またはX（{SITE.social.xHandle}
+            ）のDMまで。
           </p>
         </header>
 
-        <div className="mt-8">
+        <div className="mt-8 flex flex-col items-start gap-3">
+          <ActionLink
+            href={`mailto:${SITE.email}`}
+            aria-label={`メールで連絡（${SITE.email}）`}
+          >
+            <Mail size={15} aria-hidden="true" className="shrink-0" />
+            <span>{SITE.email}</span>
+          </ActionLink>
           <XProfileLink
             href={SITE.social.x}
             label={SITE.social.xHandle}
             ariaLabel={`X（${SITE.social.xHandle}）`}
-            className="action action-primary"
+            className="action action-secondary"
             iconSize={15}
             showExternalIcon
           />

@@ -121,6 +121,15 @@ test.describe("Site features", () => {
     await page.goto("/contact");
     await expect(page.getByRole("heading", { name: /Contact/i })).toBeVisible();
 
+    const contactLink = page.getByRole("link", {
+      name: /contact@megadrawk\.com/,
+    });
+    await expect(contactLink).toBeVisible();
+    await expect(contactLink).toHaveAttribute(
+      "href",
+      "mailto:contact@megadrawk.com",
+    );
+
     const content = await page.content();
     expect(content).not.toMatch(/高安動脈炎|闘病|疾患/);
   });

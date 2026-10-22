@@ -24,6 +24,24 @@ Cloudflareが本番で追加するWeb Analyticsには、公式のCSP要件に従
 
 scripts/serve-static.mjsはローカル専用の証拠取得用サーバーです。生成済み_headersを適用し、書き込みメソッドとドットファイルへのアクセスを拒否します。公開はCloudflare Pagesの静的配信を使用します。
 
+## メール構成（contact@megadrawk.com）
+
+連絡先の正本はsrc/config/site.tsの`SITE.email`です。ページ・テストはこの値のみを参照し、アドレスを複製しないこと。
+
+**受信（Cloudflare Email Routing）**: `contact@`と`security@`をryumasa0226@gmail.comへ転送するリテラルルールが有効。Cloudflareは送信しないため、返信はGmailまたはBrevo経由で行う。ルールの変更はCloudflareダッシュボード（Email → Email Routing）で行う。
+
+**送信（Brevo SMTP）**: ドメイン認証済み（DKIM 2本＋Brevo code＋ブランドトラッキングmail.megadrawk.com）。送信者`Drawk <contact@megadrawk.com>`はVerified。Gmailの「Send mail as」でcontact@名義で返信する手順は次のとおり。
+
+1. Brevoの設定 → SMTP & APIでSMTPキーを生成する（シークレットなのでリポジトリ・チャットに残さない）。
+2. Gmailの設定 → アカウント → 送信元アドレスを追加。SMTPサーバー`smtp-relay.brevo.com`、ポート587、ユーザー名はBrevoのSMTP & API画面の表示値、パスワードはSMTPキー。
+3. 確認メールをGmail側で承認する。
+
+**DNSレコードの役割（削除・変更前に必ず確認）**: `_dmarc` TXTはポリシー`p=none`＋レポート集約先`rua@dmarc.brevo.com`。`brevo1/2._domainkey` CNAMEはBrevoのDKIM鍵。`brevo-code` TXTはBrevoドメイン所有権確認。`mail`・`r.mail`・`img.mail` CNAMEはBrevoのリンク・画像ブランドトラッキング。`send.megadrawk.com`のMX/TXTと`resend._domainkey`はlawdrawk（Pagesプロジェクト、本番で`RESEND_API_KEY`を使用）が問い合わせメールを送るためのResendDKIM・バウンス経路であり、削除するとlawdrawkのメールがDKIM不一致で迷惑メール化するため削除禁止。ResendとBrevoの両DKIMが`d=megadrawk.com`で整合するため、DMARCは両送信経路を保護する。`google-site-verification` TXTはSearch Console確認用。`8band.megadrawk.com`（Worker `band8`）と`meetpicks.megadrawk.com`（Pages `meetpicks`）は稼働中アプリのカスタムドメイン。
+
+**DMARC強化計画**: 現行は監視フェーズ（p=none）。BrevoのDMARCレポートで正規送信（Brevo・Resend経由）のみが2〜4週間続くことを確認したら`p=quarantine`へ、さらに数か月問題がなければ`p=reject`へ引き上げる。集約先を個人メールボックスに変えるとレポートXMLで受信箱が溢れるため避ける。
+
+**運用上の最優先事項**: このアドレスを対外主要連絡先にするため、megadrawk.comの自動更新・レジストラロック・Cloudflareアカウントの2FAを維持する。ドメイン失効は連絡先の完全喪失を意味する。重要アカウントの復帰用メールアドレスにはGmailを使い、ドメイン依存のcontact@を単独の復帰経路にしない。
+
 ## 変更と品質ゲート
 
 npm run verifyでUTF-8/BOM検査、Prettier、ESLint、astro check、Vitest、静的ビルド、npm audit、Playwrightを実行します。Playwrightは本番成果物を自動起動し、公開URL、JavaScript無効時の表示、CSP、エディターの実動作、保存復元、XSS入力、破損データ保護、モバイル操作を検証します。スクリーンショットはscreenshots/へ保存します。
