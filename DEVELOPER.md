@@ -30,12 +30,7 @@ scripts/serve-static.mjsはローカル専用の証拠取得用サーバーで�
 
 **受信（Cloudflare Email Routing）**: `contact@`と`security@`をryumasa0226@gmail.comへ転送するリテラルルールが有効。Cloudflareは送信しないため、返信はGmailまたはBrevo経由で行う。ルールの変更はCloudflareダッシュボード（Email → Email Routing）で行う。
 
-**送信（Brevo SMTP）**: ドメイン認証済み（DKIM 2本＋Brevo code＋ブランドトラッキングmail.megadrawk.com）。送信者`Drawk <contact@megadrawk.com>`はVerified。返信をcontact@名義で出すGmail「Send mail as」の設定は次のとおり。
-
-1. Brevoの設定 → SMTP & APIでSMTPキーを生成する。生成には2段階の認証がかかる。メール確認コード（Gmailに届く）は自動化済み。**電話SMS確認のみユーザー本人が受信する必要がある**（Brevoのアカウント保護で、スキップ・メール代替は不可。生成ダイアログで電話番号を入力しSMSコードを入れると続行する）。
-2. SMTPキーは表示された場面で即コピーし保存する（再表示不可のシークレット。リポジトリ・チャットに残さない）。
-3. Gmailの設定 → アカウント → 送信元アドレスを追加。SMTPサーバー`smtp-relay.brevo.com`、ポート587、ユーザー名はBrevoのSMTP & API画面の表示値（ログイン`bf6cf6001@smtp-brevo.com`）、パスワードにSMTPキー。
-4. 確認メールがcontact@megadrawk.com宛に届きEmail RoutingでGmailへ転送されるので、Gmail側でコードを承認する。
+**送信（Brevo SMTP・稼働済み）**: ドメイン認証済み（DKIM 2本＋Brevo code＋ブランドトラッキングmail.megadrawk.com）。送信者`Drawk <contact@megadrawk.com>`Verified、SMTPキー（名称`gmail-send-as`）生成済み。Gmailの「Send mail as」の`MegaDrawk <contact@megadrawk.com>`は**smtp-relay.brevo.com（TLS 587、ログイン`bf6cf6001@smtp-brevo.com`＋SMTPキー）へ移行済み**で、2026-10-22に実送信テスト完了（From=`contact@megadrawk.com`でGmail宛に配信確認）。旧設定はlawdrawkのResend SMTPを使っていたが、個人連絡先をlawdrawkのResendアカウントに依存させないためBrevoへ切り替えた。lawdrawk.com用の送信元（Resend）は別エントリとして変更していない。SMTPキーは生成時に一度しか表示されないため紛失時は再発行する。既定の送信元（デフォルトのFrom）は`contact@megadrawk.com`に設定してある。対外メールの主送信元として意図した状態であり、Gmail個人の既定に戻す場合は設定 → アカウント → 送信元で`ryumasa0226@gmail.com`の「デフォルトに設定」を押す。Brevoアカウントの電話認証は完了済み。
 
 **DNSレコードの役割（削除・変更前に必ず確認）**: `_dmarc` TXTはポリシー`p=none`＋レポート集約先`rua@dmarc.brevo.com`。`brevo1/2._domainkey` CNAMEはBrevoのDKIM鍵。`brevo-code` TXTはBrevoドメイン所有権確認。`mail`・`r.mail`・`img.mail` CNAMEはBrevoのリンク・画像ブランドトラッキング。`send.megadrawk.com`のMX/TXTと`resend._domainkey`はlawdrawk（Pagesプロジェクト、本番で`RESEND_API_KEY`を使用）が問い合わせメールを送るためのResendDKIM・バウンス経路であり、削除するとlawdrawkのメールがDKIM不一致で迷惑メール化するため削除禁止。ResendとBrevoの両DKIMが`d=megadrawk.com`で整合するため、DMARCは両送信経路を保護する。`google-site-verification` TXTはSearch Console確認用。`8band.megadrawk.com`（Worker `band8`）と`meetpicks.megadrawk.com`（Pages `meetpicks`）は稼働中アプリのカスタムドメイン。
 

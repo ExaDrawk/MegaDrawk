@@ -191,4 +191,8 @@
 - [x] Brevo SMTPキー生成の自動実行開始 → メールstep-up認証コードはGmailから自動取得して通過
 - [x] 受信経路の実E2E確認（Gmail→contact@→Email Routing→受信トレイの往復を実送信で検証）
 - [x] 本番のmailtoがCloudflareメール難読化+CSPで壊れていることを実機で発見 → Email Obfuscation offで修復、実機再確認
-- [ ] ユーザー作業: Brevoの電話SMS確認のみ（物理的にSIM所有者必須。生成ダイアログは開いたまま）。SMS後はSMTPキー生成・Gmail Send mail as設定・テスト送信を再委譲で自動実行可能（DEVELOPER.md参照）
+- [x] ユーザーが電話SMS認証を実施 → 以降を全自動で完走
+- [x] Brevo SMTPキー（gmail-send-as）生成・取得（値は転記せず即消費、一時ファイルは削除済み）
+- [x] Gmail送信元 MegaDrawk <contact@megadrawk.com> をResend SMTPからsmtp-relay.brevo.comへ移行（旧Resend依存を解消、lawdrawk.comエントリは変更なし）
+- [x] 実送信テスト: From=contact@megadrawk.com（Brevo経由）で送信 → Sent/受信トレイ双方で実ヘッダ確認
+- [x] 既定の送信元をcontact@megadrawk.comに設定（対外主要アドレスとして意図した状態。戻し方もDEVELOPER.mdに記載）
