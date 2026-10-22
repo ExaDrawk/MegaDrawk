@@ -1,80 +1,46 @@
 # MEGADRAWK
 
-Next.js 16 + TypeScript + Tailwind CSS v4 で構築したポートフォリオサイトです。
+Astroで静的生成するポートフォリオサイトです。公開ページはHTML・CSSとして配信し、Reactはコメントと記事草案エディターだけで起動します。Next.js、OpenNext、サーバーレンダリングの実行基盤は不要です。
 
 ## セットアップ
 
-1. 依存インストール
+Node.js 22.23.4以上（検証は24系）とnpmを使用します。
 
+```sh
 npm ci
-
-2. 環境変数の設定
-
-NEXT_PUBLIC_ADSENSE_CLIENT を .env.local に設定します。
-例: NEXT_PUBLIC_ADSENSE_CLIENT=ca-pub-xxxxxxxxxxxxxxxx
-
-3. 開発サーバー起動
-
 npm run dev
+```
 
-## 品質ゲート
+開発サーバーは http://127.0.0.1:4321 です。広告を有効にする場合のみ、.env.local に PUBLIC_ADSENSE_CLIENT=ca-pub-に続く16桁のIDを設定します。旧NEXT_PUBLIC_ADSENSE_CLIENTは使用しません。広告ID未設定では広告スクリプトを出力しません。不正な値はビルドエラーになります。
 
-- Lint: npm run lint
-- 型チェック: npm run typecheck
-- 単体テスト: npm run test
-- E2Eテスト: npm run e2e （初回は `npm run e2e:install` でブラウザを導入）
-- ビルド: npm run build
-- セキュリティ監査: npm audit （0 vulnerabilities を維持）
+## 検証
 
-## ブログ運用フロー
+```sh
+npm run e2e:install
+npm run verify
+```
 
-1. `src/config/blog.ts` の `BLOG_POSTS` に `createBlogPost(...)` を追加します。
-2. `date` は公開日、追記した日は `updatedAt` に入れます。
-3. `excerpt` は自動生成されるので、本文の冒頭120文字が一覧に出る前提で書きます。
-4. 追加後は `npm run lint` と `npm run typecheck` を通します。
-5. 公開画面に内部ファイル名や実装都合の文言が出ていないことを確認します。
+verifyは文字コード、整形、lint、Astro/TypeScript型チェック、単体テスト、本番ビルド、依存監査、ChromiumのE2Eを実行します。終了コードとログは verification/latest/manifest.json に保存します。個別実行は package.json のscriptsを参照してください。
 
-### 管理画面で草案を作る手順
+## ビルドと配信
 
-1. 開発サーバーで `/admin` もしくは `/admin/posts/new` を開きます。
-2. タイトル・本文・日付・タグを入力してコード生成します。
-3. 入力内容はブラウザに自動保存されるので、途中離脱しても復元できます。
-4. 生成された `createBlogPost(...)` を `src/config/blog.ts` の `BLOG_POSTS` に貼り付けます。
-5. 必要なら `updatedAt` を追加し、`npm run lint && npm run typecheck && npm run test` を実行します。
+```sh
+npm run build
+npm start
+```
 
-## 定期保守チェック
+ビルド成果物はdist/です。npm startは本番成果物と生成済みセキュリティヘッダーを使うローカル検証サーバー（127.0.0.1:3000）です。公開用サーバーとしては使用しません。
 
-- 月1回: 依存更新（`npm audit` で 0 vulnerabilities を確認）、リンク切れ、法的ページの最終更新日確認
-- 記事公開時: `title` / `description` / 日付 / タグ / sitemap 反映確認
-- ブランド変更時: `src/config/site.ts` を更新し、個人名とサイト名の混線がないか確認
-- UI変更時: loading / empty / error / success の各状態が崩れていないか確認
-- デプロイ前: `npm run lint`, `npm run typecheck`, `npm run build`
+Cloudflare Pagesではビルドコマンドを npm run build、出力ディレクトリを dist に設定します。認証済みのWrangler CLIから公開する場合は npm run deploy を使用します。ローカルビルド成功と公開完了は別の状態です。
 
-## デプロイ
+## コンテンツの編集
 
-Cloudflare Pages 向け:
+- 作品: src/config/projects.ts
+- サイト情報・ナビゲーション: src/config/site.ts
+- 記事: src/config/blog.ts のBLOG_POSTS。既存のcreateBlogPost形式を継続します。
+- 草案: /admin/posts/new で生成したコードを記事設定へ追加し、再ビルドします。画面からの公開・サーバーへの書き込み機能はありません。
+- 外観: tokens.css と src/styles/globals.css。フォントはnpmパッケージから自己配信します。
 
-npm run deploy
+コメントと草案は同じオリジンのlocalStorageにだけ保存されます。共有コメントサービス、認証付きCMSではありません。保存キーは移行前と同じです。ブラウザデータの読み込みに失敗した場合、自動保存による上書きを停止して再読み込みを提供します。
 
-このコマンドは Next.js ビルド、OpenNext ビルド、Pages 向け変換スクリプトを順番に実行します。
-
-## 設計メモ
-
-- サイト共通情報は src/config/site.ts に集約
-- ブログ記事の生成ルールは src/domain/blog/post.ts に集約
-- ブログ公開順と最新更新日は src/config/blog.ts に集約
-- 管理用の記事草案生成は src/domain/blog/admin.ts と /admin/posts/new に集約
-- 管理用の一時保存は src/infra/storage/blogDraftStorage.ts に集約
-- コメント入力値の検証ルールは src/domain/comment/types.ts に集約
-- 日付フォーマットは src/lib/date.ts に集約
-- UI は loading / empty / error / success の状態を各ページで表現
-- セキュリティヘッダーと CSP は middleware.ts で一元管理
-
-## セキュリティ
-
-- `middleware.ts` で許可HTTPメソッドを `GET/HEAD/OPTIONS` に制限し、不正なメソッドを 405 で即時拒否します。
-- URL長は 2048 文字で制限し、過大リクエストを 414 で拒否します。
-- `next.config.mjs` の `images.unoptimized=true` により、Next Image Optimizer を無効化しています。
-- `npm audit` は本番・開発依存ともに 0 vulnerabilities を維持しています。
-- コメントの入力値はドメイン層 (`src/domain/comment/types.ts`) で文字数制限・空値検証を行い、UI の `maxLength` 属性と単一の情報源を共有します。
-- CSP の `style-src` には Tailwind CSS v4 との互換性のため暫定的に `'unsafe-inline'` を許可しています（TODO で追跡中）。
+設計・セキュリティ・運用上の制約は DEVELOPER.md を参照してください。

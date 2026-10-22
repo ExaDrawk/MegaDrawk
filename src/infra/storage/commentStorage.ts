@@ -28,9 +28,9 @@ export const commentStorageRepository: CommentRepository = {
 
   saveComments: (postId: string, comments: CommentItem[]): void => {
     if (typeof window === "undefined") {
-      return;
+      throw new Error("Comment storage is only available in the browser.");
     }
-
+    if (!isCommentItemArray(comments)) throw new Error("Invalid comment data");
     window.localStorage.setItem(storageKey(postId), JSON.stringify(comments));
   },
 };

@@ -55,9 +55,7 @@ describe("isCommentItemArray", () => {
 
   it("returns false for an array with a malformed item", () => {
     expect(
-      isCommentItemArray([
-        { id: "1", name: "Drawk", message: "こんにちは" },
-      ]),
+      isCommentItemArray([{ id: "1", name: "Drawk", message: "こんにちは" }]),
     ).toBe(false);
   });
 
@@ -65,5 +63,23 @@ describe("isCommentItemArray", () => {
     expect(isCommentItemArray(null)).toBe(false);
     expect(isCommentItemArray("not-an-array")).toBe(false);
     expect(isCommentItemArray({})).toBe(false);
+  });
+
+  it("rejects stored comments with invalid dates or over-limit input", () => {
+    const comment = {
+      id: "1",
+      name: "Drawk",
+      message: "hello",
+      createdAt: "2026-01-01T00:00:00.000Z",
+    };
+    expect(isCommentItemArray([{ ...comment, createdAt: "not-a-date" }])).toBe(
+      false,
+    );
+    expect(
+      isCommentItemArray([
+        { ...comment, name: "x".repeat(COMMENT_LIMITS.maxNameLength + 1) },
+      ]),
+    ).toBe(false);
+    expect(isCommentItemArray([{ ...comment, id: "" }])).toBe(false);
   });
 });

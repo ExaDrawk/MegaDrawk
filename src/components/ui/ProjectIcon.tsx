@@ -1,5 +1,3 @@
-import Image from "next/image";
-
 interface ProjectIconProps {
   readonly src: string;
   readonly alt: string;
@@ -7,12 +5,7 @@ interface ProjectIconProps {
   readonly size?: "sm" | "md";
 }
 
-export function ProjectIcon({
-  src,
-  alt,
-  href,
-  size = "md",
-}: ProjectIconProps) {
+export function ProjectIcon({ src, alt, href, size = "md" }: ProjectIconProps) {
   const dimension = size === "sm" ? 56 : 64;
   const className = size === "sm" ? "w-14 h-14" : "w-16 h-16";
 
@@ -24,7 +17,7 @@ export function ProjectIcon({
       className={`group relative block shrink-0 rounded-lg overflow-hidden border border-[var(--color-border-subtle)] bg-[var(--color-surface-muted)] hover:border-[var(--color-accent)] transition-all hover:scale-105 active:scale-95 focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] ${className}`}
       aria-label={`${alt}（アプリアイコン）`}
     >
-      <Image
+      <img
         src={src}
         alt=""
         width={dimension}

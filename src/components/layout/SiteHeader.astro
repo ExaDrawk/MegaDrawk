@@ -1,0 +1,122 @@
+---
+import { SITE, NAV_LINKS } from "@/config/site";
+import { BrandLockup, getBrandLockupContainerClassName } from "./BrandLockup";
+const pathname = Astro.url.pathname.replace(/\/$/, "") || "/";
+---
+
+<header class="site-header">
+  <div class="site-header__inner">
+    <a
+      href="/"
+      class={getBrandLockupContainerClassName("header") + " site-brand"}
+      aria-label={SITE.name + " トップページ"}
+    >
+      <BrandLockup preset="header" priority />
+    </a>
+    <nav class="site-nav" aria-label="メインナビゲーション">
+      <ul class="site-nav__list">
+        {NAV_LINKS.map((link) => (
+          <li>
+            <a
+              href={link.href}
+              class="site-nav__link"
+              aria-current={pathname === link.href ? "page" : undefined}
+            >
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+    <button
+      id="menu-trigger"
+      type="button"
+      class="site-menu-trigger"
+      aria-expanded="false"
+      aria-controls="mobile-menu"
+      aria-label="メニューを開く"
+    >
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        aria-hidden="true"
+      >
+        <path d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+  </div>
+  <nav
+    id="mobile-menu"
+    class="mobile-menu"
+    aria-label="モバイルナビゲーション"
+    hidden
+  >
+    <ul class="site-nav__list">
+      {NAV_LINKS.map((link) => (
+        <li>
+          <a
+            href={link.href}
+            class="site-nav__link"
+            aria-current={pathname === link.href ? "page" : undefined}
+          >
+            {link.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+</header>
+<script>
+  const button = document.querySelector<HTMLButtonElement>("#menu-trigger");
+  const menu = document.querySelector<HTMLElement>("#mobile-menu");
+  if (button && menu) {
+    const close = (restore = false) => {
+      menu.hidden = true;
+      button.setAttribute("aria-expanded", "false");
+      button.setAttribute("aria-label", "メニューを開く");
+      if (restore) button.focus();
+    };
+    button.addEventListener("click", () => {
+      if (!menu.hidden) {
+        close();
+        return;
+      }
+      menu.hidden = false;
+      button.setAttribute("aria-expanded", "true");
+      button.setAttribute("aria-label", "メニューを閉じる");
+      menu.querySelector<HTMLAnchorElement>("a")?.focus();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !menu.hidden) close(true);
+    });
+    document.addEventListener("click", (event) => {
+      if (
+        event.target instanceof Node &&
+        !menu.contains(event.target) &&
+        !button.contains(event.target)
+      )
+        close();
+    });
+    document.addEventListener("focusin", (event) => {
+      if (
+        event.target instanceof Node &&
+        !menu.contains(event.target) &&
+        !button.contains(event.target)
+      )
+        close();
+    });
+    const desktop = window.matchMedia("(min-width: 768px)");
+    desktop.addEventListener("change", () => close());
+  }
+</script>
+<noscript>
+  <nav aria-label="ページ一覧">
+    {NAV_LINKS.map((link) => (
+      <a href={link.href}>{link.label} </a>
+    ))}
+  </nav>
+</noscript>

@@ -43,7 +43,7 @@
   --color-code: var(--color-graphite);
   --color-code-text: var(--color-paper);
 
-  --font-display: "Bricolage Grotesque", "Noto Sans JP", sans-serif;
+  --font-display: "Bricolage Grotesque Variable", "Noto Sans JP", sans-serif;
   --font-body: "IBM Plex Sans", "Noto Sans JP", sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 

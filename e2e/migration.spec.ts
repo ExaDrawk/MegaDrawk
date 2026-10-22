@@ -1,0 +1,144 @@
+import { test, expect } from "@playwright/test";
+
+test("public pages are static, usable without JS, and have page-specific canonical URLs", async ({
+  browser,
+}) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  for (const route of [
+    "/",
+    "/about",
+    "/blog",
+    "/contact",
+    "/privacy",
+    "/terms",
+  ]) {
+    const response = await page.goto("http://127.0.0.1:3000" + route);
+    expect(response?.status()).toBe(200);
+    await expect(page.locator("h1")).toBeVisible();
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      "href",
+      "https://megadrawk.com" + (route === "/" ? "/" : route),
+    );
+    expect(await page.locator("astro-island[component-url]").count()).toBe(0);
+    expect(await page.content()).not.toContain("/_next/");
+  }
+  await context.close();
+});
+
+test("editor hydrates under strict CSP, escapes HTML, and restores saved drafts", async ({
+  page,
+}) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("console", (message) => {
+    if (message.type() === "error") errors.push(message.text());
+  });
+  await page.goto("/admin/posts/new");
+  const payload = '<img src=x onerror="window.compromised=true">';
+  await page.getByLabel("タイトル", { exact: true }).fill("Astro検証");
+  await page.getByLabel("本文", { exact: true }).fill(payload);
+  await page.getByRole("button", { name: "記事コードを生成" }).click();
+  await expect(
+    page.getByText("コードを生成しました", { exact: true }),
+  ).toBeVisible();
+  await expect(page.locator("code")).toContainText(
+    payload.replaceAll('"', '\\"'),
+  );
+  expect(await page.evaluate(() => "compromised" in window)).toBe(false);
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          JSON.parse(localStorage.getItem("admin:blog-post-draft") ?? "{}")
+            .draft?.title,
+      ),
+    )
+    .toBe("Astro検証");
+  await page.reload();
+  await expect(page.getByLabel("タイトル", { exact: true })).toHaveValue(
+    "Astro検証",
+  );
+  await expect(page.getByLabel("本文", { exact: true })).toHaveValue(payload);
+  expect(errors).toEqual([]);
+});
+
+test("corrupt draft stays intact in the browser and recovery does not silently overwrite it", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("admin:blog-post-draft", "{broken");
+  });
+  await page.goto("/admin/posts/new");
+  await expect(
+    page.getByRole("button", { name: "草案を再読み込み" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "草案を再読み込み" }).click();
+  await expect(page.getByRole("alert")).toContainText(
+    "保存済み草案を読み込めません",
+  );
+  expect(
+    await page.evaluate(() => localStorage.getItem("admin:blog-post-draft")),
+  ).toBe("{broken");
+  await page.getByRole("button", { name: "保存済み草案を削除" }).click();
+  expect(
+    await page.evaluate(() => localStorage.getItem("admin:blog-post-draft")),
+  ).toBeNull();
+  await page.getByLabel("タイトル", { exact: true }).fill("復旧後の草案");
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          JSON.parse(localStorage.getItem("admin:blog-post-draft") ?? "{}")
+            .draft?.title,
+      ),
+    )
+    .toBe("復旧後の草案");
+});
+
+test("static response rejects write requests, serves 404 and keeps security rules strict", async ({
+  request,
+}) => {
+  const home = await request.get("/");
+  expect(home.headers()["content-security-policy"]).not.toMatch(
+    /unsafe-inline|unsafe-eval/,
+  );
+  expect(home.headers()["content-security-policy"]).toContain("sha256-");
+  expect((await request.post("/")).status()).toBe(405);
+  const missing = await request.get("/not-a-real-page");
+  expect(missing.status()).toBe(404);
+  expect(await missing.text()).toContain(
+    "お探しのページは見つかりませんでした",
+  );
+  expect((await request.get("/_headers")).status()).toBe(404);
+  expect((await request.get("/.env")).status()).toBe(404);
+  expect((await request.get("/.well-known/security.txt")).status()).toBe(200);
+  expect(
+    (await request.get("/robots.txt")).headers()["content-type"],
+  ).toContain("text/plain");
+  expect(
+    (await request.get("/sitemap.xml")).headers()["content-type"],
+  ).toContain("application/xml");
+  expect((await request.get("/manifest.webmanifest")).status()).toBe(200);
+});
+
+test("mobile navigation closes on outside click, repeated toggles and viewport changes", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 375, height: 667 });
+  await page.goto("/");
+  const trigger = page.locator("#menu-trigger");
+  const menu = page.locator("#mobile-menu");
+  await trigger.click();
+  await expect(menu).toBeVisible();
+  await page.mouse.click(350, 620);
+  await expect(menu).toBeHidden();
+  await trigger.click();
+  await trigger.click();
+  await expect(menu).toBeHidden();
+  await trigger.click();
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await expect(menu).toBeHidden();
+  await page.setViewportSize({ width: 375, height: 667 });
+  await expect(trigger).toHaveAttribute("aria-expanded", "false");
+});

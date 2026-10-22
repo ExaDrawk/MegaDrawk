@@ -1,34 +1,50 @@
-import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
-import nextTypeScript from "eslint-config-next/typescript";
-
-export default [
+import js from "@eslint/js";
+import tseslint from "typescript-eslint";
+import astro from "eslint-plugin-astro";
+import { defineConfig } from "eslint/config";
+export default defineConfig(
   {
     ignores: [
-      ".next/**",
-      ".open-next/**",
-      ".wrangler/**",
+      "dist/**",
+      ".astro/**",
       "node_modules/**",
       "coverage/**",
+      "playwright-report/**",
+      "test-results/**",
+      "verification/**",
     ],
   },
-  ...nextCoreWebVitals,
-  ...nextTypeScript,
   {
-    rules: {
-      "no-console": "warn",
-      "no-debugger": "error",
-      "no-alert": "error",
-      "prefer-const": "error",
-      "no-var": "error",
-      eqeqeq: ["error", "always"],
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
-      ],
-      "@typescript-eslint/consistent-type-imports": [
-        "error",
-        { prefer: "type-imports" },
-      ],
+    ...js.configs.recommended,
+    files: ["**/*.{js,mjs,cjs}"],
+    languageOptions: {
+      globals: {
+        console: "readonly",
+        process: "readonly",
+        Buffer: "readonly",
+        URL: "readonly",
+        fetch: "readonly",
+        module: "readonly",
+        require: "readonly",
+        __dirname: "readonly",
+      },
     },
   },
-];
+  ...tseslint.configs.recommended,
+  ...astro.configs.recommended,
+  {
+    files: ["**/*.cjs"],
+    rules: { "@typescript-eslint/no-require-imports": "off" },
+  },
+  {
+    files: ["**/*.{ts,tsx,astro}"],
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_" },
+      ],
+      "@typescript-eslint/consistent-type-imports": "error",
+      "no-debugger": "error",
+    },
+  },
+);

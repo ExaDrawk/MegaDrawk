@@ -1,5 +1,6 @@
 import {
   isStoredBlogPostDraft,
+  isBlogPostDraftInput,
   type BlogPostDraftInput,
   type StoredBlogPostDraft,
 } from "@/domain/blog/admin";
@@ -33,6 +34,8 @@ export const blogDraftStorageRepository = {
 
   saveDraft(draft: BlogPostDraftInput): string {
     assertBrowserEnvironment();
+    if (!isBlogPostDraftInput(draft))
+      throw new Error("Invalid blog draft data");
 
     const savedAt = new Date().toISOString();
     const payload: StoredBlogPostDraft = {

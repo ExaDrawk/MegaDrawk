@@ -1,0 +1,76 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { SITE } from "@/config/site";
+import { getPublishedBlogPosts } from "@/config/blog";
+import { formatJaDate } from "@/lib/date";
+import { CommentSection } from "@/components/blog/CommentSection";
+const posts = getPublishedBlogPosts();
+---
+
+<Layout title="Blog" description={SITE.name + "のブログ。制作記録とメモ。"}>
+  <div>
+    <section class="page-section" aria-labelledby="blog-title">
+      <header class="page-header">
+        <h1
+          id="blog-title"
+          class="page-title text-3xl sm:text-4xl font-bold tracking-tight"
+        >
+          Blog
+        </h1>
+      </header>
+
+      <div class="mt-8 max-w-3xl">
+        {posts.length > 0 ? (
+          <div class="space-y-6">
+            {posts.map((post) => (
+              <article
+                id={post.id}
+                class="surface p-6 rounded-md border border-[var(--color-border-subtle)]"
+              >
+                <div
+                  class="flex items-center gap-2 text-xs font-mono"
+                  data-color="color-text-muted"
+                >
+                  <time datetime={post.date}>{formatJaDate(post.date)}</time>
+                  {post.updatedAt !== post.date ? (
+                    <span>/ 更新 {formatJaDate(post.updatedAt)}</span>
+                  ) : null}
+                </div>
+                <h2 class="text-xl font-bold tracking-tight mt-2">
+                  {post.title}
+                </h2>
+                <p
+                  class="mt-2 text-sm leading-relaxed"
+                  data-color="color-text-secondary"
+                >
+                  {post.excerpt}
+                </p>
+                {post.tags.length > 0 ? (
+                  <div class="mt-4 flex flex-wrap gap-2" aria-label="タグ">
+                    {post.tags.map((tag) => (
+                      <span
+                        class="px-2 py-0.5 text-xs font-mono rounded border border-[var(--color-border-subtle)]"
+                        data-color="color-text-muted"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+                <div class="mt-6 border-t border-[var(--color-border-subtle)] pt-5">
+                  <CommentSection postId={post.id} client:load />
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div class="surface-muted p-8 text-center rounded-md border border-[var(--color-border-subtle)]">
+            <p class="text-sm" data-color="color-text-secondary">
+              まだ記事はありません。
+            </p>
+          </div>
+        )}
+      </div>
+    </section>
+  </div>
+</Layout>

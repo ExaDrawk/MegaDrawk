@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { SITE, FOOTER_LINKS } from "@/config/site";
 import {
   BrandLockup,
@@ -14,13 +13,13 @@ export function SiteFooter() {
       <div className="site-footer__inner">
         <div className="site-footer__top">
           <div className="site-footer__identity">
-            <Link
+            <a
               href="/"
               className={`${getBrandLockupContainerClassName("footer")} site-brand`}
               aria-label={`${SITE.name} トップページ`}
             >
               <BrandLockup preset="footer" />
-            </Link>
+            </a>
             <XProfileLink
               href={SITE.social.x}
               label={SITE.social.xHandle}
@@ -35,11 +34,17 @@ export function SiteFooter() {
             <p className="site-footer__nav-title">Index</p>
             {Object.values(FOOTER_LINKS).map((group) => (
               <div key={group.label}>
-                <p className="mono-label site-footer__group-label">{group.label}</p>
+                <p className="mono-label site-footer__group-label">
+                  {group.label}
+                </p>
                 {group.links.map((link) => (
-                  <Link key={link.href} href={link.href} className="site-footer__link">
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    className="site-footer__link"
+                  >
                     {link.label}
-                  </Link>
+                  </a>
                 ))}
               </div>
             ))}

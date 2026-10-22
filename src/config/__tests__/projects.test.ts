@@ -15,7 +15,9 @@ describe("PROJECTS configuration", () => {
   });
 
   it("contains Multi-Subtitles for YouTube with valid link and image", () => {
-    const multiSub = PROJECTS.find((p) => p.name === "Multi-Subtitles for YouTube");
+    const multiSub = PROJECTS.find(
+      (p) => p.name === "Multi-Subtitles for YouTube",
+    );
     expect(multiSub).toBeDefined();
     expect(multiSub?.platform).toBe("Chrome拡張機能");
     expect(multiSub?.href).toContain("chromewebstore.google.com");

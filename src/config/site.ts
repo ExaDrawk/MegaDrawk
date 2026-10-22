@@ -2,22 +2,14 @@
 export const SITE = {
   name: "MEGADRAWK",
   ownerName: "Drawk",
-  description:
-    "Drawkのポートフォリオと個人開発。",
-  heroCopy:
-    "大学生のDrawkが、日々の制作と学びを記録しています。",
+  description: "Drawkのポートフォリオと個人開発。",
+  heroCopy: "大学生のDrawkが、日々の制作と学びを記録しています。",
   domain: "megadrawk.com",
   url: "https://megadrawk.com",
   locale: "ja_JP",
   language: "ja",
   themeColor: "#ffffff",
-  keywords: [
-    "MEGADRAWK",
-    "Drawk",
-    "ブログ",
-    "ポートフォリオ",
-    "制作記録",
-  ],
+  keywords: ["MEGADRAWK", "Drawk", "ブログ", "ポートフォリオ", "制作記録"],
   social: {
     x: "https://x.com/Drawk1234",
     xHandle: "@Drawk1234",

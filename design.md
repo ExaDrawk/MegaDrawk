@@ -77,6 +77,6 @@ modern-minimal（技術的な個人開発者サイトとしての静かな強さ
 ## Source files
 
 - Tokens: `tokens.css`
-- Entry stylesheet: `src/app/globals.css`
+- Entry stylesheet: `src/styles/globals.css`
 - Layout: `src/layouts/SiteLayout.astro`
 - Shared chrome: `src/components/layout/SiteHeader.tsx`, `src/components/layout/SiteFooter.tsx`

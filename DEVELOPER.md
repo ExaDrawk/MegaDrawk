@@ -1,66 +1,33 @@
-# 開発者ドキュメント (Developer Guide)
+# 開発者ガイド
 
-本ドキュメントは `AGENTS.md` の設計哲学に基づいた本プロジェクトの開発手法・設計意図・運用事項をまとめたものです。
+## 設計と依存方向
 
-## 1. セットアップと起動
+Astroのsrc/pagesがURLとメタデータを定義し、src/layouts/Layout.astroがhead、ナビゲーション、フッターを統合します。src/viewsのReactコンポーネントはビルド時にHTMLへ変換され、閲覧者へReactランタイムを送りません。操作が必要なコメントと草案エディターだけ、Astroのclient:loadでハイドレーションします。
 
-本プロジェクトは Next.js 16 (App Router) + React 19 + Tailwind CSS v4 を採用しています。
+UI（pages/layouts/views/components）→ ドメイン（domain/config/lib）→ 永続化（infra）に責務を分けます。コメント永続化の契約はCommentRepositoryが定義し、インフラが実装します（DIP/ISP）。既存の小規模な草案保存には、実装が1つしかない不要な抽象層を追加していません。
 
-```bash
-# 依存関係のインストール
-npm install
+記事・作品・法的ページの内容と既存URLを保持しています。記事をMarkdownへ二重管理せず、src/config/blog.tsを正本として継続します。将来Markdownへ変更する場合は、記事データ・草案出力・検証をまとめて移行してください。
 
-# 開発サーバーの起動
-npm run dev
+## セキュリティ
 
-# 単体テストの実行
-npm run test
+scripts/prepare-static.mjsが生成HTMLを検査し、インラインスクリプトの正確なバイト列からSHA-256を生成してdist/_headersへ出力します。scripts/security.mjsがCSPと共通ヘッダーの正本です。unsafe-inline、unsafe-evalは許可せず、イベント属性・style属性はビルドで拒否します。色指定はCSSのdata属性セレクターへ移行しました。JSON-LDのHTML終端文字はエスケープします。
 
-# E2Eテストの実行（初回はブラウザ導入が必要）
-npm run e2e:install
-npm run e2e
+CSPはCloudflare PagesのHTTPヘッダーとして適用します。distを別サービスへ置く場合も_headersをそのホストのHTTPヘッダーへ設定してください。単にHTMLをコピーするだけでは同等のヘッダー保護はありません。Astro開発サーバーはHMRを使うため、本番CSPの確認は必ずnpm run build後のnpm startで行います。
 
-# 本番ビルド
-npm run build
+既存AdSense連携に必要な外部オリジンを限定列挙しています。広告配信は外部サービスの応答・同意設定にも依存し、広告コード未設定の検証を実広告配信成功とは扱いません。広告が動的に追加するスタイルが厳格CSPに抵触する場合は、実際の違反を確認して広告側の構成を調整します。全ページのCSPを安易に緩めないでください。
 
-# セキュリティ監査
-npm audit
-```
+ブラウザの保存データは信頼せず、JSON構造・入力上限・日時を読み書き時に検証します。Reactがユーザー入力をテキストとして出力し、草案の生成コードはJSON.stringifyで文字列をエスケープします。読み込み失敗後に元データを空の状態で上書きしません。
 
-## 2. アーキテクチャと設計意図
+/adminは公開可能なローカル草案ツールです。noindex、robots.txtのDisallow、Cache-Control:no-storeを設定しますが、これらは認証やアクセス制御ではありません。秘密情報や管理APIを置いてはいけません。共有投稿・認証・サーバー保存は現在存在せず、導入時には独立した認可・入力検証・CSRF対策が必要です。
 
-本プロジェクトは以下の層境界を意識して構築されています。
+scripts/serve-static.mjsはローカル専用の証拠取得用サーバーです。生成済み_headersを適用し、書き込みメソッドとドットファイルへのアクセスを拒否します。公開はCloudflare Pagesの静的配信を使用します。
 
-*   **UI層** (`src/app/`, `src/components/`)
-    *   表示とユーザーインタラクションの責務を担います。
-    *   ビジネスロジックは持たず、プレーンなコンポーネントとして実装されます。
-*   **ドメイン・設定層** (`src/domain/`, `src/config/`, `src/lib/`)
-    *   ブログの状態、コメント入力値の検証ルール、定数定義、ユースケースなどのビジネスルールを持ちます。
-    *   `src/domain/comment/types.ts` はコメントの文字数制限・空値検証をドメイン知識として一元管理します。
-    *   （例: `createBlogPost` は最低限の入力で有効な投稿データを作るドメインルールの表現です）
-*   **インフラ層** (`src/infra/`)
-    *   `CommentSection` で利用している状態永続化 (`localStorage`) はインフラ層の簡易的な代替です。本格的なバックエンドへ移行する際はこれを差し替えます。
+## 変更と品質ゲート
 
-### セキュリティと品質ゲート
+npm run verifyでUTF-8/BOM検査、Prettier、ESLint、astro check、Vitest、静的ビルド、npm audit、Playwrightを実行します。Playwrightは本番成果物を自動起動し、公開URL、JavaScript無効時の表示、CSP、エディターの実動作、保存復元、XSS入力、破損データ保護、モバイル操作を検証します。スクリーンショットはscreenshots/へ保存します。
 
-*   **Fail Fast:** 問題は発生源で即座に検知し、ビルドやLintの段階で不正なコードを弾きます (ESLint 9 + Flat Config 適用済み)。
-*   **ゼロトラスト:** セキュリティヘッダー (`middleware.ts`) により、XSS / Clickjacking 等を防ぐ堅牢なCSPを設定しています。
-*   **依存ライブラリの安全性:** `npm audit` で本番・開発依存ともに 0 vulnerabilities を維持します。
-*   **入力値検証の二重化:** コメント入力値は UI の `maxLength` 属性とドメイン層の `validateCommentInput` で二重に検証します（単一の情報源 `COMMENT_LIMITS` を共有）。
+依存の既知の脆弱性はnpm auditで確認します。0件でも未知の脆弱性がない保証にはなりません。外部広告・本番Cloudflare設定はローカル検証と別に公開後確認が必要です。
 
-## 3. よくある変更手順
+## 削除した構成
 
-*   **ブログ記事の追加:**
-    `src/config/blog.ts` にある `BLOG_POSTS` 配列に `createBlogPost({...})` を追加します。`date` は公開日、追記・修正日は `updatedAt` に入れてください。サイトマップはここから自動的に更新されます。
-*   **テーマ・配色の変更:**
-    `src/app/globals.css` のCSS変数、および `src/config/theme.ts` を修正することでサイト全体の色合いを統制できます。
-*   **サイト名・運営者名の変更:**
-    `src/config/site.ts` のみを更新します。公開名 (`name`) と運営者名 (`ownerName`) は別の知識として扱います。
-*   **コメント文字数制限の変更:**
-    `src/domain/comment/types.ts` の `COMMENT_LIMITS` のみを変更します。UI の `maxLength` 属性と検証ロジックは自動的に追従します。
-
-## 4. 運用注意事項
-
-*   現在ブログの「コメント機能」は LocalStorage を用いたクライアント完結型（プロトタイプ）です。複数ユーザー間での共有や、別ブラウザでの状態永続化が必要な場合は、データベース (PostgreSQL, D1 等) への移行が必須です (`tasks/todo.md` に将来の課題として記録してください)。
-*   本番デプロイにあたっては、Cloudflare Pages/Workers (`open-next`, `wrangler.toml` 構成) のビルドフローに従って `npm run build` のエラーゼロを維持してください。
-*   公開UIでは内部ファイルパスや実装ヘルパー名を表示しないでください。空状態文言はユーザー向けの表現を優先します。
+src/app、Next.js設定・型定義・middleware、OpenNext設定、Pages変換スクリプト、旧PostCSS設定を削除しました。レイアウト定数のうち参照元がテストしかなくCSSと食い違っていたtheme.ts、および未参照の旧作品SVGも削除しています。新たな定数の正本は既存tokens.cssへ集約してください。

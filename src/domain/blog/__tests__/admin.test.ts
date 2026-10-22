@@ -29,7 +29,7 @@ describe("buildBlogPostDraft", () => {
         date: "2026-03-15",
         updatedAt: "2026-03-14",
       }),
-    ).toThrowError("Updated date must be on or after the publish date.");
+    ).toThrow("Updated date must be on or after the publish date.");
   });
 });
 

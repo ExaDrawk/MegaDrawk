@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { ExternalLink } from "lucide-react";
 
 interface XProfileLinkProps {
@@ -6,7 +6,6 @@ interface XProfileLinkProps {
   readonly label: ReactNode;
   readonly ariaLabel?: string;
   readonly className?: string;
-  readonly style?: CSSProperties;
   readonly iconSize?: number;
   readonly target?: "_blank" | "_self";
   readonly rel?: string;
@@ -33,7 +32,6 @@ export function XProfileLink({
   label,
   ariaLabel = "X",
   className,
-  style,
   iconSize = 16,
   target = "_blank",
   rel = "noopener noreferrer",
@@ -45,7 +43,6 @@ export function XProfileLink({
       target={target}
       rel={rel}
       className={className}
-      style={style}
       aria-label={ariaLabel}
     >
       <XIcon size={iconSize} />

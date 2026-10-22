@@ -17,7 +17,7 @@ export const BLOG_POSTS: readonly BlogPost[] = [] as const;
 
 export function getPublishedBlogPosts(): readonly BlogPost[] {
   return [...BLOG_POSTS].sort((left, right) =>
-    right.date.localeCompare(left.date)
+    right.date.localeCompare(left.date),
   );
 }
 

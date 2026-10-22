@@ -1,5 +1,3 @@
-"use client";
-
 import { useRef, useState } from "react";
 import { useComments } from "@/hooks/useComments";
 import { COMMENT_LIMITS } from "@/domain/comment/types";
@@ -10,7 +8,8 @@ interface CommentSectionProps {
 }
 
 export function CommentSection({ postId }: CommentSectionProps) {
-  const { comments, isLoading, errorText, addComment } = useComments(postId);
+  const { comments, isLoading, errorText, addComment, storageReady, reload } =
+    useComments(postId);
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -43,9 +42,10 @@ export function CommentSection({ postId }: CommentSectionProps) {
 
   return (
     <section className="mt-5" aria-label="コメント欄">
-      <h3 className="section-title text-base">
-        コメント
-      </h3>
+      <h3 className="section-title text-base">コメント</h3>
+      <p className="mt-2 text-xs" data-color="color-text-muted">
+        コメントはこのブラウザに保存されます。
+      </p>
 
       <form className="mt-4 grid gap-3" onSubmit={onSubmit}>
         <label className="form-field">
@@ -74,7 +74,7 @@ export function CommentSection({ postId }: CommentSectionProps) {
         <ActionButton
           type="submit"
           className="justify-self-start"
-          disabled={isLoading || isSubmitting}
+          disabled={!storageReady || isLoading || isSubmitting}
           aria-busy={isSubmitting}
         >
           {isSubmitting ? "送信中..." : "送信"}
@@ -83,22 +83,28 @@ export function CommentSection({ postId }: CommentSectionProps) {
           <p
             id={`${postId}-comment-error`}
             className="text-sm"
-            style={{ color: "var(--color-danger)" }}
+            data-color="color-danger"
             role="alert"
           >
             {errorText}
           </p>
         ) : null}
       </form>
+      {!isLoading && !storageReady && (
+        <ActionButton className="mt-3" onClick={reload}>
+          再読み込み
+        </ActionButton>
+      )}
 
       <div className="mt-5 flex flex-col gap-3" aria-live="polite">
         {isLoading ? (
-          <div aria-busy="true" aria-label="コメント読み込み中" className="flex flex-col gap-3">
+          <div
+            aria-busy="true"
+            aria-label="コメント読み込み中"
+            className="flex flex-col gap-3"
+          >
             {[0, 1].map((skeletonIndex) => (
-              <div
-                key={skeletonIndex}
-                className="surface p-4"
-              >
+              <div key={skeletonIndex} className="surface p-4">
                 <div className="skeleton mb-3 h-3 w-24 rounded" />
                 <div className="skeleton h-4 w-full rounded" />
               </div>
@@ -106,29 +112,29 @@ export function CommentSection({ postId }: CommentSectionProps) {
           </div>
         ) : comments.length === 0 ? (
           <div className="surface-muted flex items-center justify-center py-5 text-center">
-            <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+            <p className="text-xs" data-color="color-text-muted">
               まだコメントはありません。
             </p>
           </div>
         ) : (
           comments.map((comment) => (
-            <article
-              key={comment.id}
-              className="surface p-4"
-            >
+            <article key={comment.id} className="surface p-4">
               <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-xs font-semibold" style={{ color: "var(--color-text)" }}>
+                <p className="text-xs font-semibold" data-color="color-text">
                   {comment.name}
                 </p>
                 <time
                   className="text-xs"
                   dateTime={comment.createdAt}
-                  style={{ color: "var(--color-text-muted)" }}
+                  data-color="color-text-muted"
                 >
                   {new Date(comment.createdAt).toLocaleString("ja-JP")}
                 </time>
               </div>
-              <p className="mt-2 whitespace-pre-wrap break-words text-sm" style={{ color: "var(--color-text-secondary)" }}>
+              <p
+                className="mt-2 whitespace-pre-wrap break-words text-sm"
+                data-color="color-text-secondary"
+              >
                 {comment.message}
               </p>
             </article>

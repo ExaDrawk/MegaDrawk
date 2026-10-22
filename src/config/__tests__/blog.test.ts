@@ -40,15 +40,15 @@ describe("createBlogPost", () => {
   });
 
   it("should throw an error if title is empty", () => {
-    expect(() =>
-      createBlogPost({ title: "   ", body: "body" })
-    ).toThrowError("Blog post title is required.");
+    expect(() => createBlogPost({ title: "   ", body: "body" })).toThrow(
+      "Blog post title is required.",
+    );
   });
 
   it("should throw an error if body is empty", () => {
-    expect(() =>
-      createBlogPost({ title: "title", body: "   " })
-    ).toThrowError("Blog post body is required.");
+    expect(() => createBlogPost({ title: "title", body: "   " })).toThrow(
+      "Blog post body is required.",
+    );
   });
 });
 

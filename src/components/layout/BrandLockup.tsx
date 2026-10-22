@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { SITE } from "@/config/site";
 
 const BRAND_LOCKUP_PRESETS = {
@@ -48,7 +47,7 @@ export function BrandLockup({
 
   return (
     <>
-      <Image
+      <img
         src="/icon.svg"
         alt=""
         width={config.iconWidth}
@@ -56,13 +55,14 @@ export function BrandLockup({
         className={`object-contain shrink-0 ${config.iconClassName}`}
         aria-hidden="true"
       />
-      <Image
+      <img
         src="/logo.svg"
         alt={hideAlt ? "" : SITE.name}
         width={config.logoWidth}
         height={config.logoHeight}
         className={`object-contain shrink-0 ${config.logoClassName}`}
-        priority={priority}
+        loading={priority ? "eager" : "lazy"}
+        fetchPriority={priority ? "high" : "auto"}
         aria-hidden={hideAlt ? true : undefined}
       />
     </>
@@ -74,4 +74,3 @@ export function getBrandLockupContainerClassName(
 ): string {
   return `inline-flex items-center ${BRAND_LOCKUP_PRESETS[preset].gapClassName}`;
 }
-

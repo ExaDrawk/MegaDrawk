@@ -68,7 +68,9 @@ export function buildBlogPostDraft(
     post.tags.length > 0
       ? `  tags: [${post.tags.map((tag) => escapeMultilineString(tag)).join(", ")}],`
       : null,
-    normalizedInput.date ? `  date: ${escapeMultilineString(post.date)},` : null,
+    normalizedInput.date
+      ? `  date: ${escapeMultilineString(post.date)},`
+      : null,
     normalizedInput.updatedAt && normalizedInput.updatedAt !== post.date
       ? `  updatedAt: ${escapeMultilineString(post.updatedAt)},`
       : null,
@@ -119,6 +121,8 @@ export function isStoredBlogPostDraft(
   const value = candidate as Record<string, unknown>;
 
   return (
-    isBlogPostDraftInput(value.draft) && typeof value.savedAt === "string"
+    isBlogPostDraftInput(value.draft) &&
+    typeof value.savedAt === "string" &&
+    Number.isFinite(Date.parse(value.savedAt))
   );
 }

@@ -1,12 +1,11 @@
 # Dependencies
 node_modules/
 
-# Next.js build output
-.next/
-out/
+# Astro build output
+dist/
+.astro/
 
-# OpenNext / Cloudflare build output
-.open-next/
+# Cloudflare local state
 .wrangler/
 
 # Environment variables (NEVER commit secrets)
@@ -35,3 +34,5 @@ coverage/
 playwright-report/
 test-results/
 screenshots/
+
+verification/

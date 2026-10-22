@@ -18,6 +18,8 @@ export interface UseCommentsResult {
   comments: CommentItem[];
   isLoading: boolean;
   errorText: string;
+  storageReady: boolean;
+  reload: () => void;
   addComment: (
     name: string,
     message: string,
@@ -34,21 +36,26 @@ export function useComments(postId: string): UseCommentsResult {
   const commentsRef = useRef<CommentItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorText, setErrorText] = useState("");
+  const [storageReady, setStorageReady] = useState(false);
 
-  useEffect(() => {
+  const reload = useCallback(() => {
     setIsLoading(true);
+    setStorageReady(false);
     setErrorText("");
 
     try {
       const loaded = commentStorageRepository.getComments(postId);
       commentsRef.current = loaded;
       setComments(loaded);
+      setStorageReady(true);
     } catch {
       setErrorText("コメントの読み込みに失敗しました。");
     } finally {
       setIsLoading(false);
     }
   }, [postId]);
+
+  useEffect(reload, [reload]);
 
   const addComment = useCallback(
     (
@@ -59,6 +66,13 @@ export function useComments(postId: string): UseCommentsResult {
         readonly onFailure?: () => void;
       },
     ) => {
+      if (!storageReady) {
+        setErrorText(
+          "保存済みコメントを読み込めません。再読み込みしてください。",
+        );
+        callbacks?.onFailure?.();
+        return;
+      }
       setErrorText("");
 
       const validationError = validateCommentInput(name, message);
@@ -91,13 +105,15 @@ export function useComments(postId: string): UseCommentsResult {
         callbacks?.onFailure?.();
       }
     },
-    [postId],
+    [postId, storageReady],
   );
 
   return {
     comments,
     isLoading,
     errorText,
+    storageReady,
+    reload,
     addComment,
   };
 }

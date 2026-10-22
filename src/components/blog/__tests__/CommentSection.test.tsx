@@ -49,4 +49,17 @@ describe("CommentSection", () => {
     });
     expect(setItem).toHaveBeenCalledTimes(1);
   });
+
+  it("keeps corrupt stored comments intact and offers a read retry", () => {
+    vi.spyOn(Storage.prototype, "getItem").mockReturnValue('{"broken":');
+    const save = vi.spyOn(Storage.prototype, "setItem");
+    render(<CommentSection postId="test-post" />);
+    expect(screen.getByRole("alert")).toBeDefined();
+    expect(
+      (screen.getByRole("button", { name: "送信" }) as HTMLButtonElement)
+        .disabled,
+    ).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: "再読み込み" }));
+    expect(save).not.toHaveBeenCalled();
+  });
 });

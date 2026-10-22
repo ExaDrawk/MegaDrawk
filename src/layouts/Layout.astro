@@ -1,0 +1,90 @@
+---
+import { SITE } from "@/config/site";
+import Header from "@/components/layout/SiteHeader.astro";
+import { SiteFooter } from "@/components/layout/SiteFooter";
+import { SkipNav } from "@/components/ui/SkipNav";
+import "@/styles/fonts.css";
+import "@/styles/globals.css";
+interface Props {
+  title?: string;
+  description?: string;
+  robots?: { index: boolean; follow: boolean };
+}
+const {
+  title = "",
+  description = SITE.description,
+  robots = { index: true, follow: true },
+} = Astro.props;
+const pageTitle = title ? title + " | " + SITE.name : SITE.name;
+const canonical = new URL(
+  Astro.url.pathname.replace(/\/$/, "") || "/",
+  SITE.url,
+).href;
+const adsense = import.meta.env.PUBLIC_ADSENSE_CLIENT?.trim();
+if (adsense && !/^ca-pub-\d{16}$/.test(adsense))
+  throw new Error("Invalid PUBLIC_ADSENSE_CLIENT");
+const jsonLd = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: SITE.ownerName,
+  url: SITE.url,
+  description: SITE.description,
+  sameAs: [SITE.social.x],
+}).replace(/</g, "\u003c");
+---
+
+<!doctype html>
+<html lang={SITE.language} data-theme="cobalt">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="keywords" content={SITE.keywords.join(", ")} />
+    <meta name="author" content={SITE.ownerName} />
+    <meta name="theme-color" content={SITE.themeColor} />
+    <meta
+      name="robots"
+      content={
+        (robots.index ? "index" : "noindex") +
+        ", " +
+        (robots.follow ? "follow" : "nofollow")
+      }
+    />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content={SITE.locale} />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content={SITE.social.xHandle} />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <script type="application/ld+json" is:inline set:html={jsonLd} />
+    {adsense && (
+      <script
+        is:inline
+        async
+        src={
+          "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=" +
+          adsense
+        }
+        crossorigin="anonymous"
+      ></script>
+    )}
+  </head>
+  <body class="site-body antialiased">
+    <SkipNav />
+    <div class="page-container">
+      <Header />
+      <main id="main-content" class="page-main">
+        <slot />
+      </main>
+      <SiteFooter />
+    </div>
+  </body>
+</html>

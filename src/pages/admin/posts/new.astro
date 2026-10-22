@@ -1,0 +1,23 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { BlogPostEditor } from "@/components/admin/BlogPostEditor";
+---
+
+<Layout
+  title="Admin Post Draft"
+  description="記事草案の作成"
+  robots={{ index: false, follow: false }}
+>
+  <section class="page-section">
+    <header class="page-header">
+      <h1 class="page-title text-3xl font-bold tracking-tight">
+        記事追加の管理画面
+      </h1>
+      <p class="page-description mt-2">
+        記事草案の作成、入力検証、および設定ファイル用コードの生成を行います。
+      </p>
+    </header>
+    <BlogPostEditor client:load />
+    <noscript>記事草案の編集にはJavaScriptを有効にしてください。</noscript>
+  </section>
+</Layout>

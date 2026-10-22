@@ -1,8 +1,9 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { BlogPostEditor } from "@/components/admin/BlogPostEditor";
 
 describe("BlogPostEditor", () => {
+  afterEach(() => vi.restoreAllMocks());
   beforeEach(() => {
     window.localStorage.clear();
     Object.assign(navigator, {
@@ -16,7 +17,9 @@ describe("BlogPostEditor", () => {
     render(<BlogPostEditor />);
 
     expect(
-      screen.getByText("まず左側で記事草案を入力し、コード生成を実行してください。"),
+      screen.getByText(
+        "まず左側で記事草案を入力し、コード生成を実行してください。",
+      ),
     ).toBeDefined();
   });
 
@@ -49,7 +52,9 @@ describe("BlogPostEditor", () => {
       expect(screen.getByText("コードを生成しました")).toBeDefined();
     });
     expect(screen.getByText(/slug: post-/)).toBeDefined();
-    expect(screen.getByText(/createBlogPost/, { selector: "code" })).toBeDefined();
+    expect(
+      screen.getByText(/createBlogPost/, { selector: "code" }),
+    ).toBeDefined();
   });
 
   it("restores a saved draft from localStorage", async () => {
@@ -74,5 +79,18 @@ describe("BlogPostEditor", () => {
     });
     expect(screen.getByDisplayValue("保存済み本文")).toBeDefined();
     expect(screen.getByText(/自動保存:/)).toBeDefined();
+  });
+
+  it("preserves corrupt draft data instead of autosaving over it", async () => {
+    const corrupt = '{"draft":';
+    window.localStorage.setItem("admin:blog-post-draft", corrupt);
+    const save = vi.spyOn(Storage.prototype, "setItem");
+    render(<BlogPostEditor />);
+    expect(
+      screen.getByRole("button", { name: "草案を再読み込み" }),
+    ).toBeDefined();
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    expect(save).not.toHaveBeenCalled();
+    expect(window.localStorage.getItem("admin:blog-post-draft")).toBe(corrupt);
   });
 });

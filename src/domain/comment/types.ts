@@ -17,10 +17,7 @@ export const COMMENT_LIMITS = {
 } as const;
 
 export type CommentValidationError =
-  | "name-empty"
-  | "name-too-long"
-  | "message-empty"
-  | "message-too-long";
+  "name-empty" | "name-too-long" | "message-empty" | "message-too-long";
 
 export function validateCommentInput(
   name: string,
@@ -53,9 +50,12 @@ function isCommentItem(value: unknown): value is CommentItem {
   const candidate = value as Record<string, unknown>;
   return (
     typeof candidate.id === "string" &&
+    candidate.id.length > 0 &&
     typeof candidate.name === "string" &&
     typeof candidate.message === "string" &&
-    typeof candidate.createdAt === "string"
+    validateCommentInput(candidate.name, candidate.message) === null &&
+    typeof candidate.createdAt === "string" &&
+    Number.isFinite(Date.parse(candidate.createdAt))
   );
 }
 
