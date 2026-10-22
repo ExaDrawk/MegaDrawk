@@ -47,6 +47,8 @@ describe("static CSP", () => {
     expect(csp).toContain("frame-ancestors 'none'");
     expect(csp).toContain("font-src 'self'");
     expect(csp).toContain("base-uri 'none'");
+    expect(csp).toContain("https://static.cloudflareinsights.com");
+    expect(csp).toContain("https://cloudflareinsights.com");
   });
   it("permits only the exact generated island style", () => {
     const hashes = inlineStyleHashes(

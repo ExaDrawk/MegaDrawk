@@ -49,13 +49,13 @@ export const inlineStyleHashes = (html) => inlineElementHashes(html, "style");
 export function securityHeaders(hashes, styleHashes = []) {
   const csp = [
     "default-src 'self'",
-    `script-src 'self' ${[...new Set(hashes)].join(" ")} ${adScripts.join(" ")}`,
+    `script-src 'self' ${[...new Set(hashes)].join(" ")} ${adScripts.join(" ")} https://static.cloudflareinsights.com`,
     "script-src-attr 'none'",
     `style-src 'self' ${[...new Set(styleHashes)].join(" ")}`,
     "style-src-attr 'none'",
     `img-src 'self' data: ${adScripts.join(" ")} https://googleads.g.doubleclick.net`,
     "font-src 'self'",
-    `connect-src 'self' ${adScripts.join(" ")} https://googleads.g.doubleclick.net`,
+    `connect-src 'self' ${adScripts.join(" ")} https://googleads.g.doubleclick.net https://cloudflareinsights.com`,
     `frame-src ${adFrames.join(" ")}`,
     "object-src 'none'",
     "base-uri 'none'",

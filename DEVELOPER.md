@@ -14,6 +14,8 @@ scripts/prepare-static.mjsが生成HTMLを検査し、インラインスクリ�
 
 CSPはCloudflare PagesのHTTPヘッダーとして適用します。distを別サービスへ置く場合も_headersをそのホストのHTTPヘッダーへ設定してください。単にHTMLをコピーするだけでは同等のヘッダー保護はありません。Astro開発サーバーはHMRを使うため、本番CSPの確認は必ずnpm run build後のnpm startで行います。
 
+Cloudflareが本番で追加するWeb Analyticsには、公式のCSP要件に従いstatic.cloudflareinsights.com（script-src）とcloudflareinsights.com（connect-src）だけを許可しています。
+
 既存AdSense連携に必要な外部オリジンを限定列挙しています。広告配信は外部サービスの応答・同意設定にも依存し、広告コード未設定の検証を実広告配信成功とは扱いません。広告が動的に追加するスタイルが厳格CSPに抵触する場合は、実際の違反を確認して広告側の構成を調整します。全ページのCSPを安易に緩めないでください。
 
 ブラウザの保存データは信頼せず、JSON構造・入力上限・日時を読み書き時に検証します。Reactがユーザー入力をテキストとして出力し、草案の生成コードはJSON.stringifyで文字列をエスケープします。読み込み失敗後に元データを空の状態で上書きしません。
