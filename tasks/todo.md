@@ -188,4 +188,7 @@
 - [x] DEVELOPER.md にメール構成セクション追加（Gmail Send as手順・DMARC強化計画・運用注意）
 - [x] 品質ゲート（BOM・Prettier・ESLint・astro check・Vitest・ビルド・audit・E2E）
 - [x] 未使用設定の全数調査（ローカル全リポジトリgrep・Cloudflare全Pages/Workers環境変数・DNS全レコード）→ Resend/SESレコードはlawdrawk問い合わせ送信（RESEND_API_KEY）が使用中のため保持。削除対象は0件と判定
-- [ ] ユーザー作業: Brevo SMTPキー生成 → Gmail「Send mail as」設定（DEVELOPER.md参照）
+- [x] Brevo SMTPキー生成の自動実行開始 → メールstep-up認証コードはGmailから自動取得して通過
+- [x] 受信経路の実E2E確認（Gmail→contact@→Email Routing→受信トレイの往復を実送信で検証）
+- [x] 本番のmailtoがCloudflareメール難読化+CSPで壊れていることを実機で発見 → Email Obfuscation offで修復、実機再確認
+- [ ] ユーザー作業: Brevoの電話SMS確認のみ（物理的にSIM所有者必須。生成ダイアログは開いたまま）。SMS後はSMTPキー生成・Gmail Send mail as設定・テスト送信を再委譲で自動実行可能（DEVELOPER.md参照）
