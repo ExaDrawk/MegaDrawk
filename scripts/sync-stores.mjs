@@ -9,7 +9,7 @@ import {
 import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
-import { parseStorePage } from "./store-metadata.mjs";
+import { fetchStoreListing } from "./store-metadata.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const apps = JSON.parse(
@@ -24,14 +24,7 @@ for (const app of apps) {
     !/^com\.drawk\.[a-z]+$/.test(app.packageId)
   )
     throw new Error("Invalid app registry");
-  const url =
-    "https://play.google.com/store/apps/details?id=" +
-    app.packageId +
-    "&hl=ja&gl=JP";
-  const response = await fetch(url, { redirect: "error" });
-  if (!response.ok)
-    throw new Error(`Store unavailable: ${app.packageId} (${response.status})`);
-  const metadata = parseStorePage(await response.text(), app.packageId);
+  const metadata = await fetchStoreListing(app.packageId);
   const icon = await fetch(metadata.iconUrl, { redirect: "error" });
   if (!icon.ok || !icon.headers.get("content-type")?.startsWith("image/"))
     throw new Error("Invalid store icon response");

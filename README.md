@@ -49,4 +49,4 @@ Cloudflare Pagesではビルドコマンドを npm run build、出力ディレ�
 
 Androidアプリの正本は src/config/store-apps.json のパッケージIDです。npm run sync:stores は日本向けGoogle Play公開ページから名称・短い説明・アイコンを取得し、src/config/store-listings.jsonとローカル画像へ保存します。紹介画面はこの保存済みデータを使い、閲覧時の外部通信を増やしません。
 
-GitHub ActionsのSync public store listingsは毎日日本時間6:17頃と手動起動時に取得・品質検証し、変更がある場合だけmainへコミットします。CloudflareのGit連携が本番を再ビルドします。スケジュール時刻にはGitHub側の遅延があり得ます。取得失敗時はジョブを失敗させ、最後に検証できた掲載内容を保持します。新しいアプリの追加やChrome拡張機能の説明は明示的な編集が必要です。
+GitHub ActionsのSync public store listingsは毎日日本時間6:17頃と手動起動時に取得・品質検証し、変更がある場合だけmainへコミットします。CloudflareのGit連携が本番を再ビルドします。スケジュール時刻にはGitHub側の遅延があり得ます。一時的な取得失敗は最大3回まで再検証し、復旧しない場合はジョブを失敗させ、最後に検証できた掲載内容を保持します。新しいアプリの追加やChrome拡張機能の説明は明示的な編集が必要です。

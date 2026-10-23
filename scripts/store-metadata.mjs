@@ -1,5 +1,29 @@
 import { parse } from "parse5";
 
+export async function fetchStoreListing(packageId, fetchPage = fetch) {
+  const url =
+    "https://play.google.com/store/apps/details?id=" +
+    packageId +
+    "&hl=ja&gl=JP";
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const response = await fetchPage(url, {
+        redirect: "error",
+        headers: { "Cache-Control": "no-cache" },
+      });
+      if (!response.ok)
+        throw new Error(`Store unavailable: ${packageId} (${response.status})`);
+      return parseStorePage(await response.text(), packageId);
+    } catch (error) {
+      if (attempt === 3) throw error;
+      console.warn(
+        `Retrying verified store listing: ${packageId} (${attempt}/3)`,
+      );
+    }
+  }
+  throw new Error("Store verification did not complete");
+}
+
 export function parseStorePage(html, packageId) {
   const metadata = new Map();
   const applications = [];
