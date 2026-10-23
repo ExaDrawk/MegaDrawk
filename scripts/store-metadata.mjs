@@ -28,7 +28,9 @@ export function parseStorePage(html, packageId) {
     canonical.searchParams.get("id") !== packageId ||
     app.author?.name !== "Drawk"
   )
-    throw new Error(`Unexpected store listing: ${packageId}`);
+    throw new Error(
+      `Unexpected store listing: ${packageId}; canonical=${canonical.hostname}${canonical.pathname}?id=${canonical.searchParams.get("id")}; application=${app?.["@type"] ?? "missing"}; publisher=${app?.author?.name ?? "missing"}`,
+    );
   const name = app.name;
   const description = metadata.get("og:description");
   if (
