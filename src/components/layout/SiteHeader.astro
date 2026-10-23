@@ -1,5 +1,6 @@
 ---
 import { SITE, NAV_LINKS } from "@/config/site";
+import { BrandLockup } from "@/components/layout/BrandLockup";
 
 const pathname = Astro.url.pathname.replace(/\/$/, "") || "/";
 ---
@@ -7,8 +8,7 @@ const pathname = Astro.url.pathname.replace(/\/$/, "") || "/";
 <header class="site-header">
   <div class="site-header__inner">
     <a href="/" class="site-brand" aria-label={SITE.name + " トップページ"}>
-      <img src="/icon.svg" alt="" width="28" height="28" />
-      <span>{SITE.name}</span>
+      <BrandLockup />
     </a>
     <nav class="site-nav" aria-label="メインナビゲーション">
       <ul class="site-nav__list">

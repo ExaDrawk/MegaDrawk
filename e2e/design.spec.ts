@@ -26,6 +26,14 @@ for (const width of [320, 375, 414, 768, 1280])
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/");
     await page.evaluate(() => document.fonts.ready);
+    await expect(page.locator(".site-brand .brand-wordmark")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { level: 1, name: "MegaDrawk" }),
+    ).toBeVisible();
+    await expect(page.locator("h1 .brand-wordmark")).toHaveAttribute(
+      "src",
+      "/logo.svg",
+    );
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth,

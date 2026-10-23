@@ -1,4 +1,5 @@
 import { SITE } from "@/config/site";
+import { BrandLockup } from "@/components/layout/BrandLockup";
 import { ProjectList } from "@/components/ui/ProjectList";
 import { getPublishedBlogPosts } from "@/config/blog";
 import { formatJaDate } from "@/lib/date";
@@ -7,7 +8,9 @@ export default function HomePage() {
   return (
     <div className="home">
       <header className="home-intro">
-        <h1>{SITE.name}</h1>
+        <h1>
+          <BrandLockup />
+        </h1>
         <p>{SITE.heroCopy}</p>
       </header>
       <section aria-labelledby="projects-heading">
