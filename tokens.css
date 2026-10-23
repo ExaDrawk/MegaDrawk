@@ -1,17 +1,17 @@
-/* Hallmark token export · Cobalt-inspired studied-DNA · MEGADRAWK */
+/* MEGADRAWK: cool white, slate ink, restrained blue links. */
 :root {
   color-scheme: light;
 
-  --color-paper: oklch(98.2% 0.004 250);
-  --color-paper-2: oklch(95.8% 0.006 250);
+  --color-paper: oklch(99% 0.002 250);
+  --color-paper-2: oklch(96.7% 0.004 250);
   --color-paper-3: oklch(92.8% 0.009 250);
   --color-ink: oklch(20% 0.016 258);
   --color-ink-2: oklch(32% 0.018 257);
-  --color-muted: oklch(47% 0.012 257);
-  --color-faint: oklch(62% 0.009 257);
+  --color-muted: oklch(42% 0.012 257);
+  --color-faint: oklch(44% 0.009 257);
   --color-rule: oklch(83% 0.01 250);
   --color-rule-strong: oklch(65% 0.014 257);
-  --color-accent: oklch(57% 0.2 256);
+  --color-accent: oklch(39% 0.09 252);
   --color-accent-soft: oklch(94% 0.035 256);
   --color-accent-ink: oklch(99% 0.004 250);
   --color-graphite: oklch(22% 0.018 260);
@@ -32,19 +32,19 @@
   --color-border: var(--color-rule-strong);
   --color-border-subtle: var(--color-rule);
   --color-primary: var(--color-accent);
-  --color-primary-hover: oklch(49% 0.2 256);
+  --color-primary-hover: oklch(32% 0.09 252);
   --color-code: var(--color-graphite);
   --color-code-text: var(--color-paper);
 
-  --font-display: "Bricolage Grotesque Variable", "Noto Sans JP", sans-serif;
+  --font-display: "IBM Plex Sans", "Noto Sans JP", sans-serif;
   --font-body: "IBM Plex Sans", "Noto Sans JP", sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-mono: ui-monospace, monospace;
 
-  --header-height: 5.25rem;
-  --max-width: 84rem;
-  --content-width: 65ch;
+  --header-height: 5rem;
+  --max-width: 64rem;
+  --content-width: 42rem;
   --space-page-x: clamp(1.25rem, 4vw, 4rem);
-  --space-section-y: clamp(5rem, 11vw, 9rem);
+  --space-section-y: clamp(2.5rem, 5vw, 4rem);
 
   --radius-sm: 0.25rem;
   --radius-md: 0.375rem;

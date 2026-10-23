@@ -49,3 +49,9 @@ npm run verifyでUTF-8/BOM検査、Prettier、ESLint、astro check、Vitest、�
 ## 削除した構成
 
 src/app、Next.js設定・型定義・middleware、OpenNext設定、Pages変換スクリプト、旧PostCSS設定を削除しました。レイアウト定数のうち参照元がテストしかなくCSSと食い違っていたtheme.ts、および未参照の旧作品SVGも削除しています。新たな定数の正本は既存tokens.cssへ集約してください。
+
+## ストア同期の境界
+
+Google Playの公開ページは非保証のHTMLインターフェースです。構造変更・地域制限・通信障害時は取得を失敗として扱い、既存スナップショットを維持します。ストアのcanonicalパッケージID、発行者、文字列長、画像オリジン、PNG署名とサイズを検証します。全アプリの検証後にJSONを一括置換します。アイコンは内容ハッシュ付きのローカルPNGへ保存し、以前の自動生成画像だけを整理します。更新ジョブのactionsはコミットSHAで固定し、権限はcontents:writeに限定しています。
+
+法的ページの監査ではCloudflare Web AnalyticsのCookieを使わない集計と配信用通信処理を区別しました。広告記載はLayoutと共通のSITE_FEATURESから実際のスクリプト有効状態に合わせ、localStorageがサーバー共有でない点、削除方法、連絡先・利用目的を記載しています。利用規約の一律免責と引用まで禁じる文言を撤去しました。参考はCloudflareのWeb Analytics公式資料、個人情報保護委員会の通則編・Q&A、消費者庁の消費者契約法解説です。

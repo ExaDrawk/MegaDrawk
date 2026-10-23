@@ -1,8 +1,15 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { BlogPostEditor } from "@/components/admin/BlogPostEditor";
+import { renderToStaticMarkup } from "react-dom/server";
 
 describe("BlogPostEditor", () => {
+  it("prevents editing the static form before the saved draft has loaded", () => {
+    const html = renderToStaticMarkup(<BlogPostEditor />);
+    const container = document.createElement("div");
+    container.innerHTML = html;
+    expect(container.querySelector("fieldset")?.disabled).toBe(true);
+  });
   afterEach(() => vi.restoreAllMocks());
   beforeEach(() => {
     window.localStorage.clear();

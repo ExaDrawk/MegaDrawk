@@ -1,72 +1,47 @@
 import { SITE } from "@/config/site";
-import { XProfileLink } from "@/components/ui/XProfileLink";
-
 export const metadata = {
   title: "利用規約",
-  description: `${SITE.name}の利用規約。`,
+  description: SITE.name + "の利用条件。",
 };
-
-export default function TermsPage() {
-  const lastUpdated = "2026年2月9日";
-
+export default function Terms() {
   return (
-    <div>
-      <article className="page-section content-column">
-        <a href="/" className="text-link mb-7">
-          ← トップに戻る
-        </a>
-
-        <h1 className="page-title text-3xl font-bold tracking-tight">
-          利用規約
-        </h1>
-        <p className="document-meta mt-2">最終更新日: {lastUpdated}</p>
-
-        <div className="prose-content">
-          <h2>第1条（適用）</h2>
-          <p>
-            本利用規約（以下「本規約」）は、当サイト（{SITE.domain}）の
-            利用に関する条件を定めるものです。当サイトをご利用いただくことにより、
-            本規約に同意したものとみなされます。
-          </p>
-
-          <h2>第2条（禁止事項）</h2>
-          <p>当サイトの利用にあたり、以下の行為を禁止します：</p>
-          <ul>
-            <li>法令または公序良俗に違反する行為</li>
-            <li>当サイトの運営を妨害する行為</li>
-            <li>当サイトのコンテンツを無断で複製、転載、改変する行為</li>
-            <li>不正アクセスやスクレイピング等の行為</li>
-          </ul>
-
-          <h2>第3条（知的財産権）</h2>
-          <p>
-            当サイトに掲載されるすべてのコンテンツに関する著作権は、
-            運営者または正当な権利者に帰属します。
-          </p>
-
-          <h2>第4条（免責事項）</h2>
-          <p>
-            当サイトのコンテンツの正確性、完全性、有用性について
-            保証するものではありません。当サイトの利用により生じた
-            いかなる損害についても、運営者は責任を負いません。
-          </p>
-
-          <h2>第5条（準拠法）</h2>
-          <p>本規約の解釈にあたっては、日本法を準拠法とします。</p>
-
-          <h2>第6条（お問い合わせ）</h2>
-          <p>
-            本規約に関するお問い合わせは{" "}
-            <XProfileLink
-              href={SITE.social.x}
-              label={`X（${SITE.social.xHandle}）`}
-              className="inline-flex items-center gap-1.5"
-              iconSize={14}
-            />{" "}
-            までご連絡ください。
-          </p>
-        </div>
-      </article>
-    </div>
+    <article className="page-section content-column">
+      <a className="text-link" href="/">
+        トップに戻る
+      </a>
+      <h1 className="page-title">利用規約</h1>
+      <p className="document-meta">最終更新日: 2026年10月23日</p>
+      <div className="prose-content">
+        <h2>対象</h2>
+        <p>
+          本規約は{SITE.ownerName}が運営する{SITE.domain}
+          の利用条件を定めます。紹介しているアプリ・拡張機能・外部サービスには、それぞれの利用条件が適用されます。
+        </p>
+        <h2>掲載内容と権利</h2>
+        <p>
+          文章、画像、ロゴなどの権利は、運営者または各権利者に帰属します。法令上認められる引用・私的使用や、個別のライセンスによる利用を妨げません。それ以外の複製・転載・改変には権利者の許諾が必要です。
+        </p>
+        <h2>禁止事項</h2>
+        <p>
+          不正アクセス、過度な負荷をかける行為、マルウェアの送信、他者の権利を侵害する行為など、サイトの安全な利用や運営を妨げる行為を禁止します。
+        </p>
+        <h2>掲載情報と外部リンク</h2>
+        <p>
+          内容を正確に保つよう努めますが、更新の遅れや誤りが生じる場合があります。アプリの価格、対応端末、提供地域などの最新条件は、リンク先のストアでご確認ください。サイトの内容は予告なく変更・停止することがあります。
+        </p>
+        <p>
+          本規約は、運営者の故意または重大な過失による責任を免除するものではありません。また、消費者契約法その他の法令により認められる利用者の権利や、運営者が負う責任を制限するものではありません。
+        </p>
+        <h2>端末内の保存データ</h2>
+        <p>
+          コメントと記事草案は利用中のブラウザにだけ保存されます。共有投稿やバックアップのサービスではありません。必要な内容はご自身でも保管してください。
+        </p>
+        <h2>準拠法と連絡先</h2>
+        <p>
+          本規約には日本法を適用します。お問い合わせは
+          <a href={"mailto:" + SITE.email}>{SITE.email}</a>へご連絡ください。
+        </p>
+      </div>
+    </article>
   );
 }

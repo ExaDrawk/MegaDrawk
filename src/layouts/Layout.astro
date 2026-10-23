@@ -1,5 +1,6 @@
 ---
 import { SITE } from "@/config/site";
+import { SITE_FEATURES } from "@/config/features";
 import Header from "@/components/layout/SiteHeader.astro";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SkipNav } from "@/components/ui/SkipNav";
@@ -20,9 +21,7 @@ const canonical = new URL(
   Astro.url.pathname.replace(/\/$/, "") || "/",
   SITE.url,
 ).href;
-const adsense = import.meta.env.PUBLIC_ADSENSE_CLIENT?.trim();
-if (adsense && !/^ca-pub-\d{16}$/.test(adsense))
-  throw new Error("Invalid PUBLIC_ADSENSE_CLIENT");
+const adsense = SITE_FEATURES.adsenseClient;
 const jsonLd = JSON.stringify({
   "@context": "https://schema.org",
   "@type": "Person",

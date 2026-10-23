@@ -205,87 +205,89 @@ export function BlogPostEditor() {
             handleGenerate();
           }}
         >
-          <label className="form-field" htmlFor="draft-title">
-            <span className="form-label">{FIELD_LABELS.title}</span>
-            <input
-              id="draft-title"
-              value={draftInput.title}
-              onChange={(event) => updateField("title", event.target.value)}
-              placeholder="例: 春の展示で試した新しい地形表現"
-              className="form-control"
-            />
-          </label>
-
-          <label className="form-field" htmlFor="draft-body">
-            <span className="form-label" id="draft-body-label">
-              {FIELD_LABELS.body}
-            </span>
-            <textarea
-              id="draft-body"
-              aria-labelledby="draft-body-label"
-              value={draftInput.body}
-              onChange={(event) => updateField("body", event.target.value)}
-              placeholder="段落ごとに改行を空けると、プレビューも読みやすくなります。"
-              rows={10}
-              className="form-control"
-            />
-          </label>
-
-          <div className="grid gap-5 sm:grid-cols-2">
-            <label className="form-field">
-              <span className="form-label">{FIELD_LABELS.date}</span>
+          <fieldset className="contents" disabled={storageState === "loading"}>
+            <label className="form-field" htmlFor="draft-title">
+              <span className="form-label">{FIELD_LABELS.title}</span>
               <input
-                type="date"
-                value={draftInput.date}
-                onChange={(event) => updateField("date", event.target.value)}
+                id="draft-title"
+                value={draftInput.title}
+                onChange={(event) => updateField("title", event.target.value)}
+                placeholder="例: 春の展示で試した新しい地形表現"
                 className="form-control"
               />
             </label>
 
-            <label className="form-field">
-              <span className="form-label">{FIELD_LABELS.updatedAt}</span>
-              <input
-                type="date"
-                value={draftInput.updatedAt}
-                onChange={(event) =>
-                  updateField("updatedAt", event.target.value)
-                }
+            <label className="form-field" htmlFor="draft-body">
+              <span className="form-label" id="draft-body-label">
+                {FIELD_LABELS.body}
+              </span>
+              <textarea
+                id="draft-body"
+                aria-labelledby="draft-body-label"
+                value={draftInput.body}
+                onChange={(event) => updateField("body", event.target.value)}
+                placeholder="段落ごとに改行を空けると、プレビューも読みやすくなります。"
+                rows={10}
                 className="form-control"
               />
             </label>
-          </div>
 
-          <label className="form-field">
-            <span className="form-label">{FIELD_LABELS.tags}</span>
-            <input
-              value={draftInput.tags}
-              onChange={(event) => updateField("tags", event.target.value)}
-              placeholder="例: 制作メモ, ジオラマ, 展示"
-              className="form-control"
-            />
-          </label>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <label className="form-field">
+                <span className="form-label">{FIELD_LABELS.date}</span>
+                <input
+                  type="date"
+                  value={draftInput.date}
+                  onChange={(event) => updateField("date", event.target.value)}
+                  className="form-control"
+                />
+              </label>
 
-          <div className="flex flex-wrap gap-3 pt-2">
-            <ActionButton
-              type="submit"
-              disabled={isPending}
-              aria-busy={isPending}
-            >
-              {isPending ? "生成中..." : "記事コードを生成"}
-            </ActionButton>
-            <ActionButton
-              variant="secondary"
-              onClick={() => discardSavedDraft(true)}
-            >
-              入力をリセット
-            </ActionButton>
-            <ActionButton
-              variant="secondary"
-              onClick={() => discardSavedDraft()}
-            >
-              保存済み草案を削除
-            </ActionButton>
-          </div>
+              <label className="form-field">
+                <span className="form-label">{FIELD_LABELS.updatedAt}</span>
+                <input
+                  type="date"
+                  value={draftInput.updatedAt}
+                  onChange={(event) =>
+                    updateField("updatedAt", event.target.value)
+                  }
+                  className="form-control"
+                />
+              </label>
+            </div>
+
+            <label className="form-field">
+              <span className="form-label">{FIELD_LABELS.tags}</span>
+              <input
+                value={draftInput.tags}
+                onChange={(event) => updateField("tags", event.target.value)}
+                placeholder="例: 制作メモ, ジオラマ, 展示"
+                className="form-control"
+              />
+            </label>
+
+            <div className="flex flex-wrap gap-3 pt-2">
+              <ActionButton
+                type="submit"
+                disabled={isPending}
+                aria-busy={isPending}
+              >
+                {isPending ? "生成中..." : "記事コードを生成"}
+              </ActionButton>
+              <ActionButton
+                variant="secondary"
+                onClick={() => discardSavedDraft(true)}
+              >
+                入力をリセット
+              </ActionButton>
+              <ActionButton
+                variant="secondary"
+                onClick={() => discardSavedDraft()}
+              >
+                保存済み草案を削除
+              </ActionButton>
+            </div>
+          </fieldset>
         </form>
       </section>
 

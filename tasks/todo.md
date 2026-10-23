@@ -196,3 +196,11 @@
 - [x] Gmail送信元 MegaDrawk <contact@megadrawk.com> をResend SMTPからsmtp-relay.brevo.comへ移行（旧Resend依存を解消、lawdrawk.comエントリは変更なし）
 - [x] 実送信テスト: From=contact@megadrawk.com（Brevo経由）で送信 → Sent/受信トレイ双方で実ヘッダ確認
 - [x] 既定の送信元をcontact@megadrawk.comに設定（対外主要アドレスとして意図した状態。戻し方もDEVELOPER.mdに記載）
+
+## 2026-10-23 公開アプリとサイト再設計
+
+- [x] 条文スコープの掲載・画像を削除
+- [x] Google Playで3アプリの公開確認、製品版リンク・名称・説明・アイコンの同期
+- [x] 共通の製品一覧、白・スレート基調の静かな画面へ再設計
+- [x] 実際の通信・保存・広告状態に沿うプライバシーポリシーと利用規約の修正
+- [ ] 自動更新ジョブの実行と本番反映・画面確認

@@ -1,34 +1,31 @@
 import { describe, it, expect } from "vitest";
 import { PROJECTS } from "../projects";
-
-describe("PROJECTS configuration", () => {
-  it("defines personal projects list", () => {
-    expect(PROJECTS.length).toBeGreaterThanOrEqual(3);
+describe("published product catalog", () => {
+  it("contains the three public Android releases and the subtitle extension", () => {
+    expect(PROJECTS).toHaveLength(4);
+    for (const id of ["roppo", "syopita", "tjapocket"]) {
+      const p = PROJECTS.find(
+        (p) =>
+          p.href ===
+          "https://play.google.com/store/apps/details?id=com.drawk." + id,
+      );
+      expect(p).toBeDefined();
+      expect(p?.linkLabel).toBe("Google Play");
+    }
+    expect(
+      PROJECTS.some((p) => p.href.includes("ndgdichjchjkakemdjmimflnjipcpbbd")),
+    ).toBe(true);
   });
-
-  it("contains どこでも六法 with valid link and image", () => {
-    const roppo = PROJECTS.find((p) => p.name === "どこでも六法");
-    expect(roppo).toBeDefined();
-    expect(roppo?.platform).toBe("Androidアプリ");
-    expect(roppo?.href).toContain("play.google.com");
-    expect(roppo?.imageSrc).toBe("/images/projects/roppo.png");
-  });
-
-  it("contains Multi-Subtitles for YouTube with valid link and image", () => {
-    const multiSub = PROJECTS.find(
-      (p) => p.name === "Multi-Subtitles for YouTube",
+  it("contains no removed product or testing links", () => {
+    expect(JSON.stringify(PROJECTS)).not.toMatch(
+      /条文スコープ|mmmciilhhdlldepiemjjjajiphcphgcp|apps\/testing|テスト公開/,
     );
-    expect(multiSub).toBeDefined();
-    expect(multiSub?.platform).toBe("Chrome拡張機能");
-    expect(multiSub?.href).toContain("chromewebstore.google.com");
-    expect(multiSub?.imageSrc).toBe("/images/projects/multi-subtitles.png");
   });
-
-  it("contains 条文スコープ with valid link and image", () => {
-    const jobun = PROJECTS.find((p) => p.name === "条文スコープ");
-    expect(jobun).toBeDefined();
-    expect(jobun?.platform).toBe("Chrome拡張機能");
-    expect(jobun?.href).toContain("chromewebstore.google.com");
-    expect(jobun?.imageSrc).toBe("/images/projects/joubun-scope.png");
+  it("uses unique HTTPS store links and local image assets", () => {
+    expect(new Set(PROJECTS.map((p) => p.href)).size).toBe(PROJECTS.length);
+    for (const p of PROJECTS) {
+      expect(new URL(p.href).protocol).toBe("https:");
+      expect(p.imageSrc).toMatch(/^\/images\/projects\/[a-z0-9-]+\.png$/);
+    }
   });
 });

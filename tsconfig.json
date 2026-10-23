@@ -15,6 +15,9 @@
     "dist",
     "node_modules",
     "coverage",
+    "verification",
+    "screenshots",
+    ".wrangler",
     "playwright-report",
     "test-results"
   ]
