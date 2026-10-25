@@ -46,6 +46,20 @@ export interface GithubArticleMeta {
 export async function listArticles(
   token: string | undefined,
 ): Promise<Response> {
+  // 本番のみクラッシュするため、原因特定まで全例外を応答に含める
+  try {
+    return await listArticlesInner(token);
+  } catch (error) {
+    return errorResponse(
+      `listArticles crashed: ${String(error)} | ${
+        error instanceof Error ? (error.stack ?? "").slice(0, 250) : ""
+      }`,
+      502,
+    );
+  }
+}
+
+async function listArticlesInner(token: string | undefined): Promise<Response> {
   if (!token) {
     return errorResponse("記事管理は現在利用できません。", 500);
   }
