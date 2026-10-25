@@ -94,9 +94,6 @@ export function securityHeaders(hashes, styleHashes = [], options = {}) {
     ? " " + adScripts.join(" ") + " https://googleads.g.doubleclick.net"
     : "";
   const adFrameOrigins = adsense ? " " + adFrames.join(" ") : "";
-  // giscus（ブログコメント・GitHub Discussions）は常設コンテンツ機能。
-  // client.jsがホストページへgiscus.app/default.cssのlinkを挿入するためstyle-srcも許可する。
-  const giscusOrigin = " https://giscus.app";
   // style属性はShikiの出力のみで、値ごとのハッシュで許可リスト化する。
   const styleAttrHashes = [...new Set(options.styleAttrHashes ?? [])];
   const styleSrcAttr = styleAttrHashes.length
@@ -104,14 +101,14 @@ export function securityHeaders(hashes, styleHashes = [], options = {}) {
     : "'none'";
   const csp = [
     "default-src 'self'",
-    `script-src 'self' ${[...new Set(hashes)].join(" ")}${adScriptOrigins} https://static.cloudflareinsights.com${giscusOrigin}${turnstileOrigins}`,
+    `script-src 'self' ${[...new Set(hashes)].join(" ")}${adScriptOrigins} https://static.cloudflareinsights.com${turnstileOrigins}`,
     "script-src-attr 'none'",
-    `style-src 'self'${giscusOrigin} ${[...new Set(styleHashes)].join(" ")}`,
+    `style-src 'self' ${[...new Set(styleHashes)].join(" ")}`,
     `style-src-attr ${styleSrcAttr}`,
     `img-src 'self' data:${adImgOrigins} https://github.com https://avatars.githubusercontent.com`,
     "font-src 'self'",
-    `connect-src 'self'${adConnectOrigins} https://cloudflareinsights.com${giscusOrigin}`,
-    `frame-src 'self'${adFrameOrigins}${giscusOrigin}${turnstileOrigins}`,
+    `connect-src 'self'${adConnectOrigins} https://cloudflareinsights.com`,
+    `frame-src 'self'${adFrameOrigins}${turnstileOrigins}`,
     "object-src 'none'",
     "base-uri 'none'",
     "form-action 'self'",

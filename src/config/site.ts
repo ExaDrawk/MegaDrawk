@@ -16,16 +16,6 @@ export const SITE = {
     x: "https://x.com/Drawk1234",
     xHandle: "@Drawk1234",
   },
-  /**
-   * ブログコメント（giscus / GitHub Discussions）の設定。
-   * repoId・categoryIdは公開識別子であり、ページのソースからも参照できる値。
-   */
-  giscus: {
-    repo: "ExaDrawk/MegaDrawk",
-    repoId: "R_kgDOQ-Zz_g",
-    category: "Announcements",
-    categoryId: "DIC_kwDOQ-Zz_s4DJkn0",
-  },
 } as const;
 
 /** ナビゲーションリンク */

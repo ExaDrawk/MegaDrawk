@@ -261,3 +261,10 @@
 - [x] セキュリティ正本の拡張: Shiki形式style属性の許可リスト＋CSP style-src-attrハッシュ化
 - [x] npm audit: satori依存fflateの脆弱性をオーバーライド（0.8.3）で解消
 - [x] 品質ゲート全パス（単体90・E2E44）→本番反映
+
+## 2026-10-25 コメント機能の方針変更（ユーザー指示）
+
+- [x] giscus（GitHub認証必須）を撤去し、アカウント不要のlocalStorage型コメント（CommentSection）を復元
+- [x] コメント欄にX・お問い合わせフォームへの公開導線を併記（GitHubアカウントを持たない読者への案内）
+- [x] CSPからgiscusオリジンを除去、プライバシーポリシー・README・DEVELOPER.mdを現状に整合
+- [x] 記事ページのMarkdown化・OG画像・目次・タグページなど、ブログ機能本体は維持

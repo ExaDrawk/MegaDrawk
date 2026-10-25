@@ -2,7 +2,7 @@
 
 ## 設計と依存方向
 
-Astroのsrc/pagesがURLとメタデータを定義し、src/layouts/Layout.astroがhead、ナビゲーション、フッターを統合します。src/viewsのReactコンポーネントはビルド時にHTMLへ変換され、閲覧者へReactランタイムを送りません。操作が必要なコメント（giscus）と草案エディター・お問い合わせフォームだけ、Astroのclient:visible / client:loadでハイドレーションします。
+Astroのsrc/pagesがURLとメタデータを定義し、src/layouts/Layout.astroがhead、ナビゲーション、フッターを統合します。src/viewsのReactコンポーネントはビルド時にHTMLへ変換され、閲覧者へReactランタイムを送りません。操作が必要なコメント欄と草案エディター・お問い合わせフォームだけ、Astroのclient:load / client:visibleでハイドレーションします。
 
 UI（pages/layouts/views/components）→ ドメイン（domain/config/lib）→ 永続化（infra）に責務を分けます。お問い合わせフォームの入力検証ルールはsrc/domain/contact/contact.tsにのみ存在し、ブラウザ側のisland（src/components/contact/ContactForm.tsx）とサーバー側のPages Function（functions/api/contact.ts）の双方が同じ関数を参照します。functions/はCloudflare Pages Functionsで、配信は静的distのまま、/api/contactだけサーバー処理を行います。
 
@@ -12,8 +12,8 @@ UI（pages/layouts/views/components）→ ドメイン（domain/config/lib）→
 - ルートパラメータはAstro.paramsから取ります（Astro.propsはgetStaticPathsのpropsのみ）。記事のid＝ファイル名＝URLスラッグ。
 - コードハイライトはAstro標準のShikiを二重テーマ（github-light/github-dark、defaultColor: false）で生成し、globals.cssが[data-theme]で切り替えます。Shikiはstyle属性を出力するため、scripts/security.mjsがShiki形式のstyle属性のみ許可し、値ごとのSHA-256ハッシュをCSPのstyle-src-attrへ出力します。
 - 読了時間・関連記事・タグ集計・前後記事のロジックはsrc/lib/blogUtils.tsの純粋関数（単体テスト対象）。記事ごとのOG画像はsrc/pages/og/[id].png.tsがビルド時にsatori＋sharpで生成し、フォントはscripts/assets/fonts/から読み込みます（リポジトリにコミット、ブラウザへは配信しない）。
-- コメントはgiscus（GitHub Discussions）。設定はsrc/config/site.tsのgiscus（repo・repoId・category・categoryId。いずれも公開識別子）。CSPにはgiscus.app（script/frame/connect）とGitHubのアバター画像を許可します。テーマ切替はLayoutが発火するthemechangeイベントをGiscusCommentsが購読してiframeへpostMessageします。
-- 下書き（draft: true）は本番ビルド・RSS・サイトマップから除外され、開発サーバーでのみ表示されます。旧localStorageコメント機能（CommentSection）はgiscus導入時に削除しました。ブラウザ内に残った過去のコメントデータは削除していません。
+- コメントはアカウント不要のlocalStorage保存型（CommentSection）。他の利用者には表示されないため、公開導線としてX・お問い合わせフォームへの案内リンクをコメント欄に併記します。
+- 下書き（draft: true）は本番ビルド・RSS・サイトマップから除外され、開発サーバーでのみ表示されます。コメントデータは各利用者のブラウザのlocalStorage（キーは変更なし）に残ります。
 
 ## セキュリティ
 

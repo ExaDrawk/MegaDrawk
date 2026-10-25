@@ -9,7 +9,7 @@ import {
 } from "@/config/blog";
 import { formatJaDate } from "@/lib/date";
 import { articleSchema } from "@/lib/structuredData";
-import { GiscusComments } from "@/components/blog/GiscusComments";
+import { CommentSection } from "@/components/blog/CommentSection";
 
 export async function getStaticPaths() {
   const entries = await getPublishedBlogEntries();
@@ -129,7 +129,7 @@ const tocItems = headings.filter(
     )}
 
     <div class="post-comments">
-      <GiscusComments client:visible />
+      <CommentSection postId={post.id} client:load />
     </div>
   </article>
 </Layout>

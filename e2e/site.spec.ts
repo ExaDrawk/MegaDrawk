@@ -100,22 +100,23 @@ test("per-post og image is generated as png", async ({ request }) => {
   expect(body.subarray(0, 4).toString("binary")).toBe("\x89PNG");
 });
 
-test("giscus comments container is embedded on the post page", async ({
+test("comment form works on the post page without any account", async ({
   page,
 }) => {
   await page.goto(`/blog/${POST_ID}`);
-  const comments = page.getByRole("region", { name: "コメント" });
-  // client:visibleのため、コメント欄が視界に入った時点でハイドレーションする
+  const comments = page.getByRole("region", { name: "コメント欄" });
   await comments.scrollIntoViewIfNeeded();
   await expect(comments).toBeVisible();
-  // giscusスクリプトがCSP許可オリジンから読み込まれる
-  await expect(page.locator('script[src*="giscus.app/client.js"]')).toHaveCount(
-    1,
-  );
-  const csp = (await page.request.get("/")).headers()[
-    "content-security-policy"
-  ];
-  expect(csp).toContain("https://giscus.app");
+  // アカウント不要: 名前と本文だけで投稿できる
+  await comments.getByPlaceholder("名前").fill("読者");
+  await comments.getByPlaceholder("コメントを書く").fill("応援しています！");
+  await comments.getByRole("button", { name: "送信" }).click();
+  await expect(comments.getByText("応援しています！")).toBeVisible();
+  // 公開導線の案内
+  await expect(comments.getByRole("link", { name: /X（/ })).toBeVisible();
+  await expect(
+    comments.getByRole("link", { name: "お問い合わせフォーム" }),
+  ).toBeVisible();
 });
 
 test("tag pages list the posts that carry the tag", async ({ page }) => {
