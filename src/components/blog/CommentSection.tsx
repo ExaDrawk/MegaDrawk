@@ -242,6 +242,8 @@ export function CommentSection({ postId }: CommentSectionProps) {
       setMessage("");
       setTurnstileToken("");
       setReplyTo(null);
+      // Turnstileトークンは単回使用のため、次の投稿に備えてウィジェットを再発行する
+      resetTurnstile();
       await refresh();
     } catch {
       setStatus("error");
