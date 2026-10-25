@@ -146,3 +146,13 @@ describe("conditional origins", () => {
     expect(csp.length).toBeLessThan(2000);
   });
 });
+
+describe("giscus origins", () => {
+  it("allows the giscus stylesheet that client.js injects into the host page", () => {
+    const csp = securityHeaders([])["Content-Security-Policy"];
+    const styleSrc = csp
+      .split("; ")
+      .find((directive) => directive.startsWith("style-src "));
+    expect(styleSrc).toContain("https://giscus.app");
+  });
+});

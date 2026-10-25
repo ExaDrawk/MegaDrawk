@@ -81,7 +81,20 @@ export function GiscusComments() {
       <h2 className="section-title">コメント</h2>
       <p className="text-sm mt-2" data-color="color-text-muted">
         GitHubアカウントでサインインするとコメントできます。コメントはGitHub
-        Discussions上に公開されます。
+        Discussions上に公開されます。アカウントをお持ちでない場合は、
+        <a
+          className="text-link min-h-0"
+          href={`https://x.com/${SITE.social.xHandle.slice(1)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          X（{SITE.social.xHandle}）
+        </a>
+        や
+        <a className="text-link min-h-0" href="/contact">
+          お問い合わせフォーム
+        </a>
+        からご連絡ください。
       </p>
       <div className="mt-4" ref={containerRef} />
     </section>

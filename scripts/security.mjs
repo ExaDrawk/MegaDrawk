@@ -95,6 +95,7 @@ export function securityHeaders(hashes, styleHashes = [], options = {}) {
     : "";
   const adFrameOrigins = adsense ? " " + adFrames.join(" ") : "";
   // giscus（ブログコメント・GitHub Discussions）は常設コンテンツ機能。
+  // client.jsがホストページへgiscus.app/default.cssのlinkを挿入するためstyle-srcも許可する。
   const giscusOrigin = " https://giscus.app";
   // style属性はShikiの出力のみで、値ごとのハッシュで許可リスト化する。
   const styleAttrHashes = [...new Set(options.styleAttrHashes ?? [])];
@@ -105,7 +106,7 @@ export function securityHeaders(hashes, styleHashes = [], options = {}) {
     "default-src 'self'",
     `script-src 'self' ${[...new Set(hashes)].join(" ")}${adScriptOrigins} https://static.cloudflareinsights.com${giscusOrigin}${turnstileOrigins}`,
     "script-src-attr 'none'",
-    `style-src 'self' ${[...new Set(styleHashes)].join(" ")}`,
+    `style-src 'self'${giscusOrigin} ${[...new Set(styleHashes)].join(" ")}`,
     `style-src-attr ${styleSrcAttr}`,
     `img-src 'self' data:${adImgOrigins} https://github.com https://avatars.githubusercontent.com`,
     "font-src 'self'",
