@@ -324,3 +324,11 @@
 - [x] 全管理API（admin comments/articles、コメントDELETE）を checkAdminAccess に統一（X-Admin-TokenヘッダまたはセッションCookie）
 - [x] localStorageへトークンを保存する方式を廃止（漏洩面の除去）
 - [x] 単体テスト166件・E2E44件全パス
+
+## 2026-10-26 管理メニューのパスワードポップアップ化（漏洩対策込み）
+
+- [x] /adminメニュー本体もゲートの裏へ移動（サーバーHTMLに管理メニュー本文を出さない）
+- [x] ポップアップ（dialog、表示名「パスワード」）で入力、誤パスワードは401で拒否
+- [x] 認証をHttpOnlyセッションCookie方式へ変更: 生パスワード・トークンはJSから読めず、localStorage保存も廃止
+- [x] 漏洩検査: HTML/localStorage/sessionStorage/document.cookieのいずれにもパスワード・セッション値が現れないことを実機確認
+- [x] 単体166件・E2E44件全パス

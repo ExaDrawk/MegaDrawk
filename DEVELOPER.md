@@ -17,7 +17,7 @@ UI（pages/layouts/views/components）→ ドメイン（domain/config/lib）→
 
 ## 管理画面（/admin）
 
-- /admin/comments（コメント管理）と /admin/articles（記事管理）があり、どちらもX-Admin-Token（Pages環境変数ADMIN_DELETE_TOKENと同値）で認証する。トークンは画面で一度入力するとlocalStorageに保存される。
+- /admin（メニュー）、/admin/comments（コメント管理）、/admin/articles（記事管理）の全ページがパスワードゲートの裏にあり、ポップアップ（表示名は「パスワード」）で入力を求める。認証はPOST /api/admin/sessionがADMIN_DELETE_TOKENと照合し、SHA-256導出値のHttpOnlyセッションCookie（Secure/SameSite=Strict/12時間）を発行する形式。パスワード・トークンともにJavaScriptからは読めず、localStorageにも保存されない。全管理APIはcheckAdminAccessでヘッダ（API直接利用）またはセッションCookieを検証する。ログアウトはDELETE /api/admin/session、強制失効はADMIN_DELETE_TOKENの上書きで行える。
 - コメント管理: 全コメントの一覧・削除（返信ごと削除）と、管理人コメントの投稿。管理人コメントはis_admin=1として保存され、公開ページに「管理人」バッジが表示される。一般フォームからは名前「Drawk」を予約語として拒否し、返信免除の判定もis_admin参照のためなりすましでは免除を得られない。
 - 記事管理: src/infra/articles/github.tsがGitHub Contents APIでsrc/content/blogを読み書きし、mainへコミットする。保存から反映まで1〜2分かかる。ファイル名はスラッグ（英小文字・数字・ハイフン）+.mdのみ許可。
 - 重要: Cloudflare Workersのfetchは既定のUser-Agentを送らない。GitHub APIはUA必須で、無いと403を返す（src/infra/articles/github.tsのgithubHeadersで User-Agent を必ず送ること）。 FunctionsのFetch例外はCloudflareの素の502ページになるため、外部API呼び出しは必ずtry/catchしてJSON応答に変換すること（2026-10-25に実障害として確認）。コメントデータは各利用者のブラウザのlocalStorage（キーは変更なし）に残ります。
