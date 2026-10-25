@@ -81,3 +81,33 @@ test("privacy matches actual storage and advertising behaviour", async ({
     "いかなる損害についても",
   );
 });
+
+const axeTags = ["wcag2a", "wcag2aa", "wcag21aa", "wcag2aaa"];
+
+test("dark theme follows system preference, is overridable and passes axe", async ({
+  page,
+}) => {
+  await page.emulateMedia({ colorScheme: "dark" });
+  await page.setViewportSize({ width: 375, height: 900 });
+  await page.goto("/");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  const darkResults = await new AxeBuilder({ page })
+    .withTags(axeTags)
+    .analyze();
+  expect(darkResults.violations).toEqual([]);
+
+  await page.getByRole("button", { name: "ライトテーマに切り替え" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await page.reload();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+
+  await page.getByRole("button", { name: "ダークテーマに切り替え" }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+
+  await page.emulateMedia({ colorScheme: "light" });
+  await page.goto("/contact");
+  const lightResults = await new AxeBuilder({ page })
+    .withTags(axeTags)
+    .analyze();
+  expect(lightResults.violations).toEqual([]);
+});

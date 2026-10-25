@@ -44,3 +44,14 @@ for (const [route, name] of [
       page.getByRole("heading", { level: 1, name, exact: true }),
     ).toBeVisible();
   });
+
+test("projects display their platform labels", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.locator(".project__platform").first()).toHaveText(
+    "Androidアプリ",
+  );
+  const extension = page
+    .locator(".project", { hasText: "Multi-Subtitles for YouTube" })
+    .locator(".project__platform");
+  await expect(extension).toHaveText("Chrome拡張機能");
+});

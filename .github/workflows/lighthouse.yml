@@ -1,0 +1,30 @@
+name: Lighthouse
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: lighthouse
+  cancel-in-progress: true
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Run Lighthouse CI
+        run: |
+          npx --yes @lhci/cli@0.15.1 autorun \
+            --collect.staticDistDir=dist \
+            --collect.numberOfRuns=3 \
+            --assert.assertions.categories:performance=0.9 \
+            --assert.assertions.categories:accessibility=0.95 \
+            --assert.assertions.categories:best-practices=0.9 \
+            --assert.assertions.categories:seo=0.9

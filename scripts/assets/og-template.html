@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+      }
+      html,
+      body {
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+      }
+      body {
+        background: #fcfcfd;
+        color: #3a4150;
+        font-family:
+          "IBM Plex Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic",
+          "Noto Sans JP", sans-serif;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 88px 96px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 32px;
+      }
+      .brand img.icon {
+        width: 128px;
+        height: 128px;
+        border-radius: 28px;
+      }
+      .brand img.wordmark {
+        height: 88px;
+        width: auto;
+      }
+      .copy {
+        max-width: 880px;
+      }
+      .copy p {
+        font-size: 34px;
+        line-height: 1.7;
+        letter-spacing: 0.01em;
+      }
+      .domain {
+        font-size: 24px;
+        color: #6b7280;
+        letter-spacing: 0.06em;
+      }
+      .rule {
+        height: 1px;
+        background: #d5d9e0;
+        margin-bottom: 32px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="brand">
+      <img class="icon" src="__ICON__" alt="" />
+      <img class="wordmark" src="__LOGO__" alt="MEGADRAWK" />
+    </div>
+    <div class="copy">
+      <div class="rule"></div>
+      <p>Drawkのポートフォリオと個人開発。</p>
+    </div>
+    <p class="domain">megadrawk.com</p>
+  </body>
+</html>

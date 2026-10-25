@@ -33,7 +33,9 @@ for (const file of files) {
   if (html.includes("/_next/"))
     throw new Error(`Next.js output remains: ${file}`);
 }
-const headers = securityHeaders([...hashes], [...styleHashes]);
+const headers = securityHeaders([...hashes], [...styleHashes], {
+  turnstile: Boolean(process.env.PUBLIC_TURNSTILE_SITE_KEY?.trim()),
+});
 await writeFile(
   path.join(root, "_headers"),
   "/*\n" +

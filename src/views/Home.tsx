@@ -26,7 +26,7 @@ export default function HomePage() {
           </h2>
           {posts.map((post) => (
             <article key={post.id}>
-              <a href={"/blog#" + post.id}>{post.title}</a>
+              <a href={"/blog/" + post.id}>{post.title}</a>
               <time dateTime={post.date}>{formatJaDate(post.date)}</time>
             </article>
           ))}

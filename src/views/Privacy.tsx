@@ -43,6 +43,28 @@ export default function Privacy() {
         <p>
           メールやXでご連絡いただいた際は、連絡先とお問い合わせ内容を回答・対応のために利用します。対応に必要な範囲で保管し、不要になった情報は削除します。法令に基づく場合などを除き、本人の同意なく目的外に利用したり第三者に提供したりしません。外部サービスによる処理には、そのサービスの規定も適用されます。
         </p>
+        {SITE_FEATURES.turnstileSiteKey ? (
+          <p>
+            お問い合わせフォームから送信された場合は、入力内容がスパム防止のためCloudflare
+            Turnstileで検証され、Brevoのメール配信サービス経由で運営者へ届きます。これらの処理では、
+            <a
+              href="https://www.cloudflare.com/privacypolicy/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Cloudflareのプライバシーポリシー
+            </a>
+            と
+            <a
+              href="https://www.brevo.com/legal/privacypolicy/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Brevoのプライバシーポリシー
+            </a>
+            も適用されます。
+          </p>
+        ) : null}
         <h2>広告</h2>
         {SITE_FEATURES.adsenseClient ? (
           <>

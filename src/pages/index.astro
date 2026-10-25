@@ -1,8 +1,13 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import Content, { metadata } from "@/views/Home";
+import { PROJECTS } from "@/config/projects";
+import { itemListSchema, websiteSchema } from "@/lib/structuredData";
 ---
 
-<Layout {...metadata}>
+<Layout
+  {...metadata}
+  structuredData={[websiteSchema(), itemListSchema(PROJECTS)]}
+>
   <Content />
 </Layout>

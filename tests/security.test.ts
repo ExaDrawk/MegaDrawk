@@ -63,3 +63,22 @@ describe("static CSP", () => {
     );
   });
 });
+describe("turnstile CSP", () => {
+  it("does not allow Turnstile origins unless the contact form build enables it", () => {
+    const disabled = securityHeaders([])["Content-Security-Policy"];
+    expect(disabled).not.toContain("challenges.cloudflare.com");
+    const enabled = securityHeaders([], [], {
+      turnstile: true,
+    })["Content-Security-Policy"];
+    expect(enabled).toContain("https://challenges.cloudflare.com");
+    const scriptDirectives = enabled
+      .split("; ")
+      .filter((directive) => directive.startsWith("script-src "));
+    expect(scriptDirectives).toHaveLength(1);
+    expect(scriptDirectives[0]).toContain("https://challenges.cloudflare.com");
+    const frameDirectives = enabled
+      .split("; ")
+      .filter((directive) => directive.startsWith("frame-src"));
+    expect(frameDirectives[0]).toContain("https://challenges.cloudflare.com");
+  });
+});

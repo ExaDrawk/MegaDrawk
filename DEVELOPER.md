@@ -6,6 +6,8 @@ Astroのsrc/pagesがURLとメタデータを定義し、src/layouts/Layout.astro
 
 UI（pages/layouts/views/components）→ ドメイン（domain/config/lib）→ 永続化（infra）に責務を分けます。コメント永続化の契約はCommentRepositoryが定義し、インフラが実装します（DIP/ISP）。既存の小規模な草案保存には、実装が1つしかない不要な抽象層を追加していません。
 
+お問い合わせフォームの入力検証ルールはsrc/domain/contact/contact.tsにのみ存在し、ブラウザ側のisland（src/components/contact/ContactForm.tsx）とサーバー側のPages Function（functions/api/contact.ts）の双方が同じ関数を参照します。functions/はCloudflare Pages Functionsで、配信は静的distのまま、/api/contactだけサーバー処理を行います。
+
 記事・作品・法的ページの内容と既存URLを保持しています。記事をMarkdownへ二重管理せず、src/config/blog.tsを正本として継続します。将来Markdownへ変更する場合は、記事データ・草案出力・検証をまとめて移行してください。
 
 ## セキュリティ
@@ -15,6 +17,8 @@ scripts/prepare-static.mjsが生成HTMLを検査し、インラインスクリ�
 CSPはCloudflare PagesのHTTPヘッダーとして適用します。distを別サービスへ置く場合も_headersをそのホストのHTTPヘッダーへ設定してください。単にHTMLをコピーするだけでは同等のヘッダー保護はありません。Astro開発サーバーはHMRを使うため、本番CSPの確認は必ずnpm run build後のnpm startで行います。
 
 Cloudflareが本番で追加するWeb Analyticsには、公式のCSP要件に従いstatic.cloudflareinsights.com（script-src）とcloudflareinsights.com（connect-src）だけを許可しています。
+
+Turnstile（お問い合わせフォーム）のオリジン（challenges.cloudflare.comのscript-srcとframe-src）は、ビルド時にPUBLIC_TURNSTILE_SITE_KEYが設定されている場合にのみCSPへ追加されます（scripts/security.mjsの正本とscripts/prepare-static.mjs）。フォームを無効化したビルドではCSPは広がりません。
 
 既存AdSense連携に必要な外部オリジンを限定列挙しています。広告配信は外部サービスの応答・同意設定にも依存し、広告コード未設定の検証を実広告配信成功とは扱いません。広告が動的に追加するスタイルが厳格CSPに抵触する場合は、実際の違反を確認して広告側の構成を調整します。全ページのCSPを安易に緩めないでください。
 
@@ -40,11 +44,33 @@ scripts/serve-static.mjsはローカル専用の証拠取得用サーバーで�
 
 **受信経路の実績**: Gmail→contact@megadrawk.com→Email Routing→Gmailの往復を実送信で確認済み（2026-10-22）。Cloudflareのメール難読化（Scrape ShieldのEmail Obfuscation）は本zoneで無効化済み。厳格CSP（script-src自己保証+ハッシュ）下ではCloudflare製decoderスクリプトが実行できず、mailtoリンクが`/cdn-cgi/l/email-protection`に書き換えられたまま復号されないため。連絡先は公開前提の情報であり、難読化を再び有効にするとContactページのメールボタンが壊れる。
 
+## お問い合わせフォーム（functions/api/contact.ts）
+
+- 有効条件: ビルド時に`PUBLIC_TURNSTILE_SITE_KEY`が設定され、Pages実行環境に`TURNSTILE_SECRET_KEY`と`BREVO_API_KEY`が設定されていること。シークレットはPagesの環境変数（暗号化）で管理し、コードへ書かない。
+- 現在の構成（2026-10-25設定済み）: Turnstileウィジェット`megadrawk-contact`（managed、megadrawk.comのみ）。Brevo APIキー`megadrawk-contact-085402`（Restricted・Transactional email: All・無期限だが90日未使用で失効。フォーム稼働中なら失効しない）。3変数ともPagesプロジェクト`megadrawk`のproduction環境変数に登録済み。新しいキーへ差し替える場合はBrevoのSMTP & API画面で生成し、Pagesの環境変数を更新してから再デプロイする。
+- アクセス解析はCloudflareダッシュボードのWeb Analytics自動注入（megadrawk.comゾーンで有効）を使用しているため、`PUBLIC_CF_WEB_ANALYTICS_TOKEN`は設定しないこと（二重計測になる）。
+- 処理順: サイズ上限（32KB）→JSON解析→ハニーポット（`company`欄が空でなければボットとして成功応答のみ返し送信しない）→Turnstile siteverify→ドメインの検証（src/domain/contact/contact.ts）→Brevo REST API（api.brevo.com/v3/smtp/email）で`SITE.email`へ送信、Reply-Toに送信者。
+- 送信者・宛先の正本はSITE.emailのみ。宛先を分けたい場合はconfigの変更で一括更新する。
+- 失敗時はFail Fastで状態コードを返す（設定不備500・入力413/400・Turnstile失敗400・配信失敗502）。Brevo/Turnstileの障害時、フォームはエラーを表示し、既存のメール・X導線が常に代替となる。
+- レート制限は持っていない（ステートレス）。Turnstileとハニーポットで一次防御するが、大量送信が懸念される場合はCloudflare WAFレート制限ルールをzone側へ追加する。
+- ローカル検証: `npm start`（serve-static.mjs）は書き込みメソッドを拒否するため、関数の実動作は単体テスト（tests/contact-function.test.ts）とデプロイ後の実送信で確認する。Turnstileのテストキー（公式の1x/2x…）を使えば実配信前にUI検証が可能。
+
+## テーマ（ライト/ダーク）
+
+- 正本はtokens.css。`:root`がライト、`[data-theme="dark"]`がダークで、`--meta-theme-color`も各テーマで定義する。
+- Layout先頭のインラインスクリプトが、localStorageの`theme`（light/darkのみ有効）→システム設定の順で描画前に`data-theme`を設定する（フラッシュ防止）。ボタン#theme-toggleはヘッダーにあり、クリックはLayoutのスクリプトがdocument委譲で受け、`theme`を保存する。保存領域が使えない環境ではその場の表示のみ切り替える。
+- トレードオフ: JavaScript無効環境ではダークテーマに切り替わらない（ライト固定）。CSSの二重管理を避けることを優先した判断であり、無効環境向けの自動切替が必要になった時点で再設計する。
+
+## 生成アセット（OG画像・アイコン）
+
+- public/images/og/default.png（1200x630）、public/apple-touch-icon.png（180px）、public/images/icons/icon-{192,512}.pngはscripts/generate-brand-assets.mjsがscripts/assets/のテンプレートから生成し、gitへコミットする。
+- 再生成は `npm run assets:generate`（Playwright Chromiumが必要。npm run e2e:install済みなら実行できる）。テンプレート内のコピー文はブランド表現そのものであり、site.tsのdescription変更時に手動で合わせて再生成する。
+
 ## 変更と品質ゲート
 
 npm run verifyでUTF-8/BOM検査、Prettier、ESLint、astro check、Vitest、静的ビルド、npm audit、Playwrightを実行します。Playwrightは本番成果物を自動起動し、公開URL、JavaScript無効時の表示、CSP、エディターの実動作、保存復元、XSS入力、破損データ保護、モバイル操作を検証します。スクリーンショットはscreenshots/へ保存します。
 
-依存の既知の脆弱性はnpm auditで確認します。0件でも未知の脆弱性がない保証にはなりません。外部広告・本番Cloudflare設定はローカル検証と別に公開後確認が必要です。
+依存の既知の脆弱性はnpm auditで確認します。0件でも未知の脆弱性がない保証にはなりません。外部広告・本番Cloudflare設定はローカル検証と別に公開後確認が必要です。Core Web VitalsはGitHub ActionsのLighthouseワークフロー（.github/workflows/lighthouse.yml）がmainのpushごとに本番ビルドを計測し、Performance/Accessibility/Best Practices/SEOのしきい値違反で失敗します。
 
 ## 削除した構成
 

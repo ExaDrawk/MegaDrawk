@@ -1,0 +1,57 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { getPublishedBlogPosts } from "@/config/blog";
+import { formatJaDate } from "@/lib/date";
+import { toBlogParagraphs } from "@/lib/blogBody";
+import { articleSchema } from "@/lib/structuredData";
+import { CommentSection } from "@/components/blog/CommentSection";
+
+export async function getStaticPaths() {
+  return getPublishedBlogPosts().map((post) => ({
+    params: { id: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const paragraphs = toBlogParagraphs(post.body);
+---
+
+<Layout
+  title={post.title}
+  description={post.excerpt}
+  ogType="article"
+  publishedTime={post.date}
+  modifiedTime={post.updatedAt}
+  structuredData={[articleSchema(post, `/blog/${post.id}`)]}
+>
+  <article class="page-section content-column">
+    <a class="text-link" href="/blog">
+      記事一覧に戻る
+    </a>
+    <header class="page-header">
+      <h1 class="page-title">{post.title}</h1>
+      <p class="document-meta">
+        <time datetime={post.date}>{formatJaDate(post.date)}</time>
+        {post.updatedAt !== post.date && (
+          <span>（更新 {formatJaDate(post.updatedAt)}）</span>
+        )}
+      </p>
+      {post.tags.length > 0 && (
+        <p class="post-tags" aria-label="タグ">
+          {post.tags.map((tag) => (
+            <span class="post-tag">#{tag}</span>
+          ))}
+        </p>
+      )}
+    </header>
+    <div class="prose-content">
+      {paragraphs.map((paragraph) => (
+        <p class="whitespace-pre-wrap break-words">{paragraph}</p>
+      ))}
+    </div>
+    <div class="post-comments">
+      <CommentSection postId={post.id} client:load />
+    </div>
+  </article>
+</Layout>

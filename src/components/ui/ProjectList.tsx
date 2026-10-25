@@ -11,6 +11,7 @@ export function ProjectList() {
             href={project.href}
           />
           <div className="project__copy">
+            <p className="project__platform">{project.platform}</p>
             <h3>
               <a href={project.href} target="_blank" rel="noopener noreferrer">
                 {project.name}

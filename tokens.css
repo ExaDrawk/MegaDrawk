@@ -36,6 +36,9 @@
   --color-code: var(--color-graphite);
   --color-code-text: var(--color-paper);
 
+  /* ブラウザUI用。#ffffff は --color-paper (light) の16進。 */
+  --meta-theme-color: #ffffff;
+
   --font-display: "IBM Plex Sans", "Noto Sans JP", sans-serif;
   --font-body: "IBM Plex Sans", "Noto Sans JP", sans-serif;
   --font-mono: ui-monospace, monospace;
@@ -58,4 +61,47 @@
   --ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
   --z-dropdown: 100;
   --z-sticky-nav: 300;
+}
+
+/* ダークテーマ。data-theme="dark" はLayout先頭のインラインスクリプトが
+   保存値またはシステム設定から描画前に設定する。テキストは基本7:1以上を維持する。 */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-paper: oklch(17% 0.014 258);
+  --color-paper-2: oklch(20% 0.016 258);
+  --color-paper-3: oklch(25% 0.018 258);
+  --color-ink: oklch(96% 0.005 250);
+  --color-ink-2: oklch(88% 0.01 256);
+  --color-muted: oklch(72% 0.014 256);
+  --color-faint: oklch(70% 0.01 256);
+  --color-rule: oklch(32% 0.015 257);
+  --color-rule-strong: oklch(50% 0.016 257);
+  --color-accent: oklch(78% 0.09 252);
+  --color-accent-soft: oklch(30% 0.05 256);
+  --color-accent-ink: oklch(17% 0.014 258);
+  --color-graphite: oklch(12% 0.01 260);
+  --color-graphite-rule: oklch(40% 0.016 260);
+  --color-header: oklch(17% 0.014 258 / 0.94);
+  --color-danger: oklch(76% 0.12 28);
+  --color-danger-soft: oklch(28% 0.05 28);
+  --color-danger-border: oklch(45% 0.09 28);
+  --color-success: oklch(78% 0.11 150);
+  --color-success-soft: oklch(26% 0.05 150);
+  --color-success-border: oklch(42% 0.08 150);
+
+  --color-surface: var(--color-paper);
+  --color-surface-muted: var(--color-paper-3);
+  --color-text: var(--color-ink);
+  --color-text-secondary: var(--color-ink-2);
+  --color-text-muted: var(--color-muted);
+  --color-border: var(--color-rule-strong);
+  --color-border-subtle: var(--color-rule);
+  --color-primary: var(--color-accent);
+  --color-primary-hover: oklch(84% 0.09 252);
+  --color-code: oklch(12% 0.01 260);
+  --color-code-text: var(--color-paper);
+
+  /* ブラウザUI用。#131519 は --color-paper (dark) の近似16進。 */
+  --meta-theme-color: #131519;
 }

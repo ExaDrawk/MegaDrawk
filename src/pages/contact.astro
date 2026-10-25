@@ -1,8 +1,13 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import Content, { metadata } from "@/views/Contact";
+import { ContactForm } from "@/components/contact/ContactForm";
+import { SITE_FEATURES } from "@/config/features";
 ---
 
 <Layout {...metadata}>
   <Content />
+  {SITE_FEATURES.turnstileSiteKey && (
+    <ContactForm siteKey={SITE_FEATURES.turnstileSiteKey} client:visible />
+  )}
 </Layout>

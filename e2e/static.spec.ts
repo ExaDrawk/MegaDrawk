@@ -20,7 +20,13 @@ test("public pages are static, usable without JS, and have page-specific canonic
       "href",
       "https://megadrawk.com" + (route === "/" ? "/" : route),
     );
-    expect(await page.locator("astro-island[component-url]").count()).toBe(0);
+    // ハイドレーションするのは記事コメント（/blog）とお問い合わせフォーム（/contact）だけ
+    const islands = await page.locator("astro-island[component-url]").count();
+    if (route === "/blog" || route === "/contact") {
+      expect(islands).toBeLessThanOrEqual(1);
+    } else {
+      expect(islands).toBe(0);
+    }
     expect(await page.content()).not.toContain("/_next/");
   }
   await context.close();
@@ -141,4 +147,70 @@ test("mobile navigation closes on outside click, repeated toggles and viewport c
   await expect(menu).toBeHidden();
   await page.setViewportSize({ width: 375, height: 667 });
   await expect(trigger).toHaveAttribute("aria-expanded", "false");
+});
+
+test("head exposes OG image, RSS alternate and apple-touch-icon", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+    "content",
+    "https://megadrawk.com/images/og/default.png",
+  );
+  await expect(page.locator('meta[property="og:image:width"]')).toHaveAttribute(
+    "content",
+    "1200",
+  );
+  await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute(
+    "content",
+    "summary_large_image",
+  );
+  await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveAttribute(
+    "href",
+    "/apple-touch-icon.png",
+  );
+  await expect(
+    page.locator('link[rel="alternate"][type="application/rss+xml"]'),
+  ).toHaveAttribute("href", "https://megadrawk.com/rss.xml");
+  await expect(page.locator('script[type="application/ld+json"]')).toHaveCount(
+    1,
+  );
+  const jsonLdText = await page
+    .locator('script[type="application/ld+json"]')
+    .textContent();
+  expect(jsonLdText).toBeTruthy();
+  const jsonLd = JSON.parse(jsonLdText as string);
+  expect(jsonLd["@graph"]).toBeDefined();
+  expect(jsonLd["@graph"][0]["@type"]).toBe("Person");
+});
+
+test("rss feed responds as xml with the site channel", async ({ request }) => {
+  const feed = await request.get("/rss.xml");
+  expect(feed.status()).toBe(200);
+  // 静的配信では拡張子からapplication/xmlが付く（Cloudflare Pagesと同一の挙動）
+  expect(feed.headers()["content-type"]).toContain("xml");
+  const body = await feed.text();
+  expect(body).toContain('<rss version="2.0">');
+  expect(body).toContain("<title>MEGADRAWK</title>");
+  expect(body).toContain("<language>ja</language>");
+});
+
+test("sitemap keeps static routes and per-post URLs", async ({ request }) => {
+  const sitemap = await request.get("/sitemap.xml");
+  expect(sitemap.status()).toBe(200);
+  const body = await sitemap.text();
+  expect(body).toContain("<loc>https://megadrawk.com/</loc>");
+  expect(body).toContain("<loc>https://megadrawk.com/about</loc>");
+});
+
+test("contact page keeps direct routes and renders the form island only when configured", async ({
+  page,
+}) => {
+  await page.goto("/contact");
+  await expect(
+    page.locator('a[href^="mailto:contact@megadrawk.com"]'),
+  ).toBeVisible();
+  // 既定ビルドはTurnstileサイトキー未設定のため、フォームは出さずメール/Xの導線のみ
+  expect(await page.locator(".contact-form").count()).toBe(0);
+  await expect(page.getByText("メールソフトを開きたくない場合")).toBeHidden();
 });

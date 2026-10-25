@@ -46,17 +46,21 @@ function inlineElementHashes(html, element) {
 export const inlineScriptHashes = (html) => inlineElementHashes(html, "script");
 export const inlineStyleHashes = (html) => inlineElementHashes(html, "style");
 
-export function securityHeaders(hashes, styleHashes = []) {
+export function securityHeaders(hashes, styleHashes = [], options = {}) {
+  // Turnstileはお問い合わせフォームが有効なビルドでのみ許可する（最小権限）。
+  const turnstileOrigins = options.turnstile
+    ? " https://challenges.cloudflare.com"
+    : "";
   const csp = [
     "default-src 'self'",
-    `script-src 'self' ${[...new Set(hashes)].join(" ")} ${adScripts.join(" ")} https://static.cloudflareinsights.com`,
+    `script-src 'self' ${[...new Set(hashes)].join(" ")} ${adScripts.join(" ")} https://static.cloudflareinsights.com${turnstileOrigins}`,
     "script-src-attr 'none'",
     `style-src 'self' ${[...new Set(styleHashes)].join(" ")}`,
     "style-src-attr 'none'",
     `img-src 'self' data: ${adScripts.join(" ")} https://googleads.g.doubleclick.net`,
     "font-src 'self'",
     `connect-src 'self' ${adScripts.join(" ")} https://googleads.g.doubleclick.net https://cloudflareinsights.com`,
-    `frame-src ${adFrames.join(" ")}`,
+    `frame-src ${adFrames.join(" ")}${turnstileOrigins}`,
     "object-src 'none'",
     "base-uri 'none'",
     "form-action 'self'",

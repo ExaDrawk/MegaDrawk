@@ -61,7 +61,7 @@
 - [x] wrangler pages dev（workerd）でローカル検証後に `wrangler pages deploy` で本番反映を確認（200・新UI配信）
 - [x] 全品質ゲート再実行: Lint / 型 / 単体48件 / E2E16件
 - [x] `/logo.svg` 404修正: `_routes.json` が実在しない静的パスまでexcludeし動的ルート(robots.txt/sitemap.xml/manifest)も壊していたため、prepare-pages.cjs を「assets内の実在ファイルのみexclude」方式に変更。production全パス200を確認
-- [ ] 残課題: Cloudflareダッシュボードのビルド設定を `npm run deploy` + 出力 `.open-next` に変更（Git連携ビルドは旧Astro設定のままで失敗するため。直接アップロード運用なら不要）
+- [x] 残課題: Cloudflareダッシュボードのビルド設定を `npm run deploy` + 出力 `.open-next` に変更（Git連携ビルドは旧Astro設定のままで失敗するため。直接アップロード運用なら不要）
 
 ## 2026-09-07 個人医療情報・病歴の完全削除とプライバシー強化
 
@@ -204,3 +204,21 @@
 - [x] 共通の製品一覧、白・スレート基調の静かな画面へ再設計
 - [x] 実際の通信・保存・広告状態に沿うプライバシーポリシーと利用規約の修正
 - [x] 自動更新ジョブの実行と本番反映・画面確認
+
+## 2026-10-25 改良12項目実装（ブログ個別ページ・SEO・フォーム・ダークモード・解析・アイコン・Lighthouse）
+
+- [x] 精査完了（既存コード・e2e・セキュリティ正本・CI規約）
+- [x] 3-1: ブログ個別ページ /blog/[id]（getStaticPaths・本文段落化・コメント・Article JSON-LD・Homeリンク更新）
+- [x] 3-2: RSS /rss.xml（lib/rss.ts 純粋関数・escapeXml共有 lib/xml.ts・sitemap拡張）
+- [x] 3-3: OG画像生成スクリプト＋og:image / twitter:card 設定
+- [x] 3-4: 構造化データ lib/structuredData.ts（Person/WebSite/ItemList/SoftwareApplication/Article）
+- [x] 3-5: プラットフォーム表記（ProjectList＋projects.ts拡張）
+- [x] 3-6: ダークモード（tokens.css darkブロック・no-flashスクリプト・ヘッダートグル）
+- [x] 3-7: お問い合わせフォーム（domain/contact共有バリデーション・ContactForm island・functions/api/contact.ts Turnstile+Brevo・CSP条件拡張）
+- [x] 3-8: Cloudflare Web Analytics（PUBLIC_CF_WEB_ANALYTICS_TOKEN 条件注入）
+- [x] 3-9: アイコン補完（apple-touch-icon・manifest PNG icons）
+- [x] 3-10: Lighthouse CI ワークフロー
+- [x] 3-11: .env.example・manifest・README/DEVELOPER.md 更新
+- [x] Step 4 品質ゲート: encoding / format / lint / typecheck / unit / build / audit / e2e
+- [x] Step 5 自己レビュー・修正
+- [x] Step 6 ドキュメント整備
