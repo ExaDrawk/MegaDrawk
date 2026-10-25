@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 import {
+  COMMENT_ERROR_MESSAGES,
   COMMENT_LIMITS,
+  isCommentItem,
   isCommentItemArray,
   validateCommentInput,
 } from "@/domain/comment/types";
@@ -40,7 +42,7 @@ describe("isCommentItemArray", () => {
     expect(
       isCommentItemArray([
         {
-          id: "1",
+          id: 1,
           name: "Drawk",
           message: "こんにちは",
           createdAt: "2026-01-01T00:00:00.000Z",
@@ -55,7 +57,7 @@ describe("isCommentItemArray", () => {
 
   it("returns false for an array with a malformed item", () => {
     expect(
-      isCommentItemArray([{ id: "1", name: "Drawk", message: "こんにちは" }]),
+      isCommentItemArray([{ id: 1, name: "Drawk", message: "こんにちは" }]),
     ).toBe(false);
   });
 
@@ -67,7 +69,7 @@ describe("isCommentItemArray", () => {
 
   it("rejects stored comments with invalid dates or over-limit input", () => {
     const comment = {
-      id: "1",
+      id: 1,
       name: "Drawk",
       message: "hello",
       createdAt: "2026-01-01T00:00:00.000Z",
@@ -80,6 +82,46 @@ describe("isCommentItemArray", () => {
         { ...comment, name: "x".repeat(COMMENT_LIMITS.maxNameLength + 1) },
       ]),
     ).toBe(false);
-    expect(isCommentItemArray([{ ...comment, id: "" }])).toBe(false);
+    expect(isCommentItemArray([{ ...comment, id: "1" }])).toBe(false);
+  });
+});
+
+describe("COMMENT_ERROR_MESSAGES", () => {
+  it("has a message for every validation error", () => {
+    for (const code of [
+      "name-empty",
+      "name-too-long",
+      "message-empty",
+      "message-too-long",
+    ] as const) {
+      expect(COMMENT_ERROR_MESSAGES[code].length).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe("isCommentItem", () => {
+  it("accepts server-shaped comments", () => {
+    expect(
+      isCommentItem({
+        id: 1,
+        name: "Drawk",
+        message: "こんにちは",
+        createdAt: "2026-10-25T12:00:00Z",
+      }),
+    ).toBe(true);
+  });
+
+  it("rejects items that would fail validation or have wrong types", () => {
+    expect(
+      isCommentItem({
+        id: "1",
+        name: "Drawk",
+        message: "こんにちは",
+        createdAt: "2026-10-25T12:00:00Z",
+      }),
+    ).toBe(false);
+    expect(
+      isCommentItem({ id: 2, name: "", message: "本文", createdAt: "x" }),
+    ).toBe(false);
   });
 });

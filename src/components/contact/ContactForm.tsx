@@ -1,60 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   CONTACT_ERROR_MESSAGES,
   CONTACT_LIMITS,
   trimContactInput,
   validateContactInput,
 } from "@/domain/contact/contact";
+import { useTurnstile } from "@/hooks/useTurnstile";
 import { ActionButton } from "@/components/ui/Action";
-
-interface TurnstileRenderOptions {
-  sitekey: string;
-  callback: (token: string) => void;
-  "expired-callback"?: () => void;
-  "error-callback"?: () => void;
-  theme?: "light" | "dark" | "auto";
-}
-
-interface TurnstileApi {
-  render: (container: HTMLElement, options: TurnstileRenderOptions) => string;
-  reset: (widgetId?: string) => void;
-  remove: (widgetId: string) => void;
-}
-
-declare global {
-  interface Window {
-    turnstile?: TurnstileApi;
-  }
-}
-
-const TURNSTILE_SCRIPT_URL =
-  "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
-
-let turnstilePromise: Promise<TurnstileApi> | null = null;
-
-function loadTurnstile(): Promise<TurnstileApi> {
-  if (window.turnstile) {
-    return Promise.resolve(window.turnstile);
-  }
-  turnstilePromise ??= new Promise<TurnstileApi>((resolve, reject) => {
-    const script = document.createElement("script");
-    script.src = TURNSTILE_SCRIPT_URL;
-    script.async = true;
-    script.addEventListener("load", () => {
-      if (window.turnstile) {
-        resolve(window.turnstile);
-      } else {
-        reject(new Error("Turnstile script loaded but API is unavailable."));
-      }
-    });
-    script.addEventListener("error", () => {
-      turnstilePromise = null;
-      reject(new Error("Turnstile script failed to load."));
-    });
-    document.head.appendChild(script);
-  });
-  return turnstilePromise;
-}
 
 type FormStatus = "idle" | "submitting" | "success" | "error";
 
@@ -69,45 +21,15 @@ export function ContactForm({ siteKey }: ContactFormProps) {
   const [status, setStatus] = useState<FormStatus>("idle");
   const [errorText, setErrorText] = useState("");
   const [turnstileToken, setTurnstileToken] = useState("");
-  const [turnstileReady, setTurnstileReady] = useState(false);
-  const [turnstileFailed, setTurnstileFailed] = useState(false);
-  const widgetRef = useRef<HTMLDivElement>(null);
-  const widgetIdRef = useRef<string | null>(null);
   const submitLockRef = useRef(false);
-
-  useEffect(() => {
-    let disposed = false;
-    loadTurnstile()
-      .then((turnstile) => {
-        if (disposed || !widgetRef.current) {
-          return;
-        }
-        widgetIdRef.current = turnstile.render(widgetRef.current, {
-          sitekey: siteKey,
-          callback: (token) => setTurnstileToken(token),
-          "expired-callback": () => setTurnstileToken(""),
-          "error-callback": () => setTurnstileToken(""),
-          theme: "auto",
-        });
-        setTurnstileReady(true);
-      })
-      .catch(() => {
-        if (!disposed) setTurnstileFailed(true);
-      });
-    return () => {
-      disposed = true;
-      if (widgetIdRef.current !== null && window.turnstile) {
-        window.turnstile.remove(widgetIdRef.current);
-        widgetIdRef.current = null;
-      }
-    };
-  }, [siteKey]);
+  const { containerRef, ready, failed, reset } = useTurnstile(
+    siteKey,
+    setTurnstileToken,
+  );
 
   function resetTurnstile() {
     setTurnstileToken("");
-    if (widgetIdRef.current !== null && window.turnstile) {
-      window.turnstile.reset(widgetIdRef.current);
-    }
+    reset();
   }
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -245,20 +167,18 @@ export function ContactForm({ siteKey }: ContactFormProps) {
             />
           </label>
 
-          {turnstileFailed ? (
+          {failed ? (
             <p className="text-sm" data-color="color-danger" role="alert">
               スパム防止コンポーネントを読み込めませんでした。メールまたはXでご連絡ください。
             </p>
           ) : (
-            <div className="cf-turnstile-container" ref={widgetRef} />
+            <div className="cf-turnstile-container" ref={containerRef} />
           )}
 
           <ActionButton
             type="submit"
             className="justify-self-start"
-            disabled={
-              status === "submitting" || turnstileFailed || !turnstileReady
-            }
+            disabled={status === "submitting" || failed || !ready}
             aria-busy={status === "submitting"}
           >
             {status === "submitting" ? "送信中..." : "送信する"}

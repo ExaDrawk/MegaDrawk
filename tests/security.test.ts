@@ -44,6 +44,7 @@ describe("static CSP", () => {
     const csp = headers["Content-Security-Policy"];
     expect(csp).not.toMatch(/unsafe-inline|unsafe-eval|nonce-/);
     expect(csp).toContain("script-src-attr 'none'");
+    // style属性ハッシュが無いビルドでは属性スタイルは全禁止
     expect(csp).toContain("style-src-attr 'none'");
     expect(csp).toContain("frame-ancestors 'none'");
     expect(csp).toContain("font-src 'self'");
@@ -109,7 +110,8 @@ describe("shiki style attributes", () => {
     expect(attrHashes[0]).toMatch(/^'sha256-/);
     const headers = securityHeaders([], [], { styleAttrHashes: attrHashes });
     const csp = headers["Content-Security-Policy"];
-    expect(csp).toContain(`style-src-attr ${attrHashes[0]}`);
+    // style属性のハッシュはChromiumでは'unsafe-hashes'が必要
+    expect(csp).toContain(`style-src-attr 'unsafe-hashes' ${attrHashes[0]}`);
     // ハッシュがないビルドでは従来どおり属性スタイルは全禁止
     expect(securityHeaders([], [])["Content-Security-Policy"]).toContain(
       "style-src-attr 'none'",
@@ -130,7 +132,7 @@ describe("conditional origins", () => {
   });
 
   it("keeps the CSP under the Cloudflare Pages 2,000-character line limit", () => {
-    // 実ビルド相当: 8スクリプトハッシュ＋16属性ハッシュ＋giscus
+    // 実ビルド相当: 8スクリプトハッシュ＋16属性ハッシュ＋Turnstile
     const scriptHashes = Array.from(
       { length: 8 },
       (_, i) => `'sha256-${String(i).padStart(43, "0")}='`,

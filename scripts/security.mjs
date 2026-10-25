@@ -97,7 +97,7 @@ export function securityHeaders(hashes, styleHashes = [], options = {}) {
   // style属性はShikiの出力のみで、値ごとのハッシュで許可リスト化する。
   const styleAttrHashes = [...new Set(options.styleAttrHashes ?? [])];
   const styleSrcAttr = styleAttrHashes.length
-    ? styleAttrHashes.join(" ")
+    ? "'unsafe-hashes' " + styleAttrHashes.join(" ")
     : "'none'";
   const csp = [
     "default-src 'self'",

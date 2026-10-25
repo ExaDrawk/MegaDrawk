@@ -1,16 +1,12 @@
+/** サーバー（D1）から返る公開コメントの形。idはD1の採番。 */
 export interface CommentItem {
-  id: string;
+  id: number;
   name: string;
   message: string;
   createdAt: string;
 }
 
-export interface CommentRepository {
-  getComments(postId: string): CommentItem[];
-  saveComments(postId: string, comments: CommentItem[]): void;
-}
-
-/** コメント入力値の検証ルール（単一の権威ある情報源） */
+/** コメント入力値の検証ルール（単一の権威ある情報源。コメント欄UIとComments Functionで共有する） */
 export const COMMENT_LIMITS = {
   maxNameLength: 30,
   maxMessageLength: 500,
@@ -42,15 +38,26 @@ export function validateCommentInput(
   return null;
 }
 
-function isCommentItem(value: unknown): value is CommentItem {
+/** UI表示用のエラーメッセージ（単一の権威ある情報源） */
+export const COMMENT_ERROR_MESSAGES: Readonly<
+  Record<CommentValidationError, string>
+> = {
+  "name-empty": "名前を入力してください。",
+  "name-too-long": `名前は${COMMENT_LIMITS.maxNameLength}文字以内で入力してください。`,
+  "message-empty": "コメント本文を入力してください。",
+  "message-too-long": `コメント本文は${COMMENT_LIMITS.maxMessageLength}文字以内で入力してください。`,
+};
+
+/** サーバー応答のJSON検証（不正な形状は表示せず破棄する） */
+export function isCommentItem(value: unknown): value is CommentItem {
   if (typeof value !== "object" || value === null) {
     return false;
   }
 
   const candidate = value as Record<string, unknown>;
   return (
-    typeof candidate.id === "string" &&
-    candidate.id.length > 0 &&
+    typeof candidate.id === "number" &&
+    Number.isFinite(candidate.id) &&
     typeof candidate.name === "string" &&
     typeof candidate.message === "string" &&
     validateCommentInput(candidate.name, candidate.message) === null &&

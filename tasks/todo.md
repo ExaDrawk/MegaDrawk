@@ -268,3 +268,15 @@
 - [x] コメント欄にX・お問い合わせフォームへの公開導線を併記（GitHubアカウントを持たない読者への案内）
 - [x] CSPからgiscusオリジンを除去、プライバシーポリシー・README・DEVELOPER.mdを現状に整合
 - [x] 記事ページのMarkdown化・OG画像・目次・タグページなど、ブログ機能本体は維持
+
+## 2026-10-25 公開コメントシステム（誰でも投稿・D1保存）
+
+- [x] giscus撤去済み（ユーザー指示: GitHubアカウント必須のため）＋アカウント不要コメントへ刷新
+- [x] Cloudflare D1データベース megadrawk-comments 作成・COMMENTS_DBバインディング設定
+- [x] functions/api/comments/[postId].ts: GET一覧・POST投稿・DELETE管理削除
+- [x] スパム対策: Turnstile検証、IPハッシュ化（IP_HASH_SALT、生IP非保存）、10分連投クールダウン、24時間同一本文再送抑止、入力上限（名前30/本文500文字）、8KBボディ上限
+- [x] 管理削除API（X-Admin-Token認証、ADMIN_DELETE_TOKENをPagesシークレットに設定済み）
+- [x] CommentSection刷新: useTurnstileフック共有化（ContactFormとDRY）、状態表現（loading/empty/error/success）
+- [x] プライバシーポリシー・README・DEVELOPER.mdを公開コメントの実態に更新
+- [x] Shikiのstyle属性CSP: 'unsafe-hashes'付与で実ブラウザでも有効化
+- [x] 単体127件・E2E44件全パス→本番反映→実投稿確認
