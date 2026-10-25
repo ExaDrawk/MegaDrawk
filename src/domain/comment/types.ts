@@ -1,15 +1,19 @@
-/** サーバー（D1）から返る公開コメントの形。idはD1の採番。 */
+/** サーバー（D1）から返る公開コメントの形。idはD1の採番。parentIdは返信先（ルートコメントのみ）。 */
 export interface CommentItem {
   id: number;
   name: string;
   message: string;
   createdAt: string;
+  parentId: number | null;
+  /** 投稿者本人（同一IPハッシュ）が10分以内に編集できることを示すサーバー判定 */
+  editable?: boolean;
+  editedAt?: string | null;
 }
 
 /** コメント入力値の検証ルール（単一の権威ある情報源。コメント欄UIとComments Functionで共有する） */
 export const COMMENT_LIMITS = {
   maxNameLength: 30,
-  maxMessageLength: 500,
+  maxMessageLength: 2000,
 } as const;
 
 export type CommentValidationError =
@@ -62,9 +66,25 @@ export function isCommentItem(value: unknown): value is CommentItem {
     typeof candidate.message === "string" &&
     validateCommentInput(candidate.name, candidate.message) === null &&
     typeof candidate.createdAt === "string" &&
-    Number.isFinite(Date.parse(candidate.createdAt))
+    Number.isFinite(Date.parse(candidate.createdAt)) &&
+    (candidate.parentId === null || typeof candidate.parentId === "number")
   );
 }
+
+/** 編集可能期間（分）。投稿後この時間内のみ本人（同一IPハッシュ）が編集できる。 */
+export const EDIT_WINDOW_MINUTES = 10;
+
+/** 投稿のレート制限（単一の権威ある情報源。エラーメッセージにも使用する） */
+export const COMMENT_RATE_LIMITS = {
+  /** 同一IPの連続投稿に必要な間隔（秒） */
+  intervalSeconds: 60,
+  /** 10分間の投稿上限 */
+  per10Minutes: 3,
+  /** 1日（日本時間）の投稿上限 */
+  perDay: 10,
+  /** 同一記事の1日（日本時間）あたり投稿上限 */
+  perPostPerDay: 3,
+} as const;
 
 export function isCommentItemArray(value: unknown): value is CommentItem[] {
   return Array.isArray(value) && value.every(isCommentItem);

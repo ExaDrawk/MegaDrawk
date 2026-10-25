@@ -48,7 +48,7 @@ Cloudflare Pagesではビルドコマンドを npm run build、出力ディレ�
 - 外観: tokens.css と src/styles/globals.css。フォントはnpmパッケージから自己配信します。ダークテーマは [data-theme="dark"] でtokens.cssに定義しています。
 - OG画像・アイコン: public/images/og/default.png と public/apple-touch-icon.png。ブランド変更時は `npm run assets:generate` で再生成し、コミットします。記事ごとのカードはビルド時に自動生成されます。
 
-コメントはアカウント不要・誰でも投稿でき、Cloudflare D1に保存して全員に公開します。スパム防止としてTurnstileとIPハッシュ化による連投抑止を使います（生IPは保存しません）。記事草案のみブラウザのlocalStorageに保存され、サーバーへは送信されません。
+コメントはアカウント不要・誰でも投稿でき（返信も可能）、Cloudflare D1に保存して全員に公開します。スパム防止としてTurnstileとIPハッシュ化によるレート制限（60秒間隔・10分3件・1日10件・同一記事1日3件）を設けています（生IPは保存しません）。投稿後10分以内なら自分のコメントを編集できます。記事草案のみブラウザのlocalStorageに保存され、サーバーへは送信されません。
 
 設計・セキュリティ・運用上の制約は DEVELOPER.md を参照してください。
 

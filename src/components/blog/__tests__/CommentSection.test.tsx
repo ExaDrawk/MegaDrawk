@@ -31,6 +31,7 @@ const serverComments = {
       name: "既読者",
       message: "以前のコメント",
       createdAt: "2026-10-25T09:00:00Z",
+      parentId: null,
     },
   ],
 };
@@ -96,6 +97,7 @@ describe("CommentSection", () => {
                       name: "新規読者",
                       message: "応援しています！",
                       createdAt: "2026-10-25T12:00:00Z",
+                      parentId: null,
                     },
                   ]
                 : [
@@ -104,6 +106,7 @@ describe("CommentSection", () => {
                       name: "既読者",
                       message: "以前のコメント",
                       createdAt: "2026-10-25T09:00:00Z",
+                      parentId: null,
                     },
                   ],
             }),
@@ -137,8 +140,7 @@ describe("CommentSection", () => {
         if (init?.method === "POST") {
           return new Response(
             JSON.stringify({
-              error:
-                "連続投稿はできません。10分ほど待ってから再度お試しください。",
+              error: "投稿の間隔は60秒以上あけてください。",
             }),
             { status: 429 },
           );
@@ -159,7 +161,7 @@ describe("CommentSection", () => {
     fireEvent.click(screen.getByRole("button", { name: "送信" }));
 
     await waitFor(() => {
-      expect(screen.getByText(/連続投稿はできません/)).toBeDefined();
+      expect(screen.getByText(/60秒以上あけて/)).toBeDefined();
     });
   });
 
@@ -175,5 +177,119 @@ describe("CommentSection", () => {
       ).toBeDefined();
     });
     expect(screen.getByRole("button", { name: "再読み込み" })).toBeDefined();
+  });
+});
+
+describe("CommentSection (replies)", () => {
+  beforeEach(() => {
+    globalThis.fetch = vi.fn(
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = String(input);
+        if (init?.method === "POST") {
+          return new Response(JSON.stringify({ ok: true }), { status: 200 });
+        }
+        if (url.includes("/api/comments/")) {
+          return new Response(
+            JSON.stringify({
+              comments: [
+                {
+                  id: 10,
+                  name: "元コメント",
+                  message: "最初のコメント",
+                  createdAt: "2026-10-25T09:00:00Z",
+                  parentId: null,
+                },
+                {
+                  id: 11,
+                  name: "返信者",
+                  message: "返信コメント",
+                  createdAt: "2026-10-25T09:05:00Z",
+                  parentId: 10,
+                },
+              ],
+            }),
+            { status: 200 },
+          );
+        }
+        return new Response("{}", { status: 200 });
+      },
+    ) as unknown as typeof fetch;
+  });
+
+  it("renders replies nested under their parent", async () => {
+    render(<CommentSection postId="post-1" />);
+
+    await waitFor(() => {
+      expect(screen.getByText("最初のコメント")).toBeDefined();
+    });
+    expect(screen.getByText("返信コメント")).toBeDefined();
+  });
+
+  it("sends parentId when replying from the reply button", async () => {
+    let posted = false;
+    const fetchMock = vi.fn(
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = String(input);
+        if (init?.method === "POST") {
+          const payload = JSON.parse(String(init.body));
+          expect(payload.parentId).toBe(10);
+          posted = true;
+          return new Response(JSON.stringify({ ok: true }), { status: 200 });
+        }
+        if (url.includes("/api/comments/")) {
+          return new Response(
+            JSON.stringify({
+              comments: [
+                {
+                  id: 10,
+                  name: "元コメント",
+                  message: "最初のコメント",
+                  createdAt: "2026-10-25T09:00:00Z",
+                  parentId: null,
+                },
+              ],
+            }),
+            { status: 200 },
+          );
+        }
+        return new Response("{}", { status: 200 });
+      },
+    );
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    void posted;
+
+    render(<CommentSection postId="post-1" />);
+    await waitFor(() => screen.getByText("最初のコメント"));
+
+    fireEvent.click(screen.getByRole("button", { name: "返信" }));
+    expect(
+      screen.getByText("元コメントさんへの返信を書いています"),
+    ).toBeDefined();
+
+    fireEvent.change(screen.getByPlaceholderText("名前"), {
+      target: { value: "返信者" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("コメントを書く"), {
+      target: { value: "返信テスト" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "送信" }));
+
+    await waitFor(() => {
+      expect(
+        (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls.some(
+          ([, init]) => (init as RequestInit)?.method === "POST",
+        ),
+      ).toBe(true);
+    });
+  });
+
+  it("cancels the reply mode", async () => {
+    render(<CommentSection postId="post-1" />);
+    await waitFor(() => screen.getByText("最初のコメント"));
+
+    fireEvent.click(screen.getByRole("button", { name: "返信" }));
+    fireEvent.click(screen.getByRole("button", { name: "キャンセル" }));
+
+    expect(screen.queryByText(/さんへの返信を書いています/)).toBeNull();
   });
 });

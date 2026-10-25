@@ -2,6 +2,7 @@
 import {
   createComment,
   deleteComment,
+  editComment,
   listComments,
   type CommentsEnv,
 } from "../../../src/infra/comments/server";
@@ -10,12 +11,27 @@ import {
 
 export const onRequestGet: PagesFunction<CommentsEnv> = async (context) => {
   const limit = new URL(context.request.url).searchParams.get("limit");
-  return listComments(context.env.COMMENTS_DB, context.params.postId, limit);
+  return listComments(
+    context.env.COMMENTS_DB,
+    context.params.postId,
+    limit,
+    context.request.headers.get("CF-Connecting-IP"),
+    context.env.IP_HASH_SALT,
+  );
 };
 
 export const onRequestPost: PagesFunction<CommentsEnv> = async (context) => {
   const rawBody = await context.request.text();
   return createComment(context.env, {
+    rawBody,
+    postId: context.params.postId,
+    remoteAddress: context.request.headers.get("CF-Connecting-IP"),
+  });
+};
+
+export const onRequestPut: PagesFunction<CommentsEnv> = async (context) => {
+  const rawBody = await context.request.text();
+  return editComment(context.env, {
     rawBody,
     postId: context.params.postId,
     remoteAddress: context.request.headers.get("CF-Connecting-IP"),

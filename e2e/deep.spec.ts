@@ -37,12 +37,12 @@ test.describe("Deep interactive tests", () => {
   }) => {
     await page.goto("/blog");
     // 記事一覧から個別ページへ遷移できる
-    const postLink = page.getByRole("link", { name: "MEGADRAWKへようこそ" });
+    const postLink = page.getByRole("link", { name: "ブログをはじめました" });
     await expect(postLink).toBeVisible();
     await postLink.click();
     await expect(page).toHaveURL(/\/blog\/2026-10-25-hello-megadrawk/);
     await expect(
-      page.getByRole("heading", { level: 1, name: "MEGADRAWKへようこそ" }),
+      page.getByRole("heading", { level: 1, name: "ブログをはじめました" }),
     ).toBeVisible();
   });
 

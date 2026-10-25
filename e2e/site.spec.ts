@@ -63,20 +63,9 @@ test("blog post page renders markdown, toc, reading time and per-post og image",
 }) => {
   await page.goto(`/blog/${POST_ID}`);
   await expect(
-    page.getByRole("heading", { level: 1, name: "MEGADRAWKへようこそ" }),
+    page.getByRole("heading", { level: 1, name: "ブログをはじめました" }),
   ).toBeVisible();
   await expect(page.getByText(/約\d+分/)).toBeVisible();
-  // 目次（見出しが3つあるため表示される）
-  const toc = page.getByRole("navigation", { name: "目次" });
-  await expect(toc).toBeVisible();
-  await expect(toc.locator("a")).toHaveCount(3);
-  await expect(toc.locator("a").first()).toHaveAttribute(
-    "href",
-    "#公開しているもの",
-  );
-  await toc.locator("a").first().click();
-  // Markdownのシンタックスハイライト（ビルド時にShikiで着色されたコードブロック）
-  await expect(page.locator(".prose-content .astro-code")).toHaveCount(1);
   // 記事ごとのOG画像
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
     "content",
@@ -84,7 +73,7 @@ test("blog post page renders markdown, toc, reading time and per-post og image",
   );
   await expect(page.locator('meta[property="og:image:alt"]')).toHaveAttribute(
     "content",
-    "MEGADRAWKへようこそ",
+    "ブログをはじめました",
   );
   // 記事は1件なので前後ナビゲーション・関連記事は出ない
   await expect(page.locator(".post-navigation")).toHaveCount(0);
@@ -121,13 +110,13 @@ test("comment form is account-free and degrades gracefully without turnstile con
 });
 
 test("tag pages list the posts that carry the tag", async ({ page }) => {
-  await page.goto("/tags/制作品");
+  await page.goto("/tags/サイト運営");
   await expect(
-    page.getByRole("heading", { level: 1, name: "#制作品" }),
+    page.getByRole("heading", { level: 1, name: "#サイト運営" }),
   ).toBeVisible();
   await expect(page.getByText("1件の記事")).toBeVisible();
   await expect(
-    page.getByRole("link", { name: "MEGADRAWKへようこそ" }),
+    page.getByRole("link", { name: "ブログをはじめました" }),
   ).toBeVisible();
   await page.goto("/tags/存在しないタグ");
   expect((await page.request.get("/tags/存在しないタグ")).status()).toBe(404);

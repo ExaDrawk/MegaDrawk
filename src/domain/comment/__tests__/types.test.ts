@@ -46,6 +46,7 @@ describe("isCommentItemArray", () => {
           name: "Drawk",
           message: "こんにちは",
           createdAt: "2026-01-01T00:00:00.000Z",
+          parentId: null,
         },
       ]),
     ).toBe(true);
@@ -57,7 +58,14 @@ describe("isCommentItemArray", () => {
 
   it("returns false for an array with a malformed item", () => {
     expect(
-      isCommentItemArray([{ id: 1, name: "Drawk", message: "こんにちは" }]),
+      isCommentItemArray([
+        {
+          id: 1,
+          name: "Drawk",
+          message: "こんにちは",
+          createdAt: "2026-01-01T00:00:00.000Z",
+        },
+      ]),
     ).toBe(false);
   });
 
@@ -73,6 +81,7 @@ describe("isCommentItemArray", () => {
       name: "Drawk",
       message: "hello",
       createdAt: "2026-01-01T00:00:00.000Z",
+      parentId: null,
     };
     expect(isCommentItemArray([{ ...comment, createdAt: "not-a-date" }])).toBe(
       false,
@@ -107,6 +116,19 @@ describe("isCommentItem", () => {
         name: "Drawk",
         message: "こんにちは",
         createdAt: "2026-10-25T12:00:00Z",
+        parentId: null,
+      }),
+    ).toBe(true);
+  });
+
+  it("accepts replies with a numeric parentId", () => {
+    expect(
+      isCommentItem({
+        id: 2,
+        name: "Drawk",
+        message: "こんにちは",
+        createdAt: "2026-10-25T12:00:00Z",
+        parentId: 1,
       }),
     ).toBe(true);
   });
@@ -118,10 +140,26 @@ describe("isCommentItem", () => {
         name: "Drawk",
         message: "こんにちは",
         createdAt: "2026-10-25T12:00:00Z",
+        parentId: null,
       }),
     ).toBe(false);
     expect(
-      isCommentItem({ id: 2, name: "", message: "本文", createdAt: "x" }),
+      isCommentItem({
+        id: 2,
+        name: "",
+        message: "本文",
+        createdAt: "x",
+        parentId: null,
+      }),
+    ).toBe(false);
+    expect(
+      isCommentItem({
+        id: 3,
+        name: "Drawk",
+        message: "こんにちは",
+        createdAt: "2026-10-25T12:00:00Z",
+        parentId: "1",
+      }),
     ).toBe(false);
   });
 });
