@@ -57,7 +57,7 @@ export function articleSchema(post: BlogPost, pathname: string) {
   return {
     "@type": "Article",
     headline: post.title,
-    description: post.excerpt,
+    description: post.description,
     datePublished: post.date,
     dateModified: post.updatedAt,
     inLanguage: SITE.language,

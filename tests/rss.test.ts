@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { escapeXml } from "@/lib/xml";
 import { buildRssFeed, toRssItems } from "@/lib/rss";
-import { createBlogPost } from "@/domain/blog/post";
+import { makeBlogPost } from "./helpers/makeBlogPost";
 
 describe("escapeXml", () => {
   it("escapes the five XML special characters", () => {
@@ -21,28 +21,31 @@ describe("escapeXml", () => {
 
 describe("toRssItems", () => {
   it("maps posts to RSS items with per-post URLs and RFC 822 dates", () => {
-    const post = createBlogPost({
+    const post = makeBlogPost({
+      id: "feed-item",
       title: "Feed Item",
-      body: "body text",
+      description: "body text",
       date: "2026-10-01",
     });
     const items = toRssItems([post]);
     expect(items).toHaveLength(1);
     expect(items[0]?.link).toBe("https://megadrawk.com/blog/feed-item");
+    expect(items[0]?.description).toBe("body text");
     expect(items[0]?.pubDate).toBe("Thu, 01 Oct 2026 00:00:00 GMT");
   });
 
   it("throws on an invalid date instead of emitting a broken feed", () => {
-    const post = { ...createBlogPost({ title: "X", body: "y" }), date: "nope" };
+    const post = makeBlogPost({ date: "nope" });
     expect(() => toRssItems([post])).toThrow();
   });
 });
 
 describe("buildRssFeed", () => {
   it("builds a channel with site identity and escaped entries", () => {
-    const post = createBlogPost({
+    const post = makeBlogPost({
+      id: "rss-escaping",
       title: "RSS & <Escaping>",
-      body: "本文",
+      description: "本文",
       date: "2026-10-02",
     });
     const xml = buildRssFeed(toRssItems([post]));

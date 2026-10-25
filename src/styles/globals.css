@@ -707,9 +707,168 @@ textarea.form-control {
   border: 1px solid var(--color-rule);
   border-radius: var(--radius-sm);
   padding: 0.125rem 0.5rem;
+  text-decoration: none;
+}
+.post-tag:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 .post-comments {
   margin-top: 3rem;
   border-top: 1px solid var(--color-rule);
   padding-top: 2rem;
+}
+/* 目次 */
+.post-toc {
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-md);
+  background: var(--color-paper-2);
+  padding: 1rem 1.25rem;
+  margin: 0 0 2.5rem;
+}
+.post-toc ol {
+  margin: 0.5rem 0 0;
+  padding-left: 1.25rem;
+  list-style: none;
+}
+.post-toc li {
+  margin: 0.25rem 0;
+  font-size: 0.875rem;
+}
+.toc-depth-3 {
+  padding-left: 1rem;
+}
+.post-toc a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+.post-toc a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+/* 前後記事ナビゲーション */
+.post-navigation {
+  margin-top: 3rem;
+  border-top: 1px solid var(--color-rule);
+  padding-top: 1.5rem;
+  display: grid;
+  gap: 1rem;
+}
+@media (min-width: 768px) {
+  .post-navigation {
+    grid-template-columns: 1fr 1fr;
+  }
+  .post-navigation__older {
+    text-align: right;
+  }
+}
+.post-navigation__link {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  text-decoration: none;
+  max-width: 100%;
+}
+.post-navigation__label {
+  font-size: 0.75rem;
+  color: var(--color-muted);
+}
+.post-navigation__title {
+  color: var(--color-accent);
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+.post-navigation__link:hover .post-navigation__title {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+/* 関連記事 */
+.post-related {
+  margin-top: 3rem;
+}
+.post-related__list {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+.post-related__list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  border-bottom: 1px solid var(--color-rule);
+  padding-bottom: 0.75rem;
+}
+.post-related__list a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+.post-related__list a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.post-related__list time {
+  font-size: 0.8125rem;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+/* Markdown本文（Astro Shiki出力の二重テーマ切替） */
+.prose-content .astro-code {
+  color: var(--shiki-light);
+  background-color: var(--shiki-light-bg);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+.prose-content .astro-code span {
+  color: var(--shiki-light);
+  font-style: var(--shiki-light-font-style);
+  font-weight: var(--shiki-light-font-weight);
+  text-decoration: var(--shiki-light-text-decoration);
+}
+[data-theme="dark"] .prose-content .astro-code {
+  color: var(--shiki-dark);
+  background-color: var(--shiki-dark-bg);
+  border-color: var(--color-rule);
+}
+[data-theme="dark"] .prose-content .astro-code span {
+  color: var(--shiki-dark);
+  font-style: var(--shiki-dark-font-style);
+  font-weight: var(--shiki-dark-font-weight);
+  text-decoration: var(--shiki-dark-text-decoration);
+}
+/* 見出しアンカー（Astroが自動付与するid）へのスクロール余白 */
+.prose-content h2,
+.prose-content h3 {
+  scroll-margin-top: 5rem;
+}
+.prose-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+}
+.prose-content hr {
+  border: 0;
+  border-top: 1px solid var(--color-rule);
+  margin: 2.5rem 0;
+}
+.prose-content blockquote {
+  border-left: 3px solid var(--color-rule-strong);
+  margin: 0 0 1.25rem;
+  padding: 0.25rem 0 0.25rem 1rem;
+  color: var(--color-muted);
+}
+.prose-content ol {
+  max-width: 65ch;
+  margin: 0 0 1.25rem;
+  padding-left: 1.35rem;
+  list-style: decimal;
+}
+.prose-content li + li {
+  margin-top: 0.5rem;
 }

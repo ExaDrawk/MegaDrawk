@@ -3,8 +3,7 @@ import Layout from "@/layouts/Layout.astro";
 import { SITE } from "@/config/site";
 import { getPublishedBlogPosts } from "@/config/blog";
 import { formatJaDate } from "@/lib/date";
-import { CommentSection } from "@/components/blog/CommentSection";
-const posts = getPublishedBlogPosts();
+const posts = await getPublishedBlogPosts();
 ---
 
 <Layout title="Blog" description={SITE.name + "のブログ。制作記録とメモ。"}>
@@ -23,43 +22,49 @@ const posts = getPublishedBlogPosts();
         {posts.length > 0 ? (
           <div class="space-y-6">
             {posts.map((post) => (
-              <article
-                id={post.id}
-                class="surface p-6 rounded-md border border-[var(--color-border-subtle)]"
-              >
+              <article class="surface p-6 rounded-md border border-[var(--color-border-subtle)]">
                 <div
-                  class="flex items-center gap-2 text-xs font-mono"
+                  class="flex flex-wrap items-center gap-2 text-xs font-mono"
                   data-color="color-text-muted"
                 >
                   <time datetime={post.date}>{formatJaDate(post.date)}</time>
+                  <span>・約{post.readingMinutes}分</span>
                   {post.updatedAt !== post.date ? (
                     <span>/ 更新 {formatJaDate(post.updatedAt)}</span>
                   ) : null}
+                  {post.draft ? (
+                    <span class="font-semibold" data-color="color-primary">
+                      （下書き）
+                    </span>
+                  ) : null}
                 </div>
                 <h2 class="text-xl font-bold tracking-tight mt-2">
-                  {post.title}
+                  <a
+                    class="hover:underline underline-offset-4"
+                    href={`/blog/${post.id}`}
+                  >
+                    {post.title}
+                  </a>
                 </h2>
                 <p
                   class="mt-2 text-sm leading-relaxed"
                   data-color="color-text-secondary"
                 >
-                  {post.excerpt}
+                  {post.description}
                 </p>
                 {post.tags.length > 0 ? (
                   <div class="mt-4 flex flex-wrap gap-2" aria-label="タグ">
                     {post.tags.map((tag) => (
-                      <span
-                        class="px-2 py-0.5 text-xs font-mono rounded border border-[var(--color-border-subtle)]"
+                      <a
+                        class="px-2 py-0.5 text-xs font-mono rounded border border-[var(--color-border-subtle)] hover:underline"
                         data-color="color-text-muted"
+                        href={`/tags/${tag}`}
                       >
-                        #{tag}
-                      </span>
+                        {"#" + tag}
+                      </a>
                     ))}
                   </div>
                 ) : null}
-                <div class="mt-6 border-t border-[var(--color-border-subtle)] pt-5">
-                  <CommentSection postId={post.id} client:load />
-                </div>
               </article>
             ))}
           </div>

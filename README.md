@@ -43,12 +43,12 @@ Cloudflare Pagesではビルドコマンドを npm run build、出力ディレ�
 
 - 作品: src/config/projects.ts
 - サイト情報・ナビゲーション: src/config/site.ts
-- 記事: src/config/blog.ts のBLOG_POSTS。既存のcreateBlogPost形式を継続します。各記事は /blog/{id} の個別ページと /rss.xml に自動反映されます。
-- 草案: /admin/posts/new で生成したコードを記事設定へ追加し、再ビルドします。画面からの公開・サーバーへの書き込み機能はありません。
+- 記事: src/content/blog/*.md（frontmatterにtitle・description・date・tags・draft、本文はMarkdown）。ファイル名がそのままURL（/blog/{id}）になり、RSS・サイトマップ・記事ごとのSNSカード画像に自動反映されます。コードブロックはビルド時にShikiでハイライトされます。
+- 草案: /admin/posts/new で生成したMarkdownをsrc/content/blog/へ保存し、再ビルドします。画面からの公開・サーバーへの書き込み機能はありません。draft: trueの記事は開発サーバーでのみ表示されます。
 - 外観: tokens.css と src/styles/globals.css。フォントはnpmパッケージから自己配信します。ダークテーマは [data-theme="dark"] でtokens.cssに定義しています。
-- OG画像・アイコン: public/images/og/default.png と public/apple-touch-icon.png。ブランド変更時は `npm run assets:generate` で再生成し、コミットします。
+- OG画像・アイコン: public/images/og/default.png と public/apple-touch-icon.png。ブランド変更時は `npm run assets:generate` で再生成し、コミットします。記事ごとのカードはビルド時に自動生成されます。
 
-コメントと草案は同じオリジンのlocalStorageにだけ保存されます。共有コメントサービス、認証付きCMSではありません。保存キーは移行前と同じです。ブラウザデータの読み込みに失敗した場合、自動保存による上書きを停止して再読み込みを提供します。
+コメントはGitHub Discussions（giscus）で受け付けます。GitHubアカウントでのサインインが必要で、コメントはGitHub上に公開されます。記事草案のみブラウザのlocalStorageに保存され、サーバーへは送信されません。
 
 設計・セキュリティ・運用上の制約は DEVELOPER.md を参照してください。
 

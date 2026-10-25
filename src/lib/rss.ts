@@ -21,7 +21,7 @@ export function toRssItems(posts: readonly BlogPost[]): readonly RssItem[] {
   return posts.map((post) => ({
     title: post.title,
     link: `${SITE.url}/blog/${post.id}`,
-    description: post.excerpt,
+    description: post.description,
     pubDate: toRfc822(post.date),
   }));
 }

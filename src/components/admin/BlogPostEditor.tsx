@@ -1,12 +1,4 @@
-import {
-  useCallback,
-  useDeferredValue,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useTransition,
-} from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import {
   buildBlogPostDraft,
   getInitialBlogPostDraftInput,
@@ -18,10 +10,12 @@ import { ActionButton } from "@/components/ui/Action";
 
 const FIELD_LABELS: Record<keyof BlogPostDraftInput, string> = {
   title: "タイトル",
-  body: "本文",
+  description: "説明",
+  body: "本文（Markdown）",
   tags: "タグ",
   date: "公開日",
   updatedAt: "更新日",
+  draft: "下書き",
 };
 
 export function BlogPostEditor() {
@@ -39,16 +33,7 @@ export function BlogPostEditor() {
   const [isPending, startTransition] = useTransition();
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dirtyRef = useRef(false);
-  const deferredBody = useDeferredValue(draftInput.body);
-
-  const previewParagraphs = useMemo(
-    () =>
-      deferredBody
-        .split(/\n{2,}/)
-        .map((paragraph) => paragraph.trim())
-        .filter(Boolean),
-    [deferredBody],
-  );
+  const previewBody = draftInput.body;
 
   function updateField<K extends keyof BlogPostDraftInput>(
     key: K,
@@ -165,10 +150,10 @@ export function BlogPostEditor() {
     setErrorText(null);
 
     try {
-      await navigator.clipboard.writeText(result.code);
+      await navigator.clipboard.writeText(result.markdown);
       setCopied(true);
     } catch {
-      setErrorText("コードのコピーに失敗しました。手動でコピーしてください。");
+      setErrorText("コピーに失敗しました。手動でコピーしてください。");
       setCopied(false);
     } finally {
       setIsCopying(false);
@@ -189,7 +174,8 @@ export function BlogPostEditor() {
             </a>
           </div>
           <p className="text-sm" data-color="color-text-secondary">
-            入力内容から、`src/config/blog.ts` に貼り付けるコードを生成します。
+            入力内容から、`src/content/blog/`
+            に保存するMarkdownファイルを生成します。
           </p>
           <p className="text-xs" data-color="color-text-muted">
             {savedAt
@@ -217,6 +203,20 @@ export function BlogPostEditor() {
               />
             </label>
 
+            <label className="form-field" htmlFor="draft-description">
+              <span className="form-label">{FIELD_LABELS.description}</span>
+              <textarea
+                id="draft-description"
+                rows={2}
+                value={draftInput.description}
+                onChange={(event) =>
+                  updateField("description", event.target.value)
+                }
+                placeholder="記事一覧とSNSカードに表示する要約を1〜2文で。"
+                className="form-control"
+              />
+            </label>
+
             <label className="form-field" htmlFor="draft-body">
               <span className="form-label" id="draft-body-label">
                 {FIELD_LABELS.body}
@@ -224,11 +224,11 @@ export function BlogPostEditor() {
               <textarea
                 id="draft-body"
                 aria-labelledby="draft-body-label"
-                value={draftInput.body}
+                value={previewBody}
                 onChange={(event) => updateField("body", event.target.value)}
-                placeholder="段落ごとに改行を空けると、プレビューも読みやすくなります。"
-                rows={10}
-                className="form-control"
+                placeholder="Markdownで書けます。## 見出し、**強調**、```コードブロック``` など。"
+                rows={12}
+                className="form-control font-mono text-sm"
               />
             </label>
 
@@ -266,13 +266,26 @@ export function BlogPostEditor() {
               />
             </label>
 
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={draftInput.draft}
+                onChange={(event) => updateField("draft", event.target.checked)}
+                className="h-4 w-4"
+              />
+              <span>
+                {FIELD_LABELS.draft}
+                として保存（本番サイトには公開されません）
+              </span>
+            </label>
+
             <div className="flex flex-wrap gap-3 pt-2">
               <ActionButton
                 type="submit"
                 disabled={isPending}
                 aria-busy={isPending}
               >
-                {isPending ? "生成中..." : "記事コードを生成"}
+                {isPending ? "生成中..." : "Markdownを生成"}
               </ActionButton>
               <ActionButton
                 variant="secondary"
@@ -311,15 +324,15 @@ export function BlogPostEditor() {
               </p>
               <p className="mt-1 text-sm leading-6">{errorText}</p>
               <p className="mt-2 text-sm">
-                タイトルと本文を入れ、更新日は公開日以降にしてください。
+                タイトル・説明・本文を入れ、更新日は公開日以降にしてください。
               </p>
             </div>
           ) : result ? (
             <div className="status-panel mt-5" data-status="success">
-              <p className="text-sm font-semibold">コードを生成しました</p>
+              <p className="text-sm font-semibold">Markdownを生成しました</p>
               <p className="mt-1 text-sm leading-6">
-                `src/config/blog.ts` の `BLOG_POSTS`
-                に追加できるコードを生成しました。
+                <code>{`src/content/blog/${result.filename}`}</code>{" "}
+                として保存してコミットすると公開されます。
               </p>
               {savedAt ? (
                 <p className="mt-2 text-sm">
@@ -330,7 +343,7 @@ export function BlogPostEditor() {
           ) : (
             <div className="surface-muted mt-5 px-5 py-8 text-center">
               <p className="mt-2 text-sm leading-6">
-                まず左側で記事草案を入力し、コード生成を実行してください。
+                まず左側で記事草案を入力し、Markdown生成を実行してください。
               </p>
             </div>
           )}
@@ -344,7 +357,7 @@ export function BlogPostEditor() {
                 className="text-xs font-semibold"
                 data-color="color-primary"
               >
-                slug: {result.post.id}
+                slug: {result.slug}
               </span>
             ) : null}
           </div>
@@ -352,16 +365,15 @@ export function BlogPostEditor() {
           <div className="mt-5 space-y-4">
             <div>
               <h3 className="text-2xl font-bold">
-                {result?.post.title || "タイトル未入力"}
+                {draftInput.title.trim() || "タイトル未入力"}
               </h3>
               <p className="mt-2 text-sm" data-color="color-text-secondary">
-                {result
-                  ? `${result.post.date}${result.post.updatedAt !== result.post.date ? ` / 更新 ${result.post.updatedAt}` : ""}`
-                  : "本文の冒頭120文字が excerpt として使われます。"}
+                {draftInput.description.trim() ||
+                  "説明は一覧・RSS・SNSカードに使われます。"}
               </p>
-              {result && result.post.tags.length > 0 ? (
+              {result && result.tagList.length > 0 ? (
                 <div className="mt-3 flex flex-wrap gap-2" aria-label="タグ">
-                  {result.post.tags.map((tag) => (
+                  {result.tagList.map((tag) => (
                     <span key={tag} className="tag">
                       {tag}
                     </span>
@@ -371,19 +383,26 @@ export function BlogPostEditor() {
             </div>
 
             <div className="surface p-5 shadow-none">
-              {previewParagraphs.length > 0 ? (
-                <div className="space-y-4 text-sm leading-7">
-                  {previewParagraphs.map((paragraph, index) => (
-                    <p key={`${paragraph.slice(0, 24)}-${index}`}>
-                      {paragraph}
-                    </p>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm" data-color="color-text-secondary">
-                  本文を入力すると、ここにプレビューが表示されます。
-                </p>
-              )}
+              <p className="text-xs" data-color="color-text-muted">
+                簡易プレビュー（見た目は実際の記事ページで確認してください）
+              </p>
+              <div className="mt-3 space-y-4 text-sm leading-7">
+                {previewBody.trim() ? (
+                  previewBody
+                    .split(/\n{2,}/)
+                    .map((paragraph) => paragraph.trim())
+                    .filter(Boolean)
+                    .map((paragraph, index) => (
+                      <p key={`${paragraph.slice(0, 24)}-${index}`}>
+                        {paragraph}
+                      </p>
+                    ))
+                ) : (
+                  <p className="text-sm" data-color="color-text-secondary">
+                    本文を入力すると、ここにプレビューが表示されます。
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </article>
@@ -393,7 +412,7 @@ export function BlogPostEditor() {
           data-code-panel
         >
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-xl font-bold">生成コード</h2>
+            <h2 className="text-xl font-bold">生成Markdown</h2>
             <ActionButton
               variant="dark"
               onClick={() => {
@@ -406,14 +425,14 @@ export function BlogPostEditor() {
                 ? "コピー中..."
                 : copied
                   ? "コピー済み"
-                  : "コードをコピー"}
+                  : "Markdownをコピー"}
             </ActionButton>
           </div>
 
           <pre className="mt-5 overflow-x-auto rounded-2xl bg-black/25 p-5 text-sm leading-7">
             <code>
-              {result?.code ??
-                'createBlogPost({\n  title: "...",\n  body: "..."\n})'}
+              {result?.markdown ??
+                '---\ntitle: "..."\ndescription: "..."\ndate: "YYYY-MM-DD"\n---\n\n本文（Markdown）'}
             </code>
           </pre>
         </article>

@@ -2,13 +2,18 @@
 
 ## 設計と依存方向
 
-Astroのsrc/pagesがURLとメタデータを定義し、src/layouts/Layout.astroがhead、ナビゲーション、フッターを統合します。src/viewsのReactコンポーネントはビルド時にHTMLへ変換され、閲覧者へReactランタイムを送りません。操作が必要なコメントと草案エディターだけ、Astroのclient:loadでハイドレーションします。
+Astroのsrc/pagesがURLとメタデータを定義し、src/layouts/Layout.astroがhead、ナビゲーション、フッターを統合します。src/viewsのReactコンポーネントはビルド時にHTMLへ変換され、閲覧者へReactランタイムを送りません。操作が必要なコメント（giscus）と草案エディター・お問い合わせフォームだけ、Astroのclient:visible / client:loadでハイドレーションします。
 
-UI（pages/layouts/views/components）→ ドメイン（domain/config/lib）→ 永続化（infra）に責務を分けます。コメント永続化の契約はCommentRepositoryが定義し、インフラが実装します（DIP/ISP）。既存の小規模な草案保存には、実装が1つしかない不要な抽象層を追加していません。
+UI（pages/layouts/views/components）→ ドメイン（domain/config/lib）→ 永続化（infra）に責務を分けます。お問い合わせフォームの入力検証ルールはsrc/domain/contact/contact.tsにのみ存在し、ブラウザ側のisland（src/components/contact/ContactForm.tsx）とサーバー側のPages Function（functions/api/contact.ts）の双方が同じ関数を参照します。functions/はCloudflare Pages Functionsで、配信は静的distのまま、/api/contactだけサーバー処理を行います。
 
-お問い合わせフォームの入力検証ルールはsrc/domain/contact/contact.tsにのみ存在し、ブラウザ側のisland（src/components/contact/ContactForm.tsx）とサーバー側のPages Function（functions/api/contact.ts）の双方が同じ関数を参照します。functions/はCloudflare Pages Functionsで、配信は静的distのまま、/api/contactだけサーバー処理を行います。
+## ブログ（Content Collections）
 
-記事・作品・法的ページの内容と既存URLを保持しています。記事をMarkdownへ二重管理せず、src/config/blog.tsを正本として継続します。将来Markdownへ変更する場合は、記事データ・草案出力・検証をまとめて移行してください。
+- 記事の正本はsrc/content/blog/*.md。src/content.config.tsのZodスキーマ（title・description・date・updatedAt・tags・draft）で検証され、src/config/blog.tsがastro:contentとドメインモデル（src/domain/blog/post.ts）の仲介層になります。astro:contentはAstro実行環境でのみ解決されるため、この仲介層をimportしてよいのは.astroページとエンドポイントだけ。Reactビュー（Homeなど）には値をpropsで渡します。
+- ルートパラメータはAstro.paramsから取ります（Astro.propsはgetStaticPathsのpropsのみ）。記事のid＝ファイル名＝URLスラッグ。
+- コードハイライトはAstro標準のShikiを二重テーマ（github-light/github-dark、defaultColor: false）で生成し、globals.cssが[data-theme]で切り替えます。Shikiはstyle属性を出力するため、scripts/security.mjsがShiki形式のstyle属性のみ許可し、値ごとのSHA-256ハッシュをCSPのstyle-src-attrへ出力します。
+- 読了時間・関連記事・タグ集計・前後記事のロジックはsrc/lib/blogUtils.tsの純粋関数（単体テスト対象）。記事ごとのOG画像はsrc/pages/og/[id].png.tsがビルド時にsatori＋sharpで生成し、フォントはscripts/assets/fonts/から読み込みます（リポジトリにコミット、ブラウザへは配信しない）。
+- コメントはgiscus（GitHub Discussions）。設定はsrc/config/site.tsのgiscus（repo・repoId・category・categoryId。いずれも公開識別子）。CSPにはgiscus.app（script/frame/connect）とGitHubのアバター画像を許可します。テーマ切替はLayoutが発火するthemechangeイベントをGiscusCommentsが購読してiframeへpostMessageします。
+- 下書き（draft: true）は本番ビルド・RSS・サイトマップから除外され、開発サーバーでのみ表示されます。旧localStorageコメント機能（CommentSection）はgiscus導入時に削除しました。ブラウザ内に残った過去のコメントデータは削除していません。
 
 ## セキュリティ
 
@@ -50,8 +55,9 @@ scripts/serve-static.mjsはローカル専用の証拠取得用サーバーで�
 - Pages設定はダッシュボード/API管理に統一し、リポジトリにwrangler.tomlを置かない。wrangler.tomlが存在すると、Git連携デプロイのたびにプロジェクト設定がファイル側へ同期され、ダッシュボード設定の環境変数が消える（2026-10-25に実障害として確認）。
 - 現在の構成（2026-10-25設定済み）: Turnstileウィジェット`megadrawk-contact`（managed、megadrawk.comのみ）。Brevo APIキー`megadrawk-contact-085402`（Restricted・Transactional email: All・無期限だが90日未使用で失効。フォーム稼働中なら失効しない）。3変数ともPagesプロジェクト`megadrawk`のproduction環境変数に登録済み。新しいキーへ差し替える場合はBrevoのSMTP & API画面で生成し、Pagesの環境変数を更新してから再デプロイする。
 - アクセス解析はCloudflareダッシュボードのWeb Analytics自動注入（megadrawk.comゾーンで有効）を使用しているため、`PUBLIC_CF_WEB_ANALYTICS_TOKEN`は設定しないこと（二重計測になる）。
-- 処理順: サイズ上限（32KB）→JSON解析→ハニーポット（`company`欄が空でなければボットとして成功応答のみ返し送信しない）→Turnstile siteverify→ドメインの検証（src/domain/contact/contact.ts）→Brevo REST API（api.brevo.com/v3/smtp/email）で`SITE.email`へ送信、Reply-Toに送信者。
+- 処理順: サイズ上限（32KB）→JSON解析→ハニーポット（`company`欄が空でなければボットとして成功応答のみ返し送信しない）→Turnstile siteverify→ドメインの検証（src/domain/contact/contact.ts）→Brevo REST API（api.brevo.com/v3/smtp/email）で`SITE.email`へ送信、Reply-Toに送信者（未入力ならReply-Toを付けない）。
 - 送信者・宛先の正本はSITE.emailのみ。宛先を分けたい場合はconfigの変更で一括更新する。
+- メールアドレスは任意（2026-10-25〜）。フォームには「返信が必要な場合は、本文にその旨と返信先をご記入ください」と案内する。未入力の問い合わせには返信できないため、返信したい場合は本文に記載された返信先へ送る。
 - 失敗時はFail Fastで状態コードを返す（設定不備500・入力413/400・Turnstile失敗400・配信失敗502）。Brevo/Turnstileの障害時、フォームはエラーを表示し、既存のメール・X導線が常に代替となる。
 - レート制限は持っていない（ステートレス）。Turnstileとハニーポットで一次防御するが、大量送信が懸念される場合はCloudflare WAFレート制限ルールをzone側へ追加する。
 - ローカル検証: `npm start`（serve-static.mjs）は書き込みメソッドを拒否するため、関数の実動作は単体テスト（tests/contact-function.test.ts）とデプロイ後の実送信で確認する。Turnstileのテストキー（公式の1x/2x…）を使えば実配信前にUI検証が可能。

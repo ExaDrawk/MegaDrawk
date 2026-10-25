@@ -20,12 +20,12 @@ describe("BlogPostEditor", () => {
     });
   });
 
-  it("shows the empty state before generating code", () => {
+  it("shows the empty state before generating markdown", () => {
     render(<BlogPostEditor />);
 
     expect(
       screen.getByText(
-        "まず左側で記事草案を入力し、コード生成を実行してください。",
+        "まず左側で記事草案を入力し、Markdown生成を実行してください。",
       ),
     ).toBeDefined();
   });
@@ -33,35 +33,59 @@ describe("BlogPostEditor", () => {
   it("shows validation errors when required fields are missing", async () => {
     render(<BlogPostEditor />);
 
-    fireEvent.click(screen.getByRole("button", { name: "記事コードを生成" }));
+    fireEvent.click(screen.getByRole("button", { name: "Markdownを生成" }));
 
     await waitFor(() => {
       expect(screen.getByRole("alert")).toBeDefined();
     });
-    expect(screen.getByText("Blog post title is required.")).toBeDefined();
+    expect(screen.getByText("Title is required.")).toBeDefined();
   });
 
-  it("shows generated code after a valid submission", async () => {
+  it("shows generated markdown after a valid submission", async () => {
     render(<BlogPostEditor />);
 
     fireEvent.change(screen.getByLabelText("タイトル"), {
       target: { value: "展示レポート" },
     });
-    fireEvent.change(screen.getByLabelText("本文"), {
-      target: { value: "展示の振り返りです。" },
+    fireEvent.change(screen.getByLabelText("説明"), {
+      target: { value: "展示の振り返りの要約です。" },
+    });
+    fireEvent.change(screen.getByLabelText("本文（Markdown）"), {
+      target: { value: "## 会場\n\n展示の振り返りです。" },
     });
     fireEvent.change(screen.getByLabelText("タグ"), {
       target: { value: "展示, レポート" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "記事コードを生成" }));
+    fireEvent.click(screen.getByRole("button", { name: "Markdownを生成" }));
 
     await waitFor(() => {
-      expect(screen.getByText("コードを生成しました")).toBeDefined();
+      expect(screen.getByText("Markdownを生成しました")).toBeDefined();
     });
-    expect(screen.getByText(/slug: post-/)).toBeDefined();
+    expect(screen.getByText(/slug: /)).toBeDefined();
     expect(
-      screen.getByText(/createBlogPost/, { selector: "code" }),
+      screen.getByText(/title: "展示レポート"/, { selector: "code" }),
     ).toBeDefined();
+  });
+
+  it("marks generated markdown as draft when the checkbox is on", async () => {
+    render(<BlogPostEditor />);
+
+    fireEvent.change(screen.getByLabelText("タイトル"), {
+      target: { value: "書きかけのメモ" },
+    });
+    fireEvent.change(screen.getByLabelText("説明"), {
+      target: { value: "まだ公開しない要約。" },
+    });
+    fireEvent.change(screen.getByLabelText("本文（Markdown）"), {
+      target: { value: "本文。" },
+    });
+    fireEvent.click(screen.getByLabelText(/下書き/));
+    fireEvent.click(screen.getByRole("button", { name: "Markdownを生成" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Markdownを生成しました")).toBeDefined();
+    });
+    expect(screen.getByText(/draft: true/, { selector: "code" })).toBeDefined();
   });
 
   it("restores a saved draft from localStorage", async () => {
@@ -70,10 +94,12 @@ describe("BlogPostEditor", () => {
       JSON.stringify({
         draft: {
           title: "保存済みタイトル",
+          description: "保存済み説明",
           body: "保存済み本文",
           tags: "制作メモ",
           date: "2026-03-15",
           updatedAt: "",
+          draft: false,
         },
         savedAt: "2026-03-15T12:00:00.000Z",
       }),

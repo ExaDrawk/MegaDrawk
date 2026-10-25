@@ -235,3 +235,29 @@
 - [x] 環境変数消失の根本修正: wrangler.tomlを削除しダッシュボード/API管理へ統一（lessons記録）
 - [x] 本番検証: /rss.xml・og:image・apple-touch-icon・CSP(challenges.cloudflare.com)・フォームisland・/api/contact 400応答
 - [x] 実送信E2E: 本番フォーム→Turnstile→Function→Brevo→contact@→Gmail着信を確認（18:41受領）
+
+## 2026-10-25 お問い合わせフォームのメールアドレス任意化
+
+- [x] Step 1: 仮定・スコープの明示（メール任意＋返信条件の注記。他フォーム・他機能には触れない）
+- [x] Step 2: アーキテクチャ設計（ドメイン＝任意という知識の正本、UI＝表示のみ、インフラ＝replyTo条件化。単方向データフロー維持）
+- [x] Step 3: 実装
+  - [x] 3-1: ドメイン層（`email-empty` を廃止、入力時のみ形式・長さを検証）
+  - [x] 3-2: インフラ層（`buildBrevoEmail` で未入力時はReply-Toを付けず本文に「返信先: （記載なし）」）
+  - [x] 3-3: UI層（`required` 廃止、ラベル「メールアドレス（任意）」、注記・成功文言を返信条件つきに更新）
+- [x] Step 4: 品質ゲート（encoding / Prettier / ESLint / astro check / Vitest / ビルド）
+- [x] Step 5: 自己レビュー・修正（未入力許可と形式検証の共存、e2eへの影響なし確認）
+- [x] Step 6: ドキュメント整備（DEVELOPER.md の処理順・任意方針を追記）
+
+## 2026-10-25 ブログ機能のプロ標準化（優先度A・B・C全部）
+
+- [x] A1: Markdown＋Content Collections移行（src/content/blog/*.md正本・Zodスキーマ・Shiki二重テーマ）
+- [x] A2: 記事別OG画像（satori＋sharpのビルド時エンドポイント・Noto Sans JP OTF同梱）
+- [x] A3: frontmatterのdescription明示＋読了時間算出（blogUtils純粋関数）
+- [x] B: 前後記事ナビ・タグページ（/tags/[tag]）・関連記事・目次
+- [x] C: giscus導入（リポジトリ公開・Discussions有効化・アプリ導入・Announcementsカテゴリ・themechange連動）
+- [x] 草案エディターをMarkdown生成に刷新（draftフラグ・ファイル名提案・ストレージ形状更新）
+- [x] 初回投稿「MEGADRAWKへようこそ」作成
+- [x] 旧localStorageコメント機能の削除（データは削除せず）＋プライバシーポリシー更新
+- [x] セキュリティ正本の拡張: Shiki形式style属性の許可リスト＋CSP style-src-attrハッシュ化
+- [x] npm audit: satori依存fflateの脆弱性をオーバーライド（0.8.3）で解消
+- [x] 品質ゲート全パス（単体90・E2E44）→本番反映

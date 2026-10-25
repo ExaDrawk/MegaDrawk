@@ -1,0 +1,68 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { getBlogTagCounts, getPublishedBlogPosts } from "@/config/blog";
+import { formatJaDate } from "@/lib/date";
+
+export async function getStaticPaths() {
+  const tags = await getBlogTagCounts();
+  return tags.map(({ tag }) => ({ params: { tag } }));
+}
+
+const { tag } = Astro.params;
+const posts = (await getPublishedBlogPosts()).filter((post) =>
+  post.tags.includes(tag),
+);
+---
+
+<Layout
+  title={`#${tag}の記事`}
+  description={`MEGADRAWKのブログのうち、タグ#${tag}が付いた記事一覧。`}
+>
+  <section class="page-section" aria-labelledby="tag-title">
+    <a class="text-link" href="/blog">
+      記事一覧に戻る
+    </a>
+    <header class="page-header">
+      <h1 id="tag-title" class="page-title">
+        {"#" + tag}
+      </h1>
+      <p class="document-meta">{posts.length}件の記事</p>
+    </header>
+
+    <div class="max-w-3xl">
+      {posts.length > 0 ? (
+        <div class="space-y-6">
+          {posts.map((post) => (
+            <article class="surface p-6 rounded-md border border-[var(--color-border-subtle)]">
+              <div
+                class="flex flex-wrap items-center gap-2 text-xs font-mono"
+                data-color="color-text-muted"
+              >
+                <time datetime={post.date}>{formatJaDate(post.date)}</time>
+                <span>・約{post.readingMinutes}分</span>
+              </div>
+              <h2 class="text-xl font-bold tracking-tight mt-2">
+                <a
+                  class="hover:underline underline-offset-4"
+                  href={`/blog/${post.id}`}
+                >
+                  {post.title}
+                </a>
+              </h2>
+              <p
+                class="mt-2 text-sm leading-relaxed"
+                data-color="color-text-secondary"
+              >
+                {post.description}
+              </p>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <p class="text-sm" data-color="color-text-secondary">
+          このタグの記事はまだありません。
+        </p>
+      )}
+    </div>
+  </section>
+</Layout>

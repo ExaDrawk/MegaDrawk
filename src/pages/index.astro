@@ -2,12 +2,20 @@
 import Layout from "@/layouts/Layout.astro";
 import Content, { metadata } from "@/views/Home";
 import { PROJECTS } from "@/config/projects";
+import { getPublishedBlogPosts } from "@/config/blog";
 import { itemListSchema, websiteSchema } from "@/lib/structuredData";
+
+// Reactビューはデータ取得を持たないため、最近の記事はpropsで渡す
+const recentPosts = (await getPublishedBlogPosts()).slice(0, 3).map((post) => ({
+  id: post.id,
+  title: post.title,
+  date: post.date,
+}));
 ---
 
 <Layout
   {...metadata}
   structuredData={[websiteSchema(), itemListSchema(PROJECTS)]}
 >
-  <Content />
+  <Content posts={recentPosts} />
 </Layout>

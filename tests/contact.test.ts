@@ -17,12 +17,14 @@ describe("validateContactInput", () => {
     expect(validateContactInput(validInput)).toBeNull();
   });
 
+  it("accepts an empty email because the address is optional", () => {
+    expect(validateContactInput({ ...validInput, email: "" })).toBeNull();
+    expect(validateContactInput({ ...validInput, email: "   " })).toBeNull();
+  });
+
   it("rejects empty fields", () => {
     expect(validateContactInput({ ...validInput, name: "  " })).toBe(
       "name-empty",
-    );
-    expect(validateContactInput({ ...validInput, email: "" })).toBe(
-      "email-empty",
     );
     expect(validateContactInput({ ...validInput, message: " " })).toBe(
       "message-empty",
@@ -86,7 +88,6 @@ describe("CONTACT_ERROR_MESSAGES", () => {
     const codes = [
       "name-empty",
       "name-too-long",
-      "email-empty",
       "email-too-long",
       "email-invalid",
       "message-empty",

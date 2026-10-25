@@ -24,7 +24,8 @@ interface ContactRequestBody extends ContactInput {
 interface BrevoEmailPayload {
   readonly sender: { readonly name: string; readonly email: string };
   readonly to: readonly { readonly email: string }[];
-  readonly replyTo: { readonly email: string };
+  /** メールアドレスは任意のため、未入力の場合は付けない。 */
+  readonly replyTo?: { readonly email: string };
   readonly subject: string;
   readonly textContent: string;
 }
@@ -34,9 +35,9 @@ export function buildBrevoEmail(input: ContactInput): BrevoEmailPayload {
   return {
     sender: { name: SITE.name, email: SITE.email },
     to: [{ email: SITE.email }],
-    replyTo: { email: input.email },
+    ...(input.email ? { replyTo: { email: input.email } } : {}),
     subject: `【${SITE.name}】お問い合わせ（${input.name}様）`,
-    textContent: `${input.name}様よりお問い合わせがありました。\n\n返信先: ${input.email}\n\n${input.message}`,
+    textContent: `${input.name}様よりお問い合わせがありました。\n\n返信先: ${input.email || "（記載なし）"}\n\n${input.message}`,
   };
 }
 

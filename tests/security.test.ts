@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import {
   inlineScriptHashes,
   inlineStyleHashes,
+  inlineStyleAttrHashes,
   assertStaticHtml,
   securityHeaders,
 } from "../scripts/security.mjs";
@@ -80,5 +81,38 @@ describe("turnstile CSP", () => {
       .split("; ")
       .filter((directive) => directive.startsWith("frame-src"));
     expect(frameDirectives[0]).toContain("https://challenges.cloudflare.com");
+  });
+});
+
+describe("shiki style attributes", () => {
+  const shikiSpan =
+    '<span style="--shiki-light:#D4D4D4;--shiki-dark:#C586C0;font-style:italic">const</span>';
+
+  it("allows only shiki-shaped style attributes in generated HTML", () => {
+    expect(() => assertStaticHtml(shikiSpan)).not.toThrow();
+    expect(() =>
+      assertStaticHtml('<div style="position:fixed;top:0">overlay</div>'),
+    ).toThrow();
+    expect(() =>
+      assertStaticHtml(
+        '<div style="background:url(https://evil.invalid/x)">leak</div>',
+      ),
+    ).toThrow();
+    expect(() =>
+      assertStaticHtml('<div style="color:red" onclick="alert(1)">x</div>'),
+    ).toThrow();
+  });
+
+  it("permits style attributes via per-value hashes in style-src-attr", () => {
+    const attrHashes = inlineStyleAttrHashes(shikiSpan);
+    expect(attrHashes).toHaveLength(1);
+    expect(attrHashes[0]).toMatch(/^'sha256-/);
+    const headers = securityHeaders([], [], { styleAttrHashes: attrHashes });
+    const csp = headers["Content-Security-Policy"];
+    expect(csp).toContain(`style-src-attr ${attrHashes[0]}`);
+    // ハッシュがないビルドでは従来どおり属性スタイルは全禁止
+    expect(securityHeaders([], [])["Content-Security-Policy"]).toContain(
+      "style-src-attr 'none'",
+    );
   });
 });

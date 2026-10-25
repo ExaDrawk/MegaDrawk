@@ -20,9 +20,9 @@ test("public pages are static, usable without JS, and have page-specific canonic
       "href",
       "https://megadrawk.com" + (route === "/" ? "/" : route),
     );
-    // ハイドレーションするのは記事コメント（/blog）とお問い合わせフォーム（/contact）だけ
+    // ハイドレーションするのはお問い合わせフォーム（/contact）だけ
     const islands = await page.locator("astro-island[component-url]").count();
-    if (route === "/blog" || route === "/contact") {
+    if (route === "/contact") {
       expect(islands).toBeLessThanOrEqual(1);
     } else {
       expect(islands).toBe(0);
@@ -43,14 +43,16 @@ test("editor hydrates under strict CSP, escapes HTML, and restores saved drafts"
   await page.goto("/admin/posts/new");
   const payload = '<img src=x onerror="window.compromised=true">';
   await page.getByLabel("タイトル", { exact: true }).fill("Astro検証");
-  await page.getByLabel("本文", { exact: true }).fill(payload);
-  await page.getByRole("button", { name: "記事コードを生成" }).click();
+  await page
+    .getByLabel("説明", { exact: true })
+    .fill("エディター検証用の要約です。");
+  await page.getByLabel("本文（Markdown）").fill(payload);
+  await page.getByRole("button", { name: "Markdownを生成" }).click();
   await expect(
-    page.getByText("コードを生成しました", { exact: true }),
+    page.getByText("Markdownを生成しました", { exact: true }),
   ).toBeVisible();
-  await expect(page.locator("code")).toContainText(
-    payload.replaceAll('"', '\\"'),
-  );
+  await expect(page.getByText(/src\/content\/blog\/.*\.md/)).toBeVisible();
+  await expect(page.locator("code").last()).toContainText(payload);
   expect(await page.evaluate(() => "compromised" in window)).toBe(false);
   await expect
     .poll(() =>
@@ -65,7 +67,7 @@ test("editor hydrates under strict CSP, escapes HTML, and restores saved drafts"
   await expect(page.getByLabel("タイトル", { exact: true })).toHaveValue(
     "Astro検証",
   );
-  await expect(page.getByLabel("本文", { exact: true })).toHaveValue(payload);
+  await expect(page.getByLabel("本文（Markdown）")).toHaveValue(payload);
   expect(errors).toEqual([]);
 });
 

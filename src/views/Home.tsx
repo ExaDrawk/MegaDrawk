@@ -1,10 +1,19 @@
 import { SITE } from "@/config/site";
 import { BrandLockup } from "@/components/layout/BrandLockup";
 import { ProjectList } from "@/components/ui/ProjectList";
-import { getPublishedBlogPosts } from "@/config/blog";
 import { formatJaDate } from "@/lib/date";
-export default function HomePage() {
-  const posts = getPublishedBlogPosts().slice(0, 3);
+
+export interface RecentPostSummary {
+  readonly id: string;
+  readonly title: string;
+  readonly date: string;
+}
+
+export default function HomePage({
+  posts,
+}: {
+  posts: readonly RecentPostSummary[];
+}) {
   return (
     <div className="home">
       <header className="home-intro">

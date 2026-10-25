@@ -1,21 +1,24 @@
-import {
-  createBlogPost,
-  type BlogPost,
-  type BlogPostInput,
-} from "@/domain/blog/post";
+import { createSlug } from "@/domain/blog/post";
 
 export interface BlogPostDraftInput {
   readonly title: string;
+  /** 記事の要約。一覧・SNSカード・RSSに使うため必須。 */
+  readonly description: string;
+  /** Markdown本文 */
   readonly body: string;
   readonly tags: string;
   readonly date: string;
   readonly updatedAt: string;
+  readonly draft: boolean;
 }
 
 export interface BlogPostDraftResult {
-  readonly post: BlogPost;
-  readonly code: string;
-  readonly normalizedInput: BlogPostInput;
+  /** src/content/blog/ に保存するファイル名 */
+  readonly filename: string;
+  /** 生成されたMarkdown（フロントマター＋本文） */
+  readonly markdown: string;
+  readonly slug: string;
+  readonly tagList: readonly string[];
 }
 
 export interface StoredBlogPostDraft {
@@ -37,59 +40,61 @@ function normalizeOptionalDate(rawDate: string): string | undefined {
   return trimmed || undefined;
 }
 
-function escapeMultilineString(value: string): string {
+/** YAMLのダブルクォート形式はJSON文字列リテラルと互換するためJSON.stringifyで安全にエスケープする。 */
+function yamlQuoted(value: string): string {
   return JSON.stringify(value);
 }
 
 export function buildBlogPostDraft(
   input: BlogPostDraftInput,
 ): BlogPostDraftResult {
-  const normalizedInput: BlogPostInput = {
-    title: input.title.trim(),
-    body: input.body.trim(),
-    tags: parseTags(input.tags),
-    date: normalizeOptionalDate(input.date),
-    updatedAt: normalizeOptionalDate(input.updatedAt),
-  };
+  const title = input.title.trim();
+  const description = input.description.trim();
+  const body = input.body.trim();
+  const tagList = parseTags(input.tags);
+  const date = input.date.trim() || undefined;
+  const updatedAt = normalizeOptionalDate(input.updatedAt);
 
-  if (
-    normalizedInput.updatedAt &&
-    normalizedInput.date &&
-    normalizedInput.updatedAt < normalizedInput.date
-  ) {
+  if (!title) throw new Error("Title is required.");
+  if (!description) throw new Error("Description is required.");
+  if (!body) throw new Error("Body is required.");
+  if (updatedAt && date && updatedAt < date) {
     throw new Error("Updated date must be on or after the publish date.");
   }
 
-  const post = createBlogPost(normalizedInput);
-
-  const properties = [
-    `  title: ${escapeMultilineString(post.title)},`,
-    `  body: ${escapeMultilineString(post.body)},`,
-    post.tags.length > 0
-      ? `  tags: [${post.tags.map((tag) => escapeMultilineString(tag)).join(", ")}],`
-      : null,
-    normalizedInput.date
-      ? `  date: ${escapeMultilineString(post.date)},`
-      : null,
-    normalizedInput.updatedAt && normalizedInput.updatedAt !== post.date
-      ? `  updatedAt: ${escapeMultilineString(post.updatedAt)},`
-      : null,
-  ].filter(Boolean);
+  const slug = createSlug(title) || `post-${date ?? "draft"}`;
+  const frontmatterLines = [
+    "---",
+    `title: ${yamlQuoted(title)}`,
+    `description: ${yamlQuoted(description)}`,
+    ...(date ? [`date: ${yamlQuoted(date)}`] : []),
+    ...(updatedAt && updatedAt !== date
+      ? [`updatedAt: ${yamlQuoted(updatedAt)}`]
+      : []),
+    ...(tagList.length > 0
+      ? [`tags: [${tagList.map((tag) => yamlQuoted(tag)).join(", ")}]`]
+      : []),
+    ...(input.draft ? ["draft: true"] : []),
+    "---",
+  ];
 
   return {
-    post,
-    normalizedInput,
-    code: `createBlogPost({\n${properties.join("\n")}\n})`,
+    filename: `${slug}.md`,
+    slug,
+    tagList,
+    markdown: `${frontmatterLines.join("\n")}\n\n${body}\n`,
   };
 }
 
 export function getInitialBlogPostDraftInput(): BlogPostDraftInput {
   return {
     title: "",
+    description: "",
     body: "",
     tags: "",
     date: new Date().toISOString().slice(0, 10),
     updatedAt: "",
+    draft: false,
   };
 }
 
@@ -104,10 +109,12 @@ export function isBlogPostDraftInput(
 
   return (
     typeof value.title === "string" &&
+    typeof value.description === "string" &&
     typeof value.body === "string" &&
     typeof value.tags === "string" &&
     typeof value.date === "string" &&
-    typeof value.updatedAt === "string"
+    typeof value.updatedAt === "string" &&
+    typeof value.draft === "boolean"
   );
 }
 

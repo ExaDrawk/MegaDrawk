@@ -9,7 +9,7 @@ import {
 } from "@/lib/structuredData";
 import { PROJECTS } from "@/config/projects";
 import { SITE } from "@/config/site";
-import { createBlogPost } from "@/domain/blog/post";
+import { makeBlogPost } from "./helpers/makeBlogPost";
 
 describe("structured data", () => {
   it("builds a person node identified on the site", () => {
@@ -44,15 +44,19 @@ describe("structured data", () => {
   });
 
   it("builds an article node pointing at its own URL", () => {
-    const post = createBlogPost({
+    const post = makeBlogPost({
+      id: "structured-data-test",
       title: "構造化データのテスト",
-      body: "本文",
+      description: "本文の要約",
       date: "2026-10-03",
+      updatedAt: "2026-10-04",
     });
     const schema = articleSchema(post, `/blog/${post.id}`);
     expect(schema["@type"]).toBe("Article");
     expect(schema.mainEntityOfPage).toBe(SITE.url + `/blog/${post.id}`);
-    expect(schema.dateModified).toBe(post.updatedAt);
+    expect(schema.datePublished).toBe("2026-10-03");
+    expect(schema.dateModified).toBe("2026-10-04");
+    expect(schema.description).toBe("本文の要約");
   });
 
   it("escapes closing tags in the JSON-LD script", () => {

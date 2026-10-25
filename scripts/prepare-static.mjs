@@ -3,6 +3,7 @@ import path from "node:path";
 import {
   inlineScriptHashes,
   inlineStyleHashes,
+  inlineStyleAttrHashes,
   assertStaticHtml,
   securityHeaders,
 } from "./security.mjs";
@@ -21,6 +22,7 @@ const files = await htmlFiles(root);
 if (!files.length) throw new Error("No generated HTML found");
 const hashes = new Set();
 const styleHashes = new Set();
+const attrHashes = new Set();
 for (const file of files) {
   const html = await readFile(file, "utf8");
   try {
@@ -30,11 +32,13 @@ for (const file of files) {
   }
   for (const hash of inlineScriptHashes(html)) hashes.add(hash);
   for (const hash of inlineStyleHashes(html)) styleHashes.add(hash);
+  for (const hash of inlineStyleAttrHashes(html)) attrHashes.add(hash);
   if (html.includes("/_next/"))
     throw new Error(`Next.js output remains: ${file}`);
 }
 const headers = securityHeaders([...hashes], [...styleHashes], {
   turnstile: Boolean(process.env.PUBLIC_TURNSTILE_SITE_KEY?.trim()),
+  styleAttrHashes: [...attrHashes],
 });
 await writeFile(
   path.join(root, "_headers"),

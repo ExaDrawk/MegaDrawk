@@ -1,11 +1,30 @@
 import { createHash } from "node:crypto";
 import { parse } from "parse5";
 
+// Shikiがコードブロックに出力するstyle属性値のみ許可する
+// （CSS変数・色・フォント・スクロール指定。url()や配置系は値レベルで拒否する）。
+const SAFE_STYLE_ATTR_PATTERN =
+  /^(?:\s*(?:--[a-z0-9-]+|color|background-color|font-style|font-weight|text-decoration|white-space|overflow-x):[^;{}]*;?)*\s*$/i;
+const STYLE_ATTR_FORBIDDEN =
+  /url\(|expression|javascript:|@import|position\s*:/i;
+
 export function assertStaticHtml(html) {
   const visit = (node) => {
     for (const attribute of node.attrs ?? []) {
-      if (attribute.name === "style" || attribute.name.startsWith("on"))
-        throw new Error("Inline styles or event handlers found");
+      if (attribute.name === "style") {
+        const value = attribute.value ?? "";
+        if (
+          value.length > 2048 ||
+          STYLE_ATTR_FORBIDDEN.test(value) ||
+          !SAFE_STYLE_ATTR_PATTERN.test(value)
+        ) {
+          throw new Error(
+            `Disallowed style attribute found: ${value.slice(0, 80)}`,
+          );
+        }
+      }
+      if (attribute.name.startsWith("on"))
+        throw new Error("Inline event handlers found");
     }
     for (const child of node.childNodes ?? []) visit(child);
     if (node.content) visit(node.content);
@@ -46,21 +65,39 @@ function inlineElementHashes(html, element) {
 export const inlineScriptHashes = (html) => inlineElementHashes(html, "script");
 export const inlineStyleHashes = (html) => inlineElementHashes(html, "style");
 
+/** style属性の値ごとのハッシュ（style-src-attrで許可リスト化するためのもの）。 */
+export const inlineStyleAttrHashes = (html) => {
+  const hashes = new Set();
+  for (const match of html.matchAll(/style="([^"]*)"/gi)) {
+    hashes.add(
+      `'sha256-${createHash("sha256").update(match[1]).digest("base64")}'`,
+    );
+  }
+  return [...hashes];
+};
+
 export function securityHeaders(hashes, styleHashes = [], options = {}) {
   // Turnstileはお問い合わせフォームが有効なビルドでのみ許可する（最小権限）。
   const turnstileOrigins = options.turnstile
     ? " https://challenges.cloudflare.com"
     : "";
+  // giscus（ブログコメント・GitHub Discussions）は常設コンテンツ機能。
+  const giscusOrigin = " https://giscus.app";
+  // style属性はShikiの出力のみで、値ごとのハッシュで許可リスト化する。
+  const styleAttrHashes = [...new Set(options.styleAttrHashes ?? [])];
+  const styleSrcAttr = styleAttrHashes.length
+    ? styleAttrHashes.join(" ")
+    : "'none'";
   const csp = [
     "default-src 'self'",
-    `script-src 'self' ${[...new Set(hashes)].join(" ")} ${adScripts.join(" ")} https://static.cloudflareinsights.com${turnstileOrigins}`,
+    `script-src 'self' ${[...new Set(hashes)].join(" ")} ${adScripts.join(" ")} https://static.cloudflareinsights.com${giscusOrigin}${turnstileOrigins}`,
     "script-src-attr 'none'",
     `style-src 'self' ${[...new Set(styleHashes)].join(" ")}`,
-    "style-src-attr 'none'",
-    `img-src 'self' data: ${adScripts.join(" ")} https://googleads.g.doubleclick.net`,
+    `style-src-attr ${styleSrcAttr}`,
+    `img-src 'self' data: ${adScripts.join(" ")} https://googleads.g.doubleclick.net https://github.com https://avatars.githubusercontent.com`,
     "font-src 'self'",
-    `connect-src 'self' ${adScripts.join(" ")} https://googleads.g.doubleclick.net https://cloudflareinsights.com`,
-    `frame-src ${adFrames.join(" ")}${turnstileOrigins}`,
+    `connect-src 'self' ${adScripts.join(" ")} https://googleads.g.doubleclick.net https://cloudflareinsights.com${giscusOrigin}`,
+    `frame-src ${adFrames.join(" ")}${giscusOrigin}${turnstileOrigins}`,
     "object-src 'none'",
     "base-uri 'none'",
     "form-action 'self'",

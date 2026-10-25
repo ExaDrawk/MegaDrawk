@@ -180,12 +180,12 @@ export function ContactForm({ siteKey }: ContactFormProps) {
         お問い合わせフォーム
       </h2>
       <p className="contact-form__note" data-color="color-text-muted">
-        返信はご入力いただいたメールアドレスへ送ります。
+        メールアドレスは任意です。返信が必要な場合は、本文にその旨と返信先をご記入ください。
       </p>
 
       {status === "success" ? (
         <div className="status-panel mt-5" data-status="success" role="status">
-          送信しました。お返事までしばらくお待ちください。
+          送信しました。返信が必要な場合のみ、明記いただいた返信先へご連絡いたします。
         </div>
       ) : (
         <form
@@ -221,13 +221,12 @@ export function ContactForm({ siteKey }: ContactFormProps) {
           </label>
 
           <label className="form-field">
-            <span className="form-label">メールアドレス</span>
+            <span className="form-label">メールアドレス（任意）</span>
             <input
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               maxLength={CONTACT_LIMITS.maxEmailLength}
-              required
               autoComplete="email"
               className="form-control"
               aria-describedby={errorText ? "contact-form-error" : undefined}

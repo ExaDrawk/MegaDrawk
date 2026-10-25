@@ -144,6 +144,20 @@ describe("contact function", () => {
     );
   });
 
+  it("delivers a submission without an email and omits Reply-To", async () => {
+    const response = await onRequestPost(
+      createContext(JSON.stringify({ ...validBody, email: "" })),
+    );
+    expect(response.status).toBe(200);
+    const brevoCall = (
+      globalThis.fetch as ReturnType<typeof vi.fn>
+    ).mock.calls.find(([url]) => String(url).includes("api.brevo.com"));
+    expect(brevoCall).toBeDefined();
+    const payload = JSON.parse(brevoCall?.[1]?.body as string);
+    expect(payload.replyTo).toBeUndefined();
+    expect(payload.textContent).toContain("返信先: （記載なし）");
+  });
+
   it("silently succeeds for honeypot bots without sending mail", async () => {
     const response = await onRequestPost(
       createContext(
@@ -171,7 +185,18 @@ describe("buildBrevoEmail", () => {
     });
     expect(payload.sender).toEqual({ name: SITE.name, email: SITE.email });
     expect(payload.subject).toContain("花子");
+    expect(payload.replyTo).toEqual({ email: "hanako@example.com" });
     expect(payload.textContent).toContain("hanako@example.com");
     expect(payload.textContent).toContain("こんにちは");
+  });
+
+  it("omits Reply-To when the optional email is empty", () => {
+    const payload = buildBrevoEmail({
+      name: "花子",
+      email: "",
+      message: "こんにちは",
+    });
+    expect(payload.replyTo).toBeUndefined();
+    expect(payload.textContent).toContain("返信先: （記載なし）");
   });
 });

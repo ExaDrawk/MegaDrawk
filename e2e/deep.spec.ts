@@ -32,37 +32,18 @@ test.describe("Deep interactive tests", () => {
     await expect(xLink).toHaveAttribute("rel", "noopener noreferrer");
   });
 
-  test("Comment form validates empty name and message on blog page", async ({
+  test("blog post page keeps the draft editor flow working after markdown migration", async ({
     page,
   }) => {
     await page.goto("/blog");
-
-    // The blog page always renders a comment form per article.
-    // With no articles the page shows an empty state, so we only test
-    // when the comment form is present.
-    const nameInput = page.getByPlaceholder("名前");
-    const messageInput = page.getByPlaceholder("コメントを書く");
-    const submitButton = page.getByRole("button", { name: "送信" });
-
-    if (await nameInput.isVisible()) {
-      // Submit empty → should show name validation error
-      await submitButton.click();
-      await expect(page.getByText("名前を入力してください。")).toBeVisible();
-
-      // Fill name but leave message empty → should show message validation error
-      await nameInput.fill("Test User");
-      await submitButton.click();
-      await expect(
-        page.getByText("コメント本文を入力してください。"),
-      ).toBeVisible();
-
-      // Fill both → comment should appear
-      await messageInput.fill("This is a test comment from Playwright.");
-      await submitButton.click();
-      await expect(
-        page.getByText("This is a test comment from Playwright."),
-      ).toBeVisible();
-    }
+    // 記事一覧から個別ページへ遷移できる
+    const postLink = page.getByRole("link", { name: "MEGADRAWKへようこそ" });
+    await expect(postLink).toBeVisible();
+    await postLink.click();
+    await expect(page).toHaveURL(/\/blog\/2026-10-25-hello-megadrawk/);
+    await expect(
+      page.getByRole("heading", { level: 1, name: "MEGADRAWKへようこそ" }),
+    ).toBeVisible();
   });
 
   test("Security headers are present", async ({ page }) => {

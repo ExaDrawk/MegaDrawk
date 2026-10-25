@@ -1,28 +1,42 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import { getPublishedBlogPosts } from "@/config/blog";
+import { render } from "astro:content";
+import {
+  getPublishedBlogEntries,
+  toBlogPost,
+  getAdjacentPosts,
+  getRelatedPosts,
+} from "@/config/blog";
 import { formatJaDate } from "@/lib/date";
-import { toBlogParagraphs } from "@/lib/blogBody";
 import { articleSchema } from "@/lib/structuredData";
-import { CommentSection } from "@/components/blog/CommentSection";
+import { GiscusComments } from "@/components/blog/GiscusComments";
 
 export async function getStaticPaths() {
-  return getPublishedBlogPosts().map((post) => ({
-    params: { id: post.id },
-    props: { post },
+  const entries = await getPublishedBlogEntries();
+  return entries.map((entry) => ({
+    params: { id: entry.id },
+    props: { entry },
   }));
 }
 
-const { post } = Astro.props;
-const paragraphs = toBlogParagraphs(post.body);
+const { entry } = Astro.props;
+const post = toBlogPost(entry);
+const { Content, headings } = await render(entry);
+const { newer, older } = await getAdjacentPosts(post.id);
+const related = await getRelatedPosts(post);
+const tocItems = headings.filter(
+  (heading) => heading.depth === 2 || heading.depth === 3,
+);
 ---
 
 <Layout
   title={post.title}
-  description={post.excerpt}
+  description={post.description}
   ogType="article"
   publishedTime={post.date}
   modifiedTime={post.updatedAt}
+  ogImage={`/og/${post.id}.png`}
+  ogImageAlt={post.title}
   structuredData={[articleSchema(post, `/blog/${post.id}`)]}
 >
   <article class="page-section content-column">
@@ -33,25 +47,89 @@ const paragraphs = toBlogParagraphs(post.body);
       <h1 class="page-title">{post.title}</h1>
       <p class="document-meta">
         <time datetime={post.date}>{formatJaDate(post.date)}</time>
+        <span>・約{post.readingMinutes}分</span>
         {post.updatedAt !== post.date && (
           <span>（更新 {formatJaDate(post.updatedAt)}）</span>
         )}
+        {post.draft && <span class="font-semibold">（下書き）</span>}
       </p>
       {post.tags.length > 0 && (
         <p class="post-tags" aria-label="タグ">
           {post.tags.map((tag) => (
-            <span class="post-tag">#{tag}</span>
+            <a class="post-tag" href={`/tags/${tag}`}>
+              {"#" + tag}
+            </a>
           ))}
         </p>
       )}
     </header>
+
+    {tocItems.length >= 2 && (
+      <nav class="post-toc" aria-label="目次">
+        <p class="section-label">目次</p>
+        <ol>
+          {tocItems.map((heading) => (
+            <li class={`toc-depth-${heading.depth}`}>
+              <a href={`#${heading.slug}`}>{heading.text}</a>
+            </li>
+          ))}
+        </ol>
+      </nav>
+    )}
+
     <div class="prose-content">
-      {paragraphs.map((paragraph) => (
-        <p class="whitespace-pre-wrap break-words">{paragraph}</p>
-      ))}
+      <Content />
     </div>
+
+    {(newer || older) && (
+      <nav class="post-navigation" aria-label="記事ナビゲーション">
+        <div>
+          {newer && (
+            <a
+              class="post-navigation__link"
+              href={`/blog/${newer.id}`}
+              rel="next"
+            >
+              <span class="post-navigation__label">次の記事</span>
+              <span class="post-navigation__title">{newer.title}</span>
+            </a>
+          )}
+        </div>
+        <div class="post-navigation__older">
+          {older && (
+            <a
+              class="post-navigation__link"
+              href={`/blog/${older.id}`}
+              rel="prev"
+            >
+              <span class="post-navigation__label">前の記事</span>
+              <span class="post-navigation__title">{older.title}</span>
+            </a>
+          )}
+        </div>
+      </nav>
+    )}
+
+    {related.length > 0 && (
+      <section class="post-related" aria-labelledby="related-heading">
+        <h2 id="related-heading" class="section-title">
+          関連記事
+        </h2>
+        <ul class="post-related__list">
+          {related.map((relatedPost) => (
+            <li>
+              <a href={`/blog/${relatedPost.id}`}>{relatedPost.title}</a>
+              <time datetime={relatedPost.date}>
+                {formatJaDate(relatedPost.date)}
+              </time>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
     <div class="post-comments">
-      <CommentSection postId={post.id} client:load />
+      <GiscusComments client:visible />
     </div>
   </article>
 </Layout>

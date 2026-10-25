@@ -1,54 +1,30 @@
-const EXCERPT_LENGTH = 120;
-
+/** ブログ記事のドメインモデル。Content Collectionsのエントリをこの形へ写像する。 */
 export interface BlogPost {
+  /** URLスラッグ（ファイル名から生成される） */
   readonly id: string;
   readonly title: string;
-  readonly body: string;
-  readonly excerpt: string;
+  /** 記事の要約。一覧・SNSカード・RSSに使う（frontmatterで明示する） */
+  readonly description: string;
+  /** YYYY-MM-DD */
   readonly date: string;
   readonly updatedAt: string;
   readonly tags: readonly string[];
-}
-
-export interface BlogPostInput {
-  readonly title: string;
+  readonly draft: boolean;
+  /** Markdown本文（生テキスト） */
   readonly body: string;
-  readonly tags?: readonly string[];
-  readonly date?: string;
-  readonly updatedAt?: string;
+  /** 本文から算出した読了時間（分） */
+  readonly readingMinutes: number;
 }
 
+const SLUG_FORBIDDEN = /[^a-z0-9\s-]/g;
+
+/** 記事ファイル名（URLスラッグ）を生成する。英数字以外は落とし、空になった場合はdateベースのフォールバックを推奨する。 */
 export function createSlug(title: string): string {
   return title
     .trim()
     .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(SLUG_FORBIDDEN, "")
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "");
-}
-
-export function createBlogPost(input: BlogPostInput): BlogPost {
-  const normalizedTitle = input.title.trim();
-  const normalizedBody = input.body.trim();
-
-  if (!normalizedTitle) {
-    throw new Error("Blog post title is required.");
-  }
-
-  if (!normalizedBody) {
-    throw new Error("Blog post body is required.");
-  }
-
-  const publishedAt = input.date ?? new Date().toISOString().slice(0, 10);
-
-  return {
-    id: createSlug(normalizedTitle) || `post-${Date.now()}`,
-    title: normalizedTitle,
-    body: normalizedBody,
-    excerpt: normalizedBody.slice(0, EXCERPT_LENGTH),
-    date: publishedAt,
-    updatedAt: input.updatedAt ?? publishedAt,
-    tags: input.tags ?? [],
-  };
 }

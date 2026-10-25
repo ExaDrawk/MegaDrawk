@@ -3,8 +3,8 @@ import { SITE } from "@/config/site";
 import { getLatestBlogUpdateDate, getPublishedBlogPosts } from "@/config/blog";
 import { escapeXml } from "@/lib/xml";
 
-export const GET: APIRoute = () => {
-  const date = getLatestBlogUpdateDate();
+export const GET: APIRoute = async () => {
+  const date = await getLatestBlogUpdateDate();
   const staticRoutes = [
     "",
     "/about",
@@ -19,7 +19,7 @@ export const GET: APIRoute = () => {
       loc: SITE.url + (route || "/"),
       lastmod: (route === "" || route === "/blog") && date ? date : null,
     })),
-    ...getPublishedBlogPosts().map((post) => ({
+    ...(await getPublishedBlogPosts()).map((post) => ({
       loc: SITE.url + "/blog/" + post.id,
       lastmod: post.updatedAt,
     })),
