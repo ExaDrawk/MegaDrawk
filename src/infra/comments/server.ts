@@ -3,6 +3,7 @@ import {
   COMMENT_LIMITS,
   COMMENT_RATE_LIMITS,
   EDIT_WINDOW_MINUTES,
+  isReservedName,
   validateCommentInput,
 } from "../../domain/comment/types";
 import { SITE } from "../../config/site";
@@ -129,24 +130,19 @@ export function findRejectionReason(
   return null;
 }
 
-/** 管理者とみなす投稿者名（名前公開のため偽装可能だが、バイパスは返信3件までに限定） */
-function isAdminName(name: string): boolean {
-  return name === SITE.ownerName;
-}
-
 /** 返信先コメント1件分（ルート解決と管理者判定に必要な列） */
 export interface ReplyTargetComment {
   readonly id: number;
   readonly parent_id: number | null;
   readonly post_id: string;
-  readonly name: string;
+  readonly is_admin: number;
 }
 
 export interface ResolvedReplyTarget {
   /** 返信のぶら下げ先（ルートコメントのid）。非返信ならnull */
   readonly rootId: number | null;
-  /** 返信先コメントの投稿者名（非返信ならnull） */
-  readonly parentName: string | null;
+  /** 返信先が管理人コメント（is_admin=1）か。免除判定に使う */
+  readonly parentIsAdmin: boolean;
 }
 
 /** 返信先の解決。返信の返信はルートへ正規化し、表示を1階層に保つ。 */
@@ -156,7 +152,7 @@ export async function resolveReplyTarget(
   rawParentId: unknown,
 ): Promise<ResolvedReplyTarget | "invalid"> {
   if (rawParentId === undefined || rawParentId === null || rawParentId === "") {
-    return { rootId: null, parentName: null };
+    return { rootId: null, parentIsAdmin: false };
   }
   if (
     typeof rawParentId !== "number" ||
@@ -166,7 +162,9 @@ export async function resolveReplyTarget(
     return "invalid";
   }
   const parent = await db
-    .prepare("SELECT id, parent_id, post_id, name FROM comments WHERE id = ?1")
+    .prepare(
+      "SELECT id, parent_id, post_id, is_admin FROM comments WHERE id = ?1",
+    )
     .bind(rawParentId)
     .first<ReplyTargetComment>();
   if (!parent || parent.post_id !== postId) {
@@ -174,7 +172,7 @@ export async function resolveReplyTarget(
   }
   return {
     rootId: parent.parent_id ?? parent.id,
-    parentName: parent.name,
+    parentIsAdmin: parent.is_admin === 1,
   };
 }
 
@@ -203,7 +201,7 @@ export async function listComments(
     remoteAddress && ipSalt ? await hashIp(remoteAddress, ipSalt) : null;
   const rows = await db
     .prepare(
-      "SELECT id, name, message, created_at, parent_id, ip_hash, edited_at FROM comments WHERE post_id = ?1 ORDER BY created_at ASC LIMIT ?2",
+      "SELECT id, name, message, created_at, parent_id, ip_hash, edited_at, is_admin FROM comments WHERE post_id = ?1 ORDER BY created_at ASC LIMIT ?2",
     )
     .bind(rawPostId, limit)
     .all<{
@@ -214,6 +212,7 @@ export async function listComments(
       parent_id: number | null;
       ip_hash: string;
       edited_at: string | null;
+      is_admin: number;
     }>();
   const nowMs = Date.now();
   return successResponse({
@@ -223,6 +222,7 @@ export async function listComments(
       message: row.message,
       createdAt: row.created_at,
       parentId: row.parent_id,
+      isAdmin: row.is_admin === 1,
       editedAt: row.edited_at,
       editable:
         viewerIpHash !== null &&
@@ -288,6 +288,13 @@ export async function createComment(
       400,
     );
   }
+  // 管理人名は管理画面からの投稿のみ許可（なりすまし防止）
+  if (isReservedName(name)) {
+    return errorResponse(
+      "その名前は使用できません。別の名前をお使いください。",
+      403,
+    );
+  }
 
   const humanVerified = await verifyTurnstile(
     body.turnstileToken,
@@ -304,10 +311,10 @@ export async function createComment(
   const ipHash = await hashIp(remoteAddress, IP_HASH_SALT);
   const serverNow = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
 
-  // 管理者コメントへの返信は、そのコメントへの返信が3件までの間レート制限を免除する
+  // 管理人コメントへの返信は、そのコメントへの返信が3件までの間レート制限を免除する
   let limitsExempt = false;
-  if (replyTarget.rootId !== null && replyTarget.parentName) {
-    if (isAdminName(replyTarget.parentName)) {
+  if (replyTarget.rootId !== null && replyTarget.parentIsAdmin) {
+    {
       const countRow = await COMMENTS_DB.prepare(
         "SELECT COUNT(*) AS count FROM comments WHERE parent_id = ?1",
       )
@@ -442,6 +449,106 @@ export async function deleteComment(
     "DELETE FROM comments WHERE id = ?1 OR parent_id = ?1",
   )
     .bind(Number(rawId))
+    .run();
+  return successResponse({ ok: true });
+}
+
+// ===== 管理画面用（X-Admin-Token認証） =====
+
+/** 管理トークンを検証する。一致しない場合は401応答を返す。 */
+export function checkAdminToken(
+  env: CommentsEnv,
+  token: string | null,
+): Response | null {
+  if (!env.ADMIN_DELETE_TOKEN) {
+    return errorResponse("管理機能は現在利用できません。", 500);
+  }
+  if (!token || token !== env.ADMIN_DELETE_TOKEN) {
+    return errorResponse("認証に失敗しました。", 401);
+  }
+  return null;
+}
+
+/** 全コメントを新しい順で返す（管理一覧用）。 */
+export async function adminListComments(
+  db: D1Database | undefined,
+): Promise<Response> {
+  if (!db) {
+    return errorResponse("管理機能は現在利用できません。", 500);
+  }
+  const rows = await db
+    .prepare(
+      "SELECT id, post_id, name, message, created_at, parent_id, edited_at, is_admin FROM comments ORDER BY created_at DESC LIMIT 200",
+    )
+    .all<{
+      id: number;
+      post_id: string;
+      name: string;
+      message: string;
+      created_at: string;
+      parent_id: number | null;
+      edited_at: string | null;
+      is_admin: number;
+    }>();
+  return successResponse({
+    comments: (rows.results ?? []).map((row) => ({
+      id: row.id,
+      postId: row.post_id,
+      name: row.name,
+      message: row.message,
+      createdAt: row.created_at,
+      parentId: row.parent_id,
+      editedAt: row.edited_at,
+      isAdmin: row.is_admin === 1,
+    })),
+  });
+}
+
+export interface AdminCreateCommentInput {
+  readonly postId: string;
+  readonly message: string;
+  readonly parentId?: number | null;
+}
+
+/** 管理人コメント（is_admin=1）を作成する。Turnstile・レート制限は適用しない。 */
+export async function adminCreateComment(
+  db: D1Database | undefined,
+  input: AdminCreateCommentInput,
+): Promise<Response> {
+  if (!db) {
+    return errorResponse("管理機能は現在利用できません。", 500);
+  }
+  if (!input.postId || input.postId.length > 200) {
+    return errorResponse("記事のスラッグが不正です。", 400);
+  }
+  const message = input.message.trim();
+  const validationError = validateCommentInput("名前", message);
+  if (validationError) {
+    return errorResponse(
+      `本文を確認してください（${COMMENT_LIMITS.maxMessageLength}文字以内）。`,
+      400,
+    );
+  }
+  const replyTarget = await resolveReplyTarget(
+    db,
+    input.postId,
+    input.parentId ?? null,
+  );
+  if (replyTarget === "invalid") {
+    return errorResponse("返信先のコメントが見つかりません。", 400);
+  }
+  await db
+    .prepare(
+      "INSERT INTO comments (post_id, name, message, created_at, ip_hash, parent_id, is_admin) VALUES (?1, ?2, ?3, ?4, ?5, ?6, 1)",
+    )
+    .bind(
+      input.postId,
+      SITE.ownerName,
+      message,
+      new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
+      "admin",
+      replyTarget.rootId,
+    )
     .run();
   return successResponse({ ok: true });
 }

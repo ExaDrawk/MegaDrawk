@@ -5,6 +5,8 @@ export interface CommentItem {
   message: string;
   createdAt: string;
   parentId: number | null;
+  /** 管理画面から投稿された管理人コメント（バッジ表示・返信免除の対象） */
+  isAdmin?: boolean;
   /** 投稿者本人（同一IPハッシュ）が10分以内に編集できることを示すサーバー判定 */
   editable?: boolean;
   editedAt?: string | null;
@@ -71,6 +73,11 @@ export function isCommentItem(value: unknown): value is CommentItem {
   );
 }
 
+/** 管理画面向けのコメント行（公開情報＋管理用メタ）。 */
+export interface AdminCommentItem extends CommentItem {
+  postId: string;
+}
+
 /** 編集可能期間（分）。投稿後この時間内のみ本人（同一IPハッシュ）が編集できる。 */
 export const EDIT_WINDOW_MINUTES = 10;
 
@@ -85,6 +92,11 @@ export const COMMENT_RATE_LIMITS = {
   /** 同一記事の1日（日本時間）あたり投稿上限 */
   perPostPerDay: 3,
 } as const;
+
+/** 一般投稿フォームから予約している名前（管理人バッジのなりすまし防止）。管理者投稿は管理画面からのみ。 */
+export function isReservedName(name: string): boolean {
+  return name === "Drawk";
+}
 
 export function isCommentItemArray(value: unknown): value is CommentItem[] {
   return Array.isArray(value) && value.every(isCommentItem);

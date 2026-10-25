@@ -33,7 +33,7 @@ interface MockDbOptions {
     id: number;
     parent_id: number | null;
     post_id: string;
-    name?: string;
+    is_admin?: number;
   } | null;
   comment?: {
     id: number;
@@ -627,7 +627,7 @@ describe("createComment (admin reply exemption)", () => {
         id: 5,
         parent_id: null,
         post_id: "post-1",
-        name: "Drawk",
+        is_admin: 1,
       },
       replyCount: 0,
     });
@@ -647,7 +647,7 @@ describe("createComment (admin reply exemption)", () => {
         id: 5,
         parent_id: null,
         post_id: "post-1",
-        name: "Drawk",
+        is_admin: 1,
       },
       replyCount: 3,
     });
@@ -667,7 +667,7 @@ describe("createComment (admin reply exemption)", () => {
         id: 5,
         parent_id: null,
         post_id: "post-1",
-        name: "一般人",
+        is_admin: 0,
       },
       replyCount: 0,
     });
@@ -677,5 +677,20 @@ describe("createComment (admin reply exemption)", () => {
       remoteAddress: "203.0.113.10",
     });
     expect(response.status).toBe(429);
+  });
+});
+
+describe("createComment (reserved name)", () => {
+  it("rejects posting with the reserved owner name from the public form", async () => {
+    const response = await createComment(envWith(makeDb()), {
+      rawBody: JSON.stringify({
+        name: "Drawk",
+        message: "なりすましコメント",
+        turnstileToken: "token",
+      }),
+      postId: "post-1",
+      remoteAddress: "203.0.113.10",
+    });
+    expect(response.status).toBe(403);
   });
 });

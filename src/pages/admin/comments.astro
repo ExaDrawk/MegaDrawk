@@ -1,0 +1,16 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { AdminComments } from "@/components/admin/AdminComments";
+---
+
+<Layout title="コメント管理" robots={{ index: false, follow: false }}>
+  <section class="page-section">
+    <header class="page-header">
+      <h1 class="page-title text-3xl font-bold tracking-tight">コメント管理</h1>
+      <p class="page-description mt-2">
+        全コメントの一覧表示、管理人コメントの投稿（返信を含む）、削除を行います。
+      </p>
+    </header>
+    <AdminComments client:load />
+  </section>
+</Layout>

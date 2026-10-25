@@ -264,6 +264,11 @@ export function CommentSection({ postId }: CommentSectionProps) {
       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs font-semibold" data-color="color-text">
           {comment.name}
+          {comment.isAdmin && (
+            <span className="admin-badge" aria-label="管理人">
+              管理人
+            </span>
+          )}
         </p>
         <div className="flex items-center gap-3">
           <time

@@ -18,21 +18,45 @@ export default function AdminPage() {
             管理メニュー
           </h1>
           <p className="page-description mt-2">
-            記事草案の作成とコード生成を行います。
+            記事の追加・編集、コメントの管理、草案の作成を行います。
           </p>
         </header>
 
         <div className="grid gap-5 md:grid-cols-2">
           <article className="surface p-5 sm:p-6">
-            <h2 className="section-title text-lg">記事追加</h2>
+            <h2 className="section-title text-lg">記事の追加・編集</h2>
             <p
               className="mt-3 text-sm leading-7"
               data-color="color-text-secondary"
             >
-              タイトル、本文、タグ、日付を入力して、ブログ記事のコードを生成します。
+              Markdownのまま記事を追加・編集・削除します。保存すると自動でサイトに反映されます。
+            </p>
+            <ActionLink href="/admin/articles" className="mt-6">
+              記事管理画面へ
+            </ActionLink>
+          </article>
+          <article className="surface p-5 sm:p-6">
+            <h2 className="section-title text-lg">コメント管理</h2>
+            <p
+              className="mt-3 text-sm leading-7"
+              data-color="color-text-secondary"
+            >
+              コメントの一覧・削除と、管理人コメントの投稿（返信を含む）を行います。
+            </p>
+            <ActionLink href="/admin/comments" className="mt-6">
+              コメント管理画面へ
+            </ActionLink>
+          </article>
+          <article className="surface p-5 sm:p-6">
+            <h2 className="section-title text-lg">草案エディター</h2>
+            <p
+              className="mt-3 text-sm leading-7"
+              data-color="color-text-secondary"
+            >
+              入力内容から記事のMarkdownファイルを生成します。完成したら記事管理画面から保存してください。
             </p>
             <ActionLink href="/admin/posts/new" className="mt-6">
-              記事追加画面へ
+              草案エディターへ
             </ActionLink>
           </article>
         </div>
