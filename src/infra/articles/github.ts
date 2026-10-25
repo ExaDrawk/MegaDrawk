@@ -54,7 +54,10 @@ export async function listArticles(
     { headers: githubHeaders(token) },
   );
   if (!response.ok) {
-    return errorResponse("記事一覧の取得に失敗しました。", 502);
+    return errorResponse(
+      `記事一覧の取得に失敗しました。(github ${response.status})`,
+      502,
+    );
   }
   const files = (await response.json()) as {
     name: string;
