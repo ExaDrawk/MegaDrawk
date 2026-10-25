@@ -20,6 +20,8 @@ function githubHeaders(token: string): HeadersInit {
     Authorization: `Bearer ${token}`,
     Accept: "application/vnd.github+json",
     "Content-Type": "application/json",
+    // Workersのfetchは既定のUser-Agentを付けないため必須（無いとGitHubが403で拒否する）
+    "User-Agent": "megadrawk-admin",
     "X-GitHub-Api-Version": "2022-11-28",
   };
 }
@@ -76,10 +78,8 @@ async function listArticlesInner(token: string | undefined): Promise<Response> {
     );
   }
   if (!response.ok) {
-    // 原因特定まで応答本文の断片を含める
-    const bodySnippet = (await response.text().catch(() => "")).slice(0, 200);
     return errorResponse(
-      `記事一覧の取得に失敗しました。(github ${response.status} / tokenLen=${token.length} / ${bodySnippet})`,
+      `記事一覧の取得に失敗しました。(github ${response.status})`,
       502,
     );
   }
