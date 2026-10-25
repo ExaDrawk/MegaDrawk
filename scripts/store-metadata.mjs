@@ -1,5 +1,16 @@
 import { parse } from "parse5";
 
+// ストア説明に含まれる提供形態の注記（価格・広告の明示）はサイトには表示しない方針。
+// 毎日の同期が走っても表記が復活しないよう、取得境界のこの1か所で取り除く。
+const STRIPPED_DESCRIPTION_NOTES = ["無料・広告あり。"];
+
+function normalizeDescription(description) {
+  return STRIPPED_DESCRIPTION_NOTES.reduce(
+    (text, note) => text.split(note).join(""),
+    description,
+  );
+}
+
 export async function fetchStoreListing(packageId, fetchPage = fetch) {
   const url =
     "https://play.google.com/store/apps/details?id=" +
@@ -56,7 +67,7 @@ export function parseStorePage(html, packageId) {
       `Unexpected store listing: ${packageId}; canonical=${canonical.hostname}${canonical.pathname}?id=${canonical.searchParams.get("id")}; application=${app?.["@type"] ?? "missing"}; publisher=${app?.author?.name ?? "missing"}`,
     );
   const name = app.name;
-  const description = metadata.get("og:description");
+  const description = normalizeDescription(metadata.get("og:description"));
   if (
     typeof name !== "string" ||
     !name.trim() ||

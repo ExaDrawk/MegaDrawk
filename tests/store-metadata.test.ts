@@ -50,6 +50,35 @@ describe("Google Play metadata boundary", () => {
       href: "https://play.google.com/store/apps/details?id=com.drawk.roppo",
     });
   });
+  it("strips distribution notes from the description at the sync boundary", () => {
+    const html =
+      '<meta property="og:url" content="https://play.google.com/store/apps/details?id=com.drawk.syopita">' +
+      '<meta property="og:description" content="証明写真を作成。無料・広告あり。">' +
+      '<script type="application/ld+json">' +
+      JSON.stringify({
+        "@type": "SoftwareApplication",
+        name: "証ぴた",
+        author: { name: "Drawk" },
+        image: "https://play-lh.googleusercontent.com/icon",
+      }) +
+      "</script>";
+    expect(parseStorePage(html, "com.drawk.syopita")).toMatchObject({
+      description: "証明写真を作成。",
+    });
+    // 注記だけの説明は空になるためFail Fastする
+    const onlyNote =
+      '<meta property="og:url" content="https://play.google.com/store/apps/details?id=com.drawk.syopita">' +
+      '<meta property="og:description" content="無料・広告あり。">' +
+      '<script type="application/ld+json">' +
+      JSON.stringify({
+        "@type": "SoftwareApplication",
+        name: "証ぴた",
+        author: { name: "Drawk" },
+        image: "https://play-lh.googleusercontent.com/icon",
+      }) +
+      "</script>";
+    expect(() => parseStorePage(onlyNote, "com.drawk.syopita")).toThrow();
+  });
   it("rejects unrelated listings, publisher changes and untrusted images", () => {
     expect(() =>
       parseStorePage(make({}, "com.other.app"), "com.drawk.roppo"),

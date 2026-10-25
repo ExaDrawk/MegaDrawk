@@ -3,7 +3,8 @@ export const SITE = {
   name: "MEGADRAWK",
   ownerName: "Drawk",
   description: "Drawkのポートフォリオと個人開発。",
-  heroCopy: "大学生のDrawkが、日々の制作と学びを記録しています。",
+  heroCopy:
+    "こんにちは。私はDrawkと申します。ここでは、私の制作物などを紹介します",
   domain: "megadrawk.com",
   url: "https://megadrawk.com",
   email: "contact@megadrawk.com",
