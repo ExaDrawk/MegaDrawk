@@ -4,6 +4,7 @@ import {
   deleteComment,
   editComment,
   listComments,
+  checkAdminAccess,
   type CommentsEnv,
 } from "../../../src/infra/comments/server";
 
@@ -39,10 +40,8 @@ export const onRequestPut: PagesFunction<CommentsEnv> = async (context) => {
 };
 
 export const onRequestDelete: PagesFunction<CommentsEnv> = async (context) => {
+  const denied = await checkAdminAccess(context.env, context.request);
+  if (denied) return denied;
   const id = new URL(context.request.url).searchParams.get("id");
-  return deleteComment(
-    context.env,
-    id,
-    context.request.headers.get("X-Admin-Token"),
-  );
+  return deleteComment(context.env, id, context.env.ADMIN_DELETE_TOKEN ?? null);
 };

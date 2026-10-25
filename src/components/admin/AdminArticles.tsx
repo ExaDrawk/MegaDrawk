@@ -1,25 +1,30 @@
 import { useCallback, useEffect, useState } from "react";
 import { ActionButton } from "@/components/ui/Action";
+import { AdminGate } from "@/components/admin/AdminGate";
 
 /**
  * 記事管理画面（/admin/articles）。
+ * 認可はHttpOnlyセッションCookie（AdminGateが発行）で行う。
  * Markdownをそのまま編集し、GitHubのmainへコミットする。
  * 保存するとCloudflare Pagesが自動再ビルドし、1〜2分で反映される。
  */
-
-const TOKEN_STORAGE_KEY = "admin:token";
 
 interface ArticleMeta {
   name: string;
   sha: string;
 }
 
-type LoadState = "loading" | "need-token" | "ready" | "error";
+export function AdminArticlesScreen() {
+  return (
+    <AdminGate>
+      <AdminArticles />
+    </AdminGate>
+  );
+}
 
-export function AdminArticles() {
-  const [token, setToken] = useState("");
+function AdminArticles() {
   const [articles, setArticles] = useState<ArticleMeta[]>([]);
-  const [state, setState] = useState<LoadState>("loading");
+  const [state, setState] = useState<"loading" | "ready" | "error">("loading");
   const [errorText, setErrorText] = useState("");
   const [filename, setFilename] = useState("");
   const [content, setContent] = useState("");
@@ -28,15 +33,13 @@ export function AdminArticles() {
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
 
-  const load = useCallback(async (t: string) => {
+  const load = useCallback(async () => {
     setState("loading");
     setErrorText("");
     try {
-      const response = await fetch("/api/admin/articles", {
-        headers: { "X-Admin-Token": t },
-      });
+      const response = await fetch("/api/admin/articles");
       if (response.status === 401) {
-        setState("need-token");
+        window.location.reload();
         return;
       }
       if (!response.ok) throw new Error("load failed");
@@ -50,27 +53,19 @@ export function AdminArticles() {
   }, []);
 
   useEffect(() => {
-    const stored = localStorage.getItem(TOKEN_STORAGE_KEY);
-    if (stored) {
-      setToken(stored);
-      void load(stored);
-    } else {
-      setState("need-token");
-    }
+    void load();
   }, [load]);
-
-  function saveToken() {
-    localStorage.setItem(TOKEN_STORAGE_KEY, token.trim());
-    void load(token.trim());
-  }
 
   async function openArticle(name: string) {
     setErrorText("");
     try {
       const response = await fetch(
         `/api/admin/articles?file=${encodeURIComponent(name)}`,
-        { headers: { "X-Admin-Token": token.trim() } },
       );
+      if (response.status === 401) {
+        window.location.reload();
+        return;
+      }
       if (!response.ok) throw new Error("open failed");
       const payload = (await response.json()) as {
         name: string;
@@ -106,10 +101,7 @@ export function AdminArticles() {
     try {
       const response = await fetch("/api/admin/articles", {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Admin-Token": token.trim(),
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: filename.trim(),
           content,
@@ -127,7 +119,7 @@ export function AdminArticles() {
         "保存しました。GitHubにコミットしたので、1〜2分でサイトに反映されます。",
       );
       setDirty(false);
-      await load(token.trim());
+      await load();
     } catch {
       setSaveMessage("保存に失敗しました。");
     } finally {
@@ -145,7 +137,7 @@ export function AdminArticles() {
     }
     const response = await fetch(
       `/api/admin/articles?file=${encodeURIComponent(name)}&sha=${encodeURIComponent(sha)}`,
-      { method: "DELETE", headers: { "X-Admin-Token": token.trim() } },
+      { method: "DELETE" },
     );
     if (!response.ok) {
       setErrorText("削除に失敗しました。");
@@ -157,7 +149,7 @@ export function AdminArticles() {
       setCurrentSha(null);
     }
     setSaveMessage(`${name}を削除しました。1〜2分で反映されます。`);
-    await load(token.trim());
+    await load();
   }
 
   return (
@@ -169,39 +161,10 @@ export function AdminArticles() {
         </div>
       )}
 
-      {state === "need-token" && (
-        <section className="surface p-5 sm:p-6">
-          <h2 className="section-title">管理トークン</h2>
-          <p className="mt-2 text-sm" data-color="color-text-secondary">
-            Cloudflare Pagesの環境変数 ADMIN_DELETE_TOKEN
-            の値を入力してください。ブラウザに保存されます。
-          </p>
-          <form
-            className="mt-4 flex flex-wrap gap-3"
-            onSubmit={(event) => {
-              event.preventDefault();
-              saveToken();
-            }}
-          >
-            <input
-              type="password"
-              value={token}
-              onChange={(event) => setToken(event.target.value)}
-              className="form-control max-w-sm"
-              autoComplete="off"
-            />
-            <ActionButton type="submit">認証する</ActionButton>
-          </form>
-        </section>
-      )}
-
       {state === "error" && (
         <div className="status-panel" data-status="error" role="alert">
           <p className="text-sm">{errorText}</p>
-          <ActionButton
-            className="mt-3"
-            onClick={() => void load(token.trim())}
-          >
+          <ActionButton className="mt-3" onClick={() => void load()}>
             再読み込み
           </ActionButton>
         </div>

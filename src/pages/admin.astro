@@ -1,8 +1,8 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import Content, { metadata } from "@/views/Admin";
+import { AdminHome } from "@/components/admin/AdminHome";
 ---
 
-<Layout {...metadata}>
-  <Content />
+<Layout robots={{ index: false, follow: false }}>
+  <AdminHome client:load />
 </Layout>

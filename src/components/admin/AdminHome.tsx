@@ -1,18 +1,15 @@
 import { ActionLink } from "@/components/ui/Action";
+import { AdminGate } from "@/components/admin/AdminGate";
 
-export const metadata = {
-  title: "Admin",
-  description: "MEGADRAWK の管理導線一覧です。",
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
+/**
+ * 管理メニュー。ゲート（パスワードポップアップ）を通らないと
+ * メニューの内容（リンク先）も表示されない。
+ */
 
-export default function AdminPage() {
+export function AdminHome() {
   return (
-    <div>
-      <section className="page-section">
+    <section className="page-section">
+      <AdminGate>
         <header className="page-header">
           <h1 className="page-title text-3xl font-bold tracking-tight">
             管理メニュー
@@ -35,6 +32,7 @@ export default function AdminPage() {
               記事管理画面へ
             </ActionLink>
           </article>
+
           <article className="surface p-5 sm:p-6">
             <h2 className="section-title text-lg">コメント管理</h2>
             <p
@@ -47,6 +45,7 @@ export default function AdminPage() {
               コメント管理画面へ
             </ActionLink>
           </article>
+
           <article className="surface p-5 sm:p-6">
             <h2 className="section-title text-lg">草案エディター</h2>
             <p
@@ -60,7 +59,7 @@ export default function AdminPage() {
             </ActionLink>
           </article>
         </div>
-      </section>
-    </div>
+      </AdminGate>
+    </section>
   );
 }

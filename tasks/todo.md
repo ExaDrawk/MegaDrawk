@@ -316,3 +316,11 @@
 - [x] GitHub 403の根本原因（UA必須）を特定・修正し本番API 200を確認
 - [x] 本番E2E: 管理画面認証→記事新規作成→GitHubコミット→削除まで成功（実訪問者コメントは保持）
 - [x] 管理人コメント＋バッジは公開ページで確認済み（前回E2E）
+
+## 2026-10-26 管理メニューのパスワードゲート化（ユーザー指示）
+
+- [x] 全管理ページ（/admin、/admin/comments、/admin/articles）にポップアップ式パスワードゲートを実装
+- [x] 認証方式をHttpOnlyセッションCookieへ変更: POST /api/admin/session がパスワード検証後、SHA-256導出値のCookie（HttpOnly/Secure/SameSite=Strict/12時間）を発行。JavaScriptからは値も生パスワードも読めない
+- [x] 全管理API（admin comments/articles、コメントDELETE）を checkAdminAccess に統一（X-Admin-TokenヘッダまたはセッションCookie）
+- [x] localStorageへトークンを保存する方式を廃止（漏洩面の除去）
+- [x] 単体テスト166件・E2E44件全パス

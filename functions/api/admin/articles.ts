@@ -7,21 +7,18 @@ import {
   type SaveArticleInput,
 } from "../../../src/infra/articles/github";
 import {
-  checkAdminToken,
+  checkAdminAccess,
   type CommentsEnv,
 } from "../../../src/infra/comments/server";
 
-// 管理画面用記事API（GitHubコミット経由）。全操作でX-Admin-Tokenヘッダを要求する。
+// 管理画面用記事API（GitHubコミット経由）。セッションCookieで認可する。
 
 interface ArticlesEnv extends CommentsEnv {
   readonly GITHUB_TOKEN?: string;
 }
 
 export const onRequestGet: PagesFunction<ArticlesEnv> = async (context) => {
-  const denied = checkAdminToken(
-    context.env,
-    context.request.headers.get("X-Admin-Token"),
-  );
+  const denied = await checkAdminAccess(context.env, context.request);
   if (denied) return denied;
   const file = new URL(context.request.url).searchParams.get("file");
   if (file) {
@@ -31,10 +28,7 @@ export const onRequestGet: PagesFunction<ArticlesEnv> = async (context) => {
 };
 
 export const onRequestPut: PagesFunction<ArticlesEnv> = async (context) => {
-  const denied = checkAdminToken(
-    context.env,
-    context.request.headers.get("X-Admin-Token"),
-  );
+  const denied = await checkAdminAccess(context.env, context.request);
   if (denied) return denied;
   let body: SaveArticleInput;
   try {
@@ -52,10 +46,7 @@ export const onRequestPut: PagesFunction<ArticlesEnv> = async (context) => {
 };
 
 export const onRequestDelete: PagesFunction<ArticlesEnv> = async (context) => {
-  const denied = checkAdminToken(
-    context.env,
-    context.request.headers.get("X-Admin-Token"),
-  );
+  const denied = await checkAdminAccess(context.env, context.request);
   if (denied) return denied;
   const params = new URL(context.request.url).searchParams;
   return deleteArticle(

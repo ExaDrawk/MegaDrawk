@@ -694,3 +694,66 @@ describe("createComment (reserved name)", () => {
     expect(response.status).toBe(403);
   });
 });
+
+describe("admin session", () => {
+  const makeSessionEnv = () => ({
+    ...baseEnv,
+    COMMENTS_DB: makeDb(),
+  });
+  const importSession = async () =>
+    await import("../src/infra/comments/server").then((m) => ({
+      createAdminSessionResponse: m.createAdminSessionResponse,
+      checkAdminAccess: m.checkAdminAccess,
+      adminSessionValue: m.adminSessionValue,
+    }));
+
+  it("issues an http-only session cookie for the correct password", async () => {
+    const { createAdminSessionResponse } = await importSession();
+    const response = await createAdminSessionResponse(
+      makeSessionEnv(),
+      "admin-token",
+    );
+    expect(response.status).toBe(200);
+    const cookie = response.headers.get("Set-Cookie") ?? "";
+    expect(cookie).toContain("admin_session=");
+    expect(cookie).toContain("HttpOnly");
+    expect(cookie).toContain("Secure");
+    expect(cookie).toContain("SameSite=Strict");
+  });
+
+  it("rejects a wrong password with 401 and no cookie", async () => {
+    const { createAdminSessionResponse } = await importSession();
+    const response = await createAdminSessionResponse(
+      makeSessionEnv(),
+      "wrong",
+    );
+    expect(response.status).toBe(401);
+    expect(response.headers.get("Set-Cookie")).toBeNull();
+  });
+
+  it("authorizes requests via the session cookie without exposing the token", async () => {
+    const { createAdminSessionResponse, checkAdminAccess } =
+      await importSession();
+    const env = makeSessionEnv();
+    const login = await createAdminSessionResponse(env, "admin-token");
+    const setCookie = login.headers.get("Set-Cookie") ?? "";
+    const cookie = setCookie.split(";")[0] ?? "";
+    const request = new Request("https://megadrawk.com/api/admin/comments", {
+      headers: { Cookie: cookie },
+    });
+    expect(await checkAdminAccess(env, request)).toBeNull();
+    // Cookieの値はパスワードそのものではない
+    expect(cookie.includes("admin-token")).toBe(false);
+  });
+
+  it("still rejects a bad session value", async () => {
+    const { checkAdminAccess } = await importSession();
+    const request = new Request("https://megadrawk.com/api/admin/comments", {
+      headers: {
+        Cookie: `admin_session=${"0".repeat(64)}`,
+      },
+    });
+    const denied = await checkAdminAccess(makeSessionEnv(), request);
+    expect(denied?.status).toBe(401);
+  });
+});

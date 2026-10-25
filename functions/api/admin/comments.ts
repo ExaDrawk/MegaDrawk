@@ -2,26 +2,20 @@
 import {
   adminCreateComment,
   adminListComments,
-  checkAdminToken,
+  checkAdminAccess,
   type CommentsEnv,
 } from "../../../src/infra/comments/server";
 
-// 管理画面用コメントAPI。全操作でX-Admin-Tokenヘッダを要求する。
+// 管理画面用コメントAPI。パスワードから発行したHttpOnlyセッションCookieで認可する。
 
 export const onRequestGet: PagesFunction<CommentsEnv> = async (context) => {
-  const denied = checkAdminToken(
-    context.env,
-    context.request.headers.get("X-Admin-Token"),
-  );
+  const denied = await checkAdminAccess(context.env, context.request);
   if (denied) return denied;
   return adminListComments(context.env.COMMENTS_DB);
 };
 
 export const onRequestPost: PagesFunction<CommentsEnv> = async (context) => {
-  const denied = checkAdminToken(
-    context.env,
-    context.request.headers.get("X-Admin-Token"),
-  );
+  const denied = await checkAdminAccess(context.env, context.request);
   if (denied) return denied;
   let body: { postId?: unknown; message?: unknown; parentId?: unknown };
   try {

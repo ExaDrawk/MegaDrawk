@@ -432,7 +432,7 @@ export async function editComment(
 export async function deleteComment(
   env: CommentsEnv,
   rawId: string | null,
-  adminToken: string | null,
+  adminToken: string | null | undefined,
 ): Promise<Response> {
   const { COMMENTS_DB, ADMIN_DELETE_TOKEN } = env;
   if (!COMMENTS_DB || !ADMIN_DELETE_TOKEN) {
@@ -453,20 +453,90 @@ export async function deleteComment(
   return successResponse({ ok: true });
 }
 
-// ===== 管理画面用（X-Admin-Token認証） =====
+// ===== 管理画面用（パスワード→HttpOnlyセッションCookie認証） =====
 
-/** 管理トークンを検証する。一致しない場合は401応答を返す。 */
-export function checkAdminToken(
+/** セッションCookieの名前と有効時間（秒）。 */
+export const ADMIN_SESSION_COOKIE = "admin_session";
+export const ADMIN_SESSION_MAX_AGE = 60 * 60 * 12;
+
+/**
+ * セッションCookieの値。生のパスワードではなく、
+ * パスワードから導出したSHA-256値を使うことでCookie漏えい時も本体は分からない。
+ */
+export async function adminSessionValue(
   env: CommentsEnv,
-  token: string | null,
-): Response | null {
+): Promise<string | null> {
+  if (!env.ADMIN_DELETE_TOKEN) {
+    return null;
+  }
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode("admin-session:" + env.ADMIN_DELETE_TOKEN),
+  );
+  return [...new Uint8Array(digest)]
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+/**
+ * パスワードを検証し、HttpOnlyセッションCookieを発行する応答を返す。
+ * CookieはJSから読めないため、XSSがあってもパスワードを奪えない。
+ */
+export async function createAdminSessionResponse(
+  env: CommentsEnv,
+  password: unknown,
+): Promise<Response> {
   if (!env.ADMIN_DELETE_TOKEN) {
     return errorResponse("管理機能は現在利用できません。", 500);
   }
-  if (!token || token !== env.ADMIN_DELETE_TOKEN) {
-    return errorResponse("認証に失敗しました。", 401);
+  if (typeof password !== "string" || password !== env.ADMIN_DELETE_TOKEN) {
+    return errorResponse("パスワードが違います。", 401);
   }
-  return null;
+  const value = await adminSessionValue(env);
+  return new Response(JSON.stringify({ ok: true }), {
+    status: 200,
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      "Set-Cookie": `${ADMIN_SESSION_COOKIE}=${value}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${ADMIN_SESSION_MAX_AGE}`,
+    },
+  });
+}
+
+/** ログアウト用。セッションCookieを失効させる。 */
+export function createAdminLogoutResponse(): Response {
+  return new Response(JSON.stringify({ ok: true }), {
+    status: 200,
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      "Set-Cookie": `${ADMIN_SESSION_COOKIE}=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0`,
+    },
+  });
+}
+
+/**
+ * 管理API共通の認可。X-Admin-Tokenヘッダ（API直接利用）または
+ * セッションCookie（管理画面）のいずれかで通す。不一致なら401応答を返す。
+ */
+export async function checkAdminAccess(
+  env: CommentsEnv,
+  request: Request,
+): Promise<Response | null> {
+  if (!env.ADMIN_DELETE_TOKEN) {
+    return errorResponse("管理機能は現在利用できません。", 500);
+  }
+  const headerToken = request.headers.get("X-Admin-Token");
+  if (headerToken && headerToken === env.ADMIN_DELETE_TOKEN) {
+    return null;
+  }
+  const sessionValue = await adminSessionValue(env);
+  const cookie = request.headers.get("Cookie") ?? "";
+  const match = cookie.match(
+    new RegExp(`${ADMIN_SESSION_COOKIE}=([a-f0-9]{64})`),
+  );
+  if (sessionValue && match && match[1] === sessionValue) {
+    return null;
+  }
+  return errorResponse("認証に失敗しました。", 401);
 }
 
 /** 全コメントを新しい順で返す（管理一覧用）。 */
