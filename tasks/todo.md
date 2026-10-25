@@ -332,3 +332,10 @@
 - [x] 認証をHttpOnlyセッションCookie方式へ変更: 生パスワード・トークンはJSから読めず、localStorage保存も廃止
 - [x] 漏洩検査: HTML/localStorage/sessionStorage/document.cookieのいずれにもパスワード・セッション値が現れないことを実機確認
 - [x] 単体166件・E2E44件全パス
+
+## 2026-10-26 Google Search Console設定（ユーザー指示・Brave操作）
+
+- [x] megadrawk.com/sitemap.xml を送信（それまでは別サイトmeetpicksの分のみ登録だった）
+- [x] ホームは「URL は Google に登録されています」を確認（既にインデックス済み）
+- [x] 記事 /blog/2026-10-25-hello-megadrawk は未登録のため「インデックス登録をリクエスト」を実行
+- [x] 今後の記事はサイトマップに自動追加→Googleが定期的に取得で自動掲載（追加操作不要）
