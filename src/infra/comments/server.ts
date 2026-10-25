@@ -5,6 +5,7 @@ import {
   EDIT_WINDOW_MINUTES,
   validateCommentInput,
 } from "../../domain/comment/types";
+import { SITE } from "../../config/site";
 
 /**
  * 公開コメントAPIのロジック（Cloudflare D1保存）。
@@ -27,6 +28,8 @@ const MAX_LIST_LIMIT = 100;
 const MAX_BODY_BYTES = 16 * 1024;
 /** レート制限・編集判定のために取得する同一IPハッシュの履歴件数 */
 const HISTORY_LIMIT = 50;
+/** 管理者コメントへの返信でレート制限を免除する件数（それ以降は原則の制限が適用される） */
+const ADMIN_REPLY_EXEMPT_LIMIT = 3;
 
 const TURNSTILE_VERIFY_URL =
   "https://challenges.cloudflare.com/turnstile/v0/siteverify";
@@ -126,14 +129,34 @@ export function findRejectionReason(
   return null;
 }
 
+/** 管理者とみなす投稿者名（名前公開のため偽装可能だが、バイパスは返信3件までに限定） */
+function isAdminName(name: string): boolean {
+  return name === SITE.ownerName;
+}
+
+/** 返信先コメント1件分（ルート解決と管理者判定に必要な列） */
+export interface ReplyTargetComment {
+  readonly id: number;
+  readonly parent_id: number | null;
+  readonly post_id: string;
+  readonly name: string;
+}
+
+export interface ResolvedReplyTarget {
+  /** 返信のぶら下げ先（ルートコメントのid）。非返信ならnull */
+  readonly rootId: number | null;
+  /** 返信先コメントの投稿者名（非返信ならnull） */
+  readonly parentName: string | null;
+}
+
 /** 返信先の解決。返信の返信はルートへ正規化し、表示を1階層に保つ。 */
 export async function resolveReplyTarget(
   db: D1Database,
   postId: string,
   rawParentId: unknown,
-): Promise<number | null | "invalid"> {
+): Promise<ResolvedReplyTarget | "invalid"> {
   if (rawParentId === undefined || rawParentId === null || rawParentId === "") {
-    return null;
+    return { rootId: null, parentName: null };
   }
   if (
     typeof rawParentId !== "number" ||
@@ -143,13 +166,16 @@ export async function resolveReplyTarget(
     return "invalid";
   }
   const parent = await db
-    .prepare("SELECT id, parent_id, post_id FROM comments WHERE id = ?1")
+    .prepare("SELECT id, parent_id, post_id, name FROM comments WHERE id = ?1")
     .bind(rawParentId)
-    .first<{ id: number; parent_id: number | null; post_id: string }>();
+    .first<ReplyTargetComment>();
   if (!parent || parent.post_id !== postId) {
     return "invalid";
   }
-  return parent.parent_id ?? parent.id;
+  return {
+    rootId: parent.parent_id ?? parent.id,
+    parentName: parent.name,
+  };
 }
 
 export async function listComments(
@@ -277,25 +303,41 @@ export async function createComment(
   const remoteAddress = input.remoteAddress ?? "unknown";
   const ipHash = await hashIp(remoteAddress, IP_HASH_SALT);
   const serverNow = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
-  const historyRows = await COMMENTS_DB.prepare(
-    "SELECT post_id, message, created_at FROM comments WHERE ip_hash = ?1 ORDER BY created_at DESC LIMIT ?2",
-  )
-    .bind(ipHash, HISTORY_LIMIT)
-    .all<{ post_id: string; message: string; created_at: string }>();
-  const rejection = findRejectionReason(
-    historyRows.results ?? [],
-    postId,
-    message,
-    serverNow,
-  );
-  if (rejection) {
-    return errorResponse(rejection, 429);
+
+  // 管理者コメントへの返信は、そのコメントへの返信が3件までの間レート制限を免除する
+  let limitsExempt = false;
+  if (replyTarget.rootId !== null && replyTarget.parentName) {
+    if (isAdminName(replyTarget.parentName)) {
+      const countRow = await COMMENTS_DB.prepare(
+        "SELECT COUNT(*) AS count FROM comments WHERE parent_id = ?1",
+      )
+        .bind(replyTarget.rootId)
+        .first<{ count: number }>();
+      limitsExempt = (countRow?.count ?? 0) < ADMIN_REPLY_EXEMPT_LIMIT;
+    }
+  }
+
+  if (!limitsExempt) {
+    const historyRows = await COMMENTS_DB.prepare(
+      "SELECT post_id, message, created_at FROM comments WHERE ip_hash = ?1 ORDER BY created_at DESC LIMIT ?2",
+    )
+      .bind(ipHash, HISTORY_LIMIT)
+      .all<{ post_id: string; message: string; created_at: string }>();
+    const rejection = findRejectionReason(
+      historyRows.results ?? [],
+      postId,
+      message,
+      serverNow,
+    );
+    if (rejection) {
+      return errorResponse(rejection, 429);
+    }
   }
 
   await COMMENTS_DB.prepare(
     "INSERT INTO comments (post_id, name, message, created_at, ip_hash, parent_id) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
   )
-    .bind(postId, name, message, serverNow, ipHash, replyTarget)
+    .bind(postId, name, message, serverNow, ipHash, replyTarget.rootId)
     .run();
 
   return successResponse({ ok: true });

@@ -29,13 +29,19 @@ function hashOf(ip: string): string {
 
 interface MockDbOptions {
   history?: readonly IpHistoryRow[];
-  parent?: { id: number; parent_id: number | null; post_id: string } | null;
+  parent?: {
+    id: number;
+    parent_id: number | null;
+    post_id: string;
+    name?: string;
+  } | null;
   comment?: {
     id: number;
     post_id: string;
     ip_hash: string;
     created_at: string;
   } | null;
+  replyCount?: number;
 }
 
 type MockDb = CommentsEnv["COMMENTS_DB"] & {
@@ -57,6 +63,9 @@ function makeDb(options: MockDbOptions = {}): MockDb {
         first: async () => {
           if (sql.includes("SELECT id, parent_id, post_id")) {
             return options.parent ?? null;
+          }
+          if (sql.includes("COUNT(*)")) {
+            return { count: options.replyCount ?? 0 };
           }
           if (sql.includes("SELECT id, post_id, ip_hash, created_at")) {
             return options.comment ?? null;
@@ -597,5 +606,76 @@ describe("findRejectionReason", () => {
     expect(
       findRejectionReason(history, "post-1", "本文", serverNow),
     ).toBeNull();
+  });
+});
+
+describe("createComment (admin reply exemption)", () => {
+  const replyBody = (parentId: number, message: string) =>
+    JSON.stringify({
+      name: "読者",
+      message,
+      turnstileToken: "token",
+      parentId,
+    });
+
+  it("exempts rate limits for replies to an admin comment", async () => {
+    // 直近10秒前に投稿済みでも、管理者コメントへの返信（既存0件）なら制限を免除
+    const now = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+    const db = makeDb({
+      history: [{ post_id: "post-1", message: "直近の投稿", created_at: now }],
+      parent: {
+        id: 5,
+        parent_id: null,
+        post_id: "post-1",
+        name: "Drawk",
+      },
+      replyCount: 0,
+    });
+    const response = await createComment(envWith(db), {
+      rawBody: replyBody(5, "管理者への返信です"),
+      postId: "post-1",
+      remoteAddress: "203.0.113.10",
+    });
+    expect(response.status).toBe(200);
+  });
+
+  it("applies rate limits from the 4th reply to an admin comment", async () => {
+    const now = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+    const db = makeDb({
+      history: [{ post_id: "post-1", message: "直近の投稿", created_at: now }],
+      parent: {
+        id: 5,
+        parent_id: null,
+        post_id: "post-1",
+        name: "Drawk",
+      },
+      replyCount: 3,
+    });
+    const response = await createComment(envWith(db), {
+      rawBody: replyBody(5, "4本目の返信"),
+      postId: "post-1",
+      remoteAddress: "203.0.113.10",
+    });
+    expect(response.status).toBe(429);
+  });
+
+  it("does not exempt replies to a non-admin comment", async () => {
+    const now = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+    const db = makeDb({
+      history: [{ post_id: "post-1", message: "直近の投稿", created_at: now }],
+      parent: {
+        id: 5,
+        parent_id: null,
+        post_id: "post-1",
+        name: "一般人",
+      },
+      replyCount: 0,
+    });
+    const response = await createComment(envWith(db), {
+      rawBody: replyBody(5, "一般コメントへの返信"),
+      postId: "post-1",
+      remoteAddress: "203.0.113.10",
+    });
+    expect(response.status).toBe(429);
   });
 });
