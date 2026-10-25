@@ -47,6 +47,7 @@ scripts/serve-static.mjsはローカル専用の証拠取得用サーバーで�
 ## お問い合わせフォーム（functions/api/contact.ts）
 
 - 有効条件: ビルド時に`PUBLIC_TURNSTILE_SITE_KEY`が設定され、Pages実行環境に`TURNSTILE_SECRET_KEY`と`BREVO_API_KEY`が設定されていること。シークレットはPagesの環境変数（暗号化）で管理し、コードへ書かない。
+- Pages設定はダッシュボード/API管理に統一し、リポジトリにwrangler.tomlを置かない。wrangler.tomlが存在すると、Git連携デプロイのたびにプロジェクト設定がファイル側へ同期され、ダッシュボード設定の環境変数が消える（2026-10-25に実障害として確認）。
 - 現在の構成（2026-10-25設定済み）: Turnstileウィジェット`megadrawk-contact`（managed、megadrawk.comのみ）。Brevo APIキー`megadrawk-contact-085402`（Restricted・Transactional email: All・無期限だが90日未使用で失効。フォーム稼働中なら失効しない）。3変数ともPagesプロジェクト`megadrawk`のproduction環境変数に登録済み。新しいキーへ差し替える場合はBrevoのSMTP & API画面で生成し、Pagesの環境変数を更新してから再デプロイする。
 - アクセス解析はCloudflareダッシュボードのWeb Analytics自動注入（megadrawk.comゾーンで有効）を使用しているため、`PUBLIC_CF_WEB_ANALYTICS_TOKEN`は設定しないこと（二重計測になる）。
 - 処理順: サイズ上限（32KB）→JSON解析→ハニーポット（`company`欄が空でなければボットとして成功応答のみ返し送信しない）→Turnstile siteverify→ドメインの検証（src/domain/contact/contact.ts）→Brevo REST API（api.brevo.com/v3/smtp/email）で`SITE.email`へ送信、Reply-Toに送信者。
