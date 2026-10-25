@@ -49,10 +49,18 @@ export async function listArticles(
   if (!token) {
     return errorResponse("記事管理は現在利用できません。", 500);
   }
-  const response = await fetch(
-    `${GITHUB_API}/repos/${REPO}/contents/${ARTICLE_DIR}`,
-    { headers: githubHeaders(token) },
-  );
+  let response: Response;
+  try {
+    response = await fetch(
+      `${GITHUB_API}/repos/${REPO}/contents/${ARTICLE_DIR}`,
+      { headers: githubHeaders(token) },
+    );
+  } catch (error) {
+    return errorResponse(
+      `記事一覧の取得で通信エラーが発生しました。(${String(error).slice(0, 80)})`,
+      502,
+    );
+  }
   if (!response.ok) {
     return errorResponse(
       `記事一覧の取得に失敗しました。(github ${response.status})`,
@@ -80,10 +88,18 @@ export async function getArticle(
   if (!rawName || !isValidArticleFilename(rawName)) {
     return errorResponse("ファイル名が不正です。", 400);
   }
-  const response = await fetch(
-    `${GITHUB_API}/repos/${REPO}/contents/${ARTICLE_DIR}/${rawName}`,
-    { headers: githubHeaders(token) },
-  );
+  let response: Response;
+  try {
+    response = await fetch(
+      `${GITHUB_API}/repos/${REPO}/contents/${ARTICLE_DIR}/${rawName}`,
+      { headers: githubHeaders(token) },
+    );
+  } catch (error) {
+    return errorResponse(
+      `記事の取得で通信エラーが発生しました。(${String(error).slice(0, 80)})`,
+      502,
+    );
+  }
   if (!response.ok) {
     return errorResponse("記事の取得に失敗しました。", 404);
   }
@@ -122,19 +138,27 @@ export async function saveArticle(
   if (input.sha !== null && typeof input.sha !== "string") {
     return errorResponse("更新元の記事が特定できません。", 400);
   }
-  const response = await fetch(
-    `${GITHUB_API}/repos/${REPO}/contents/${ARTICLE_DIR}/${input.name}`,
-    {
-      method: "PUT",
-      headers: githubHeaders(token),
-      body: JSON.stringify({
-        message: `Update article ${input.name} via admin`,
-        content: Buffer.from(input.content, "utf8").toString("base64"),
-        branch: "main",
-        ...(typeof input.sha === "string" ? { sha: input.sha } : {}),
-      }),
-    },
-  );
+  let response: Response;
+  try {
+    response = await fetch(
+      `${GITHUB_API}/repos/${REPO}/contents/${ARTICLE_DIR}/${input.name}`,
+      {
+        method: "PUT",
+        headers: githubHeaders(token),
+        body: JSON.stringify({
+          message: `Update article ${input.name} via admin`,
+          content: Buffer.from(input.content, "utf8").toString("base64"),
+          branch: "main",
+          ...(typeof input.sha === "string" ? { sha: input.sha } : {}),
+        }),
+      },
+    );
+  } catch (error) {
+    return errorResponse(
+      `記事の保存で通信エラーが発生しました。(${String(error).slice(0, 80)})`,
+      502,
+    );
+  }
   if (!response.ok) {
     const detail = (await response.json().catch(() => null)) as {
       message?: string;
@@ -148,7 +172,10 @@ export async function saveArticle(
         409,
       );
     }
-    return errorResponse("記事の保存に失敗しました。", 502);
+    return errorResponse(
+      `記事の保存に失敗しました。(github ${response.status})`,
+      502,
+    );
   }
   return successResponse({ ok: true });
 }
@@ -164,20 +191,31 @@ export async function deleteArticle(
   if (!rawName || !isValidArticleFilename(rawName) || !sha) {
     return errorResponse("ファイル名とshaを指定してください。", 400);
   }
-  const response = await fetch(
-    `${GITHUB_API}/repos/${REPO}/contents/${ARTICLE_DIR}/${rawName}`,
-    {
-      method: "DELETE",
-      headers: githubHeaders(token),
-      body: JSON.stringify({
-        message: `Delete article ${rawName} via admin`,
-        sha,
-        branch: "main",
-      }),
-    },
-  );
+  let response: Response;
+  try {
+    response = await fetch(
+      `${GITHUB_API}/repos/${REPO}/contents/${ARTICLE_DIR}/${rawName}`,
+      {
+        method: "DELETE",
+        headers: githubHeaders(token),
+        body: JSON.stringify({
+          message: `Delete article ${rawName} via admin`,
+          sha,
+          branch: "main",
+        }),
+      },
+    );
+  } catch (error) {
+    return errorResponse(
+      `記事の削除で通信エラーが発生しました。(${String(error).slice(0, 80)})`,
+      502,
+    );
+  }
   if (!response.ok) {
-    return errorResponse("記事の削除に失敗しました。", 502);
+    return errorResponse(
+      `記事の削除に失敗しました。(github ${response.status})`,
+      502,
+    );
   }
   return successResponse({ ok: true });
 }
