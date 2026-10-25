@@ -76,8 +76,10 @@ async function listArticlesInner(token: string | undefined): Promise<Response> {
     );
   }
   if (!response.ok) {
+    // 原因特定まで応答本文の断片を含める
+    const bodySnippet = (await response.text().catch(() => "")).slice(0, 200);
     return errorResponse(
-      `記事一覧の取得に失敗しました。(github ${response.status})`,
+      `記事一覧の取得に失敗しました。(github ${response.status} / tokenLen=${token.length} / ${bodySnippet})`,
       502,
     );
   }
