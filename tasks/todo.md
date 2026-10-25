@@ -222,3 +222,16 @@
 - [x] Step 4 品質ゲート: encoding / format / lint / typecheck / unit / build / audit / e2e
 - [x] Step 5 自己レビュー・修正
 - [x] Step 6 ドキュメント整備
+
+## 2026-10-25 公開前設定と本番反映（ユーザー指示で自動化）
+
+- [x] 認証手段の調査（ローカル資格情報なし → ユーザーBraveのCDP経由で運用）
+- [x] Cloudflare Turnstileウィジェット megadrawk-contact 作成（managed / megadrawk.com）
+- [x] Pages本番環境変数に PUBLIC_TURNSTILE_SITE_KEY / TURNSTILE_SECRET_KEY / BREVO_API_KEY を設定
+- [x] Brevo APIキー megadrawk-contact-085402 を生成（Restricted / Transactional email: All / 無期限）し値喪失の孤児キー2件を削除
+- [x] Web Analyticsはゾーンの自動注入が有効であることを確認（トークン設定はせず二重計測回避）
+- [x] 改良一式をコミット＆プッシュしCloudflare Pagesが本番反映
+- [x] デプロイ失敗の根本修正: FunctionsのモジュールスコープResponse生成を廃止（lessons記録）
+- [x] 環境変数消失の根本修正: wrangler.tomlを削除しダッシュボード/API管理へ統一（lessons記録）
+- [x] 本番検証: /rss.xml・og:image・apple-touch-icon・CSP(challenges.cloudflare.com)・フォームisland・/api/contact 400応答
+- [x] 実送信E2E: 本番フォーム→Turnstile→Function→Brevo→contact@→Gmail着信を確認（18:41受領）
