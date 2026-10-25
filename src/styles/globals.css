@@ -691,10 +691,6 @@ textarea.form-control {
   margin-top: 3rem;
   max-width: 34rem;
 }
-.contact-form__note {
-  font-size: 0.875rem;
-  margin: 0.5rem 0 0;
-}
 .post-tags {
   display: flex;
   flex-wrap: wrap;

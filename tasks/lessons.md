@@ -188,3 +188,10 @@
 - 違反した原則: 変更前の影響範囲確認、Fail Fast（本番500に気づくのが遅れた）
 - 根本原因: Pages APIはGETでシークレット値を返さない。返ってきた形状をそのままPATCHすると「値なしシークレット」として上書きされる仕様を把握していなかった。
 - 再発防止ルール: deployment_configsをPATCHするときは、env_varsに含める全シークレットの実値を必ず揃えてから送る（既存シークレットを「維持目的」でGET値を再送しない）。Function env変更後は本番エンドポイントの実応答（500/400の区別）で動作確認する。
+
+### 2026-10-25: Pages FunctionsからGitHub APIが403（User-Agent必須）
+
+- ミスの内容: 管理画面の記事APIがCloudflare WorkersのfetchでGitHub APIを呼ぶと403になり、更に応答JSON解析の例外が未捕捉でCloudflareの素の502ページが返っていた。ローカルのNodeでは同じトークンで200のため切り分けに時間を要した。
+- 違反した原則: PoLA（外部APIの要件確認）、Fail Fast（例外をJSONに変換していなかった）
+- 根本原因: Workersランタイムのfetchは既定のUser-Agentを送らず、GitHub APIはUA必須（無いと403）。また外部呼び出しをtry/catchしていなかったため例外がそのままクラッシュになった。
+- 再発防止ルール: Workers/ブラウザ以外のランタイムからのfetchではUser-Agentを明示する。外部API呼び出しは必ずtry/catchし、上流ステータスを含むJSON応答に変換する。

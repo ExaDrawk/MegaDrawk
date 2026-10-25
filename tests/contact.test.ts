@@ -10,6 +10,7 @@ const validInput = {
   name: "山田 太郎",
   email: "taro@example.com",
   message: "お問い合わせ内容です。",
+  wantsReply: false,
 };
 
 describe("validateContactInput", () => {
@@ -17,9 +18,28 @@ describe("validateContactInput", () => {
     expect(validateContactInput(validInput)).toBeNull();
   });
 
+  it("accepts a valid input that wants a reply", () => {
+    expect(
+      validateContactInput({ ...validInput, wantsReply: true }),
+    ).toBeNull();
+  });
+
   it("accepts an empty email because the address is optional", () => {
-    expect(validateContactInput({ ...validInput, email: "" })).toBeNull();
-    expect(validateContactInput({ ...validInput, email: "   " })).toBeNull();
+    expect(
+      validateContactInput({ ...validInput, email: "", wantsReply: false }),
+    ).toBeNull();
+    expect(
+      validateContactInput({ ...validInput, email: "   ", wantsReply: false }),
+    ).toBeNull();
+  });
+
+  it("rejects a reply request without an email address", () => {
+    expect(
+      validateContactInput({ ...validInput, email: "", wantsReply: true }),
+    ).toBe("reply-email-required");
+    expect(
+      validateContactInput({ ...validInput, email: "   ", wantsReply: true }),
+    ).toBe("reply-email-required");
   });
 
   it("rejects empty fields", () => {
@@ -78,8 +98,14 @@ describe("trimContactInput", () => {
         name: " 名前 ",
         email: " a@b.jp ",
         message: " 本文 ",
+        wantsReply: true,
       }),
-    ).toEqual({ name: "名前", email: "a@b.jp", message: "本文" });
+    ).toEqual({
+      name: "名前",
+      email: "a@b.jp",
+      message: "本文",
+      wantsReply: true,
+    });
   });
 });
 
@@ -88,6 +114,7 @@ describe("CONTACT_ERROR_MESSAGES", () => {
     const codes = [
       "name-empty",
       "name-too-long",
+      "reply-email-required",
       "email-too-long",
       "email-invalid",
       "message-empty",

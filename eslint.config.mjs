@@ -7,6 +7,8 @@ export default defineConfig(
     ignores: [
       "dist/**",
       ".astro/**",
+      // Wranglerのビルドキャッシュ（生成物）。gitignore済みだがLint対象からも除外する。
+      ".wrangler/**",
       "node_modules/**",
       "coverage/**",
       "playwright-report/**",

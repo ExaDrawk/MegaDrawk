@@ -13,7 +13,14 @@ UI（pages/layouts/views/components）→ ドメイン（domain/config/lib）→
 - コードハイライトはAstro標準のShikiを二重テーマ（github-light/github-dark、defaultColor: false）で生成し、globals.cssが[data-theme]で切り替えます。Shikiはstyle属性を出力するため、scripts/security.mjsがShiki形式のstyle属性のみ許可し、値ごとのSHA-256ハッシュをCSPのstyle-src-attrへ出力します。
 - 読了時間・関連記事・タグ集計・前後記事のロジックはsrc/lib/blogUtils.tsの純粋関数（単体テスト対象）。記事ごとのOG画像はsrc/pages/og/[id].png.tsがビルド時にsatori＋sharpで生成し、フォントはscripts/assets/fonts/から読み込みます（リポジトリにコミット、ブラウザへは配信しない）。
 - コメントはアカウント不要・公開型。functions/api/comments/[postId].tsがGET（一覧）とPOST（投稿）を提供し、D1（megadrawk-commentsデータベース、COMMENTS_DBバインディング）に保存する。POSTはTurnstile検証・入力検証（domain/comment/types.tsのCOMMENT_LIMITS、本文は2,000文字まで）・IPハッシュ（IP_HASH_SALT）によるレート制限（60秒間隔、10分間に3件、1日10件、同一記事1日3件、いずれも日本時間の暦日で集計）と同一本文再送抑止（24時間）を経由する。PUT（編集）は投稿後10分以内の同一IPハッシュのみ本文を更新し、edited_atを記録する。返信はトップレベルコメントへの1階層のみで、返信への返信はサーバー側でルートに正規化する。管理者（SITE.ownerNameと同一名のコメント）への返信は、そのコメントへの返信が3件までの間レート制限を免除され、4件目以降は原則の制限が適用される（名前は公開値のため偽装可能だが、免除は3件までに限られる）。削除はDELETEにX-Admin-Tokenヘッダ（ADMIN_DELETE_TOKEN）で認証して実行する。生IPは保存せずSHA-256ハッシュのみ保持。
-- 下書き（draft: true）は本番ビルド・RSS・サイトマップから除外され、開発サーバーでのみ表示されます。コメントデータは各利用者のブラウザのlocalStorage（キーは変更なし）に残ります。
+- 下書き（draft: true）は本番ビルド・RSS・サイトマップから除外され、開発サーバーでのみ表示されます。
+
+## 管理画面（/admin）
+
+- /admin/comments（コメント管理）と /admin/articles（記事管理）があり、どちらもX-Admin-Token（Pages環境変数ADMIN_DELETE_TOKENと同値）で認証する。トークンは画面で一度入力するとlocalStorageに保存される。
+- コメント管理: 全コメントの一覧・削除（返信ごと削除）と、管理人コメントの投稿。管理人コメントはis_admin=1として保存され、公開ページに「管理人」バッジが表示される。一般フォームからは名前「Drawk」を予約語として拒否し、返信免除の判定もis_admin参照のためなりすましでは免除を得られない。
+- 記事管理: src/infra/articles/github.tsがGitHub Contents APIでsrc/content/blogを読み書きし、mainへコミットする。保存から反映まで1〜2分かかる。ファイル名はスラッグ（英小文字・数字・ハイフン）+.mdのみ許可。
+- 重要: Cloudflare Workersのfetchは既定のUser-Agentを送らない。GitHub APIはUA必須で、無いと403を返す（src/infra/articles/github.tsのgithubHeadersで User-Agent を必ず送ること）。 FunctionsのFetch例外はCloudflareの素の502ページになるため、外部API呼び出しは必ずtry/catchしてJSON応答に変換すること（2026-10-25に実障害として確認）。コメントデータは各利用者のブラウザのlocalStorage（キーは変更なし）に残ります。
 
 ## セキュリティ
 

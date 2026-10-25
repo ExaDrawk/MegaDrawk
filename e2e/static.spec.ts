@@ -214,5 +214,4 @@ test("contact page keeps direct routes and renders the form island only when con
   ).toBeVisible();
   // 既定ビルドはTurnstileサイトキー未設定のため、フォームは出さずメール/Xの導線のみ
   expect(await page.locator(".contact-form").count()).toBe(0);
-  await expect(page.getByText("メールソフトを開きたくない場合")).toBeHidden();
 });

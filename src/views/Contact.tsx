@@ -1,6 +1,5 @@
 import { Mail } from "lucide-react";
 import { SITE } from "@/config/site";
-import { SITE_FEATURES } from "@/config/features";
 import { ActionLink } from "@/components/ui/Action";
 import { XProfileLink } from "@/components/ui/XProfileLink";
 
@@ -46,11 +45,6 @@ export default function ContactPage() {
             showExternalIcon
           />
         </div>
-        {SITE_FEATURES.turnstileSiteKey ? (
-          <p className="mt-6 text-sm" data-color="color-text-muted">
-            メールソフトを開きたくない場合は、下のフォームからも送信できます。
-          </p>
-        ) : null}
       </section>
     </div>
   );

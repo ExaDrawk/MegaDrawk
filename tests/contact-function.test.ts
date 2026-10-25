@@ -8,6 +8,7 @@ const validBody = {
   name: "太郎",
   email: "taro@example.com",
   message: "お問い合わせ内容",
+  wantsReply: false,
   turnstileToken: "token",
   company: "",
 };
@@ -144,6 +145,26 @@ describe("contact function", () => {
     );
   });
 
+  it("rejects a reply request without an email address", async () => {
+    const response = await onRequestPost(
+      createContext(
+        JSON.stringify({ ...validBody, email: "", wantsReply: true }),
+      ),
+    );
+    expect(response.status).toBe(400);
+    const calls = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls;
+    expect(calls.filter(([url]) => String(url).includes("brevo"))).toHaveLength(
+      0,
+    );
+  });
+
+  it("rejects a non-boolean reply flag", async () => {
+    const response = await onRequestPost(
+      createContext(JSON.stringify({ ...validBody, wantsReply: "yes" })),
+    );
+    expect(response.status).toBe(400);
+  });
+
   it("delivers a submission without an email and omits Reply-To", async () => {
     const response = await onRequestPost(
       createContext(JSON.stringify({ ...validBody, email: "" })),
@@ -155,6 +176,7 @@ describe("contact function", () => {
     expect(brevoCall).toBeDefined();
     const payload = JSON.parse(brevoCall?.[1]?.body as string);
     expect(payload.replyTo).toBeUndefined();
+    expect(payload.textContent).toContain("返信希望: なし");
     expect(payload.textContent).toContain("返信先: （記載なし）");
   });
 
@@ -182,10 +204,12 @@ describe("buildBrevoEmail", () => {
       name: "花子",
       email: "hanako@example.com",
       message: "こんにちは",
+      wantsReply: true,
     });
     expect(payload.sender).toEqual({ name: SITE.name, email: SITE.email });
     expect(payload.subject).toContain("花子");
     expect(payload.replyTo).toEqual({ email: "hanako@example.com" });
+    expect(payload.textContent).toContain("返信希望: あり");
     expect(payload.textContent).toContain("hanako@example.com");
     expect(payload.textContent).toContain("こんにちは");
   });
@@ -195,8 +219,10 @@ describe("buildBrevoEmail", () => {
       name: "花子",
       email: "",
       message: "こんにちは",
+      wantsReply: false,
     });
     expect(payload.replyTo).toBeUndefined();
+    expect(payload.textContent).toContain("返信希望: なし");
     expect(payload.textContent).toContain("返信先: （記載なし）");
   });
 });

@@ -37,7 +37,7 @@ export function buildBrevoEmail(input: ContactInput): BrevoEmailPayload {
     to: [{ email: SITE.email }],
     ...(input.email ? { replyTo: { email: input.email } } : {}),
     subject: `【${SITE.name}】お問い合わせ（${input.name}様）`,
-    textContent: `${input.name}様よりお問い合わせがありました。\n\n返信先: ${input.email || "（記載なし）"}\n\n${input.message}`,
+    textContent: `${input.name}様よりお問い合わせがありました。\n\n返信希望: ${input.wantsReply ? "あり" : "なし"}\n返信先: ${input.email || "（記載なし）"}\n\n${input.message}`,
   };
 }
 
@@ -132,7 +132,8 @@ export const onRequestPost: PagesFunction<ContactFunctionEnv> = async (
   if (
     typeof body.name !== "string" ||
     typeof body.email !== "string" ||
-    typeof body.message !== "string"
+    typeof body.message !== "string" ||
+    typeof body.wantsReply !== "boolean"
   ) {
     return errorResponse("送信内容の形式が正しくありません。", 400);
   }
@@ -141,6 +142,7 @@ export const onRequestPost: PagesFunction<ContactFunctionEnv> = async (
     name: body.name,
     email: body.email,
     message: body.message,
+    wantsReply: body.wantsReply,
   });
   const validationError = validateContactInput(input);
   if (validationError) {
