@@ -84,10 +84,14 @@ function errorResponse(message: string, status: number): Response {
   });
 }
 
-const SUCCESS_RESPONSE = new Response(JSON.stringify({ ok: true }), {
-  status: 200,
-  headers: { "Content-Type": "application/json; charset=utf-8" },
-});
+// Responseはグローバルスコープで生成できず、ボディの再利用もできないため
+// 毎リクエスト内で生成する。
+function successResponse(): Response {
+  return new Response(JSON.stringify({ ok: true }), {
+    status: 200,
+    headers: { "Content-Type": "application/json; charset=utf-8" },
+  });
+}
 
 export const onRequestPost: PagesFunction<ContactFunctionEnv> = async (
   context,
@@ -114,7 +118,7 @@ export const onRequestPost: PagesFunction<ContactFunctionEnv> = async (
 
   // ハニーポットは人間には表示されない。入力がある場合はボットとして静かに成功扱いにする。
   if (typeof body.company === "string" && body.company.trim() !== "") {
-    return SUCCESS_RESPONSE;
+    return successResponse();
   }
 
   if (typeof body.turnstileToken !== "string" || !body.turnstileToken) {
@@ -169,5 +173,5 @@ export const onRequestPost: PagesFunction<ContactFunctionEnv> = async (
     );
   }
 
-  return SUCCESS_RESPONSE;
+  return successResponse();
 };
