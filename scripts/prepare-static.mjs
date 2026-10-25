@@ -38,6 +38,7 @@ for (const file of files) {
 }
 const headers = securityHeaders([...hashes], [...styleHashes], {
   turnstile: Boolean(process.env.PUBLIC_TURNSTILE_SITE_KEY?.trim()),
+  adsense: Boolean(process.env.PUBLIC_ADSENSE_CLIENT?.trim()),
   styleAttrHashes: [...attrHashes],
 });
 await writeFile(

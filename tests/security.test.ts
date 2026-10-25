@@ -116,3 +116,33 @@ describe("shiki style attributes", () => {
     );
   });
 });
+
+describe("conditional origins", () => {
+  it("excludes ad origins unless the adsense build enables them", () => {
+    const disabled = securityHeaders([])["Content-Security-Policy"];
+    expect(disabled).not.toContain("googlesyndication");
+    expect(disabled).not.toContain("doubleclick");
+    const enabled = securityHeaders([], [], {
+      adsense: true,
+    })["Content-Security-Policy"];
+    expect(enabled).toContain("googlesyndication");
+    expect(enabled).toContain("doubleclick");
+  });
+
+  it("keeps the CSP under the Cloudflare Pages 2,000-character line limit", () => {
+    // 実ビルド相当: 8スクリプトハッシュ＋16属性ハッシュ＋giscus
+    const scriptHashes = Array.from(
+      { length: 8 },
+      (_, i) => `'sha256-${String(i).padStart(43, "0")}='`,
+    );
+    const styleAttrHashes = Array.from(
+      { length: 16 },
+      (_, i) => `'sha256-${String(i).padStart(43, "1")}='`,
+    );
+    const csp = securityHeaders(scriptHashes, [], {
+      styleAttrHashes,
+      turnstile: true,
+    })["Content-Security-Policy"];
+    expect(csp.length).toBeLessThan(2000);
+  });
+});

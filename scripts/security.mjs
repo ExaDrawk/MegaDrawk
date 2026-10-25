@@ -81,6 +81,19 @@ export function securityHeaders(hashes, styleHashes = [], options = {}) {
   const turnstileOrigins = options.turnstile
     ? " https://challenges.cloudflare.com"
     : "";
+  // 広告オリジンはAdSense有効なビルドでのみ許可する。
+  // （CSPはCloudflare Pagesの_headersで1行2,000文字上限のため、縮減も兼ねる）
+  const adsense = Boolean(options.adsense);
+  const adScriptOrigins = adsense ? " " + adScripts.join(" ") : "";
+  const adImgOrigins = adsense
+    ? " " +
+      adScripts.join(" ") +
+      " https://googleads.g.doubleclick.net https://tpc.googlesyndication.com"
+    : "";
+  const adConnectOrigins = adsense
+    ? " " + adScripts.join(" ") + " https://googleads.g.doubleclick.net"
+    : "";
+  const adFrameOrigins = adsense ? " " + adFrames.join(" ") : "";
   // giscus（ブログコメント・GitHub Discussions）は常設コンテンツ機能。
   const giscusOrigin = " https://giscus.app";
   // style属性はShikiの出力のみで、値ごとのハッシュで許可リスト化する。
@@ -90,14 +103,14 @@ export function securityHeaders(hashes, styleHashes = [], options = {}) {
     : "'none'";
   const csp = [
     "default-src 'self'",
-    `script-src 'self' ${[...new Set(hashes)].join(" ")} ${adScripts.join(" ")} https://static.cloudflareinsights.com${giscusOrigin}${turnstileOrigins}`,
+    `script-src 'self' ${[...new Set(hashes)].join(" ")}${adScriptOrigins} https://static.cloudflareinsights.com${giscusOrigin}${turnstileOrigins}`,
     "script-src-attr 'none'",
     `style-src 'self' ${[...new Set(styleHashes)].join(" ")}`,
     `style-src-attr ${styleSrcAttr}`,
-    `img-src 'self' data: ${adScripts.join(" ")} https://googleads.g.doubleclick.net https://github.com https://avatars.githubusercontent.com`,
+    `img-src 'self' data:${adImgOrigins} https://github.com https://avatars.githubusercontent.com`,
     "font-src 'self'",
-    `connect-src 'self' ${adScripts.join(" ")} https://googleads.g.doubleclick.net https://cloudflareinsights.com${giscusOrigin}`,
-    `frame-src ${adFrames.join(" ")}${giscusOrigin}${turnstileOrigins}`,
+    `connect-src 'self'${adConnectOrigins} https://cloudflareinsights.com${giscusOrigin}`,
+    `frame-src 'self'${adFrameOrigins}${giscusOrigin}${turnstileOrigins}`,
     "object-src 'none'",
     "base-uri 'none'",
     "form-action 'self'",
