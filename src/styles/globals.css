@@ -871,6 +871,12 @@ textarea.form-control {
   padding: 0.25rem 0 0.25rem 1rem;
   color: var(--color-muted);
 }
+.prose-content blockquote > :first-child {
+  margin-top: 0;
+}
+.prose-content blockquote > :last-child {
+  margin-bottom: 0;
+}
 .prose-content ol {
   max-width: 65ch;
   margin: 0 0 1.25rem;
