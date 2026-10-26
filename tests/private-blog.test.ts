@@ -24,10 +24,27 @@ const markdown =
 describe("article visibility", () => {
   it("updates only YAML visibility and preserves the body, metadata and comments", () => {
     const result = setArticleDraft(markdown, false);
+    expect(result).toBe(
+      markdown.replace("draft: true\n---", "draft: false\n---"),
+    );
     expect(readArticleDraft(result)).toBe(false);
     expect(result).toContain("# keep this comment");
     expect(result.split("---\n").at(-1)).toBe(markdown.split("---\n").at(-1));
     expect(readArticleDraft(setArticleDraft(result, true))).toBe(true);
+  });
+
+  it("preserves inline comments and CRLF and adds missing visibility without reformatting metadata", () => {
+    const input =
+      '---\r\ntitle: "Long title"\r\ndraft: true # private\r\n---\r\nBody';
+    expect(setArticleDraft(input, false)).toBe(
+      input.replace("true # private", "false # private"),
+    );
+    const missing = input.replace("draft: true # private\r\n", "");
+    const added = setArticleDraft(missing, true);
+    expect(readArticleDraft(added)).toBe(true);
+    expect(added).toBe(
+      missing.replace("\r\n---\r\nBody", "\r\ndraft: true\r\n---\r\nBody"),
+    );
   });
 
   it.each([

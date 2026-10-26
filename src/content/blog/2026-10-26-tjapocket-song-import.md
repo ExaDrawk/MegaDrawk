@@ -1,10 +1,8 @@
 ---
 title: "TJA Pocketに曲を追加する方法｜ZIP・フォルダからの取り込み"
-description: "TJA
-  Pocketで譜面と音源を取り込む手順を、Androidの実際の画面で紹介します。ZIPからの追加、フォルダの取り込み、参照フォルダの登録と、曲が見つから\
-  ないときの確認点をまとめました。"
+description: "TJA Pocketで譜面と音源を取り込む手順を、Androidの実際の画面で紹介します。ZIPからの追加、フォルダの取り込み、参照フォルダの登録と、曲が見つからないときの確認点をまとめました。"
 date: "2026-10-26"
-tags: [ "TJA Pocket", "使い方" ]
+tags: ["TJA Pocket", "使い方"]
 draft: true
 ---
 

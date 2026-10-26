@@ -1,4 +1,4 @@
-import { isMap, parseDocument } from "yaml";
+import { isMap, isScalar, parseDocument } from "yaml";
 
 export function isValidArticleFilename(name: string): boolean {
   return /^[a-z0-9][a-z0-9-]*\.md$/.test(name);
@@ -20,7 +20,8 @@ function frontmatter(markdown: string) {
   return {
     document,
     draft: draft === true,
-    body: markdown.slice(match[0].length),
+    yaml: match[1]!,
+    start: markdown.indexOf("\n") + 1,
   };
 }
 
@@ -30,7 +31,19 @@ export function readArticleDraft(markdown: string): boolean {
 
 /** YAMLとして更新し、本文・他の設定・コメントを保持する。 */
 export function setArticleDraft(markdown: string, draft: boolean): string {
-  const { document, body } = frontmatter(markdown);
-  document.set("draft", draft);
-  return `---\n${document.toString()}---\n${body}`;
+  const { document, yaml, start } = frontmatter(markdown);
+  const node = document.get("draft", true);
+  if (isScalar(node) && node.range) {
+    return (
+      markdown.slice(0, start + node.range[0]) +
+      String(draft) +
+      markdown.slice(start + node.range[1])
+    );
+  }
+  const newline = markdown.includes("\r\n") ? "\r\n" : "\n";
+  return (
+    markdown.slice(0, start + yaml.length) +
+    `${newline}draft: ${draft}` +
+    markdown.slice(start + yaml.length)
+  );
 }
