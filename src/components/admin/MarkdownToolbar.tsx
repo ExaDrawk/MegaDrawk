@@ -102,9 +102,10 @@ export function MarkdownToolbar({
       const next = lines
         .map((line) => (allHave ? line.slice(prefix.length) : prefix + line))
         .join("\n");
+      // 行全体を選択せず、キャレットを行末に置く（継続入力を行を選んで消さないため）
       return {
         text: next,
-        selectStart: lineStart,
+        selectStart: lineStart + next.length,
         selectEnd: lineStart + next.length,
       };
     });
