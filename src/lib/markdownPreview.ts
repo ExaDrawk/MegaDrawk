@@ -1,7 +1,8 @@
 import { parseFragment, serialize, type DefaultTreeAdapterMap } from "parse5";
-import { marked } from "marked";
+import { Marked } from "marked";
+import markedCjkFriendly from "marked-cjk-friendly";
 
-marked.setOptions({ gfm: true, breaks: false });
+const marked = new Marked({ gfm: true, breaks: false }, markedCjkFriendly());
 
 export interface MarkdownPreviewData {
   /** frontmatterのtitle。無ければ「無題」 */

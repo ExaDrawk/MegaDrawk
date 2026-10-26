@@ -2,6 +2,7 @@ import { defineConfig } from "astro/config";
 import react from "@astrojs/react";
 import tailwindcss from "@tailwindcss/vite";
 import { remarkAppCard } from "./src/infra/blog/remarkAppCard";
+import remarkCjkFriendly from "remark-cjk-friendly/parseOnly";
 export default defineConfig({
   output: "static",
   trailingSlash: "never",
@@ -13,7 +14,7 @@ export default defineConfig({
       themes: { light: "github-light", dark: "github-dark" },
       defaultColor: false,
     },
-    remarkPlugins: [remarkAppCard],
+    remarkPlugins: [remarkCjkFriendly, remarkAppCard],
   },
   vite: { plugins: [tailwindcss()] },
 });

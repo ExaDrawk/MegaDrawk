@@ -40,6 +40,30 @@ async function setup(page: Page) {
     page.getByRole("textbox", { name: "本文（Markdown）" }),
   ).toHaveValue(content);
 }
+
+test("Japanese bold needs no spaces in preview or published article", async ({
+  page,
+}) => {
+  await setup(page);
+  const body = page.getByRole("textbox", { name: "本文（Markdown）" });
+  await body.fill(
+    '---\ntitle: "太字の確認"\ndate: "2026-10-26"\ndraft: true\n---\n設定へ戻り、**「外観」→「スキン」**を開いて',
+  );
+  const preview = page.locator(".editor-preview-scroll .prose-content");
+  await expect(preview.locator("strong")).toHaveText("「外観」→「スキン」");
+  await expect(preview).toHaveText("設定へ戻り、「外観」→「スキン」を開いて");
+  await page.goto("/blog/2026-10-26-tjapocket-skin-import");
+  const paragraph = page
+    .locator(".prose-content p")
+    .filter({ hasText: "設定へ戻り、" });
+  await expect(paragraph.locator("strong").first()).toHaveText(
+    "「外観」→「スキン」",
+  );
+  await expect(paragraph).not.toContainText("**");
+  await expect(paragraph).toContainText(
+    "設定へ戻り、「外観」→「スキン」を開いて",
+  );
+});
 test("full-width editor keeps DOM, cursor, scroll and edits made while saving", async ({
   page,
 }) => {
