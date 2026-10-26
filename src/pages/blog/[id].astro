@@ -2,7 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 import { render } from "astro:content";
 import {
-  getPublishedBlogEntries,
+  getAllBlogEntries,
   toBlogPost,
   getAdjacentPosts,
   getRelatedPosts,
@@ -12,7 +12,7 @@ import { articleSchema } from "@/lib/structuredData";
 import { CommentSection } from "@/components/blog/CommentSection";
 
 export async function getStaticPaths() {
-  const entries = await getPublishedBlogEntries();
+  const entries = await getAllBlogEntries();
   return entries.map((entry) => ({
     params: { id: entry.id },
     props: { entry },
@@ -37,6 +37,7 @@ const tocItems = headings.filter(
   modifiedTime={post.updatedAt}
   ogImage={`/og/${post.id}.png`}
   ogImageAlt={post.title}
+  robots={post.draft ? { index: false, follow: false } : undefined}
   structuredData={[articleSchema(post, `/blog/${post.id}`)]}
 >
   <article class="page-section content-column">
@@ -128,8 +129,10 @@ const tocItems = headings.filter(
       </section>
     )}
 
-    <div class="post-comments">
-      <CommentSection postId={post.id} client:load />
-    </div>
+    {!post.draft && (
+      <div class="post-comments">
+        <CommentSection postId={post.id} client:load />
+      </div>
+    )}
   </article>
 </Layout>

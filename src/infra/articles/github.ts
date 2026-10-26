@@ -1,4 +1,9 @@
 /// <reference types="@cloudflare/workers-types" />
+import {
+  isValidArticleFilename,
+  readArticleDraft,
+} from "../../domain/blog/markdown";
+export { isValidArticleFilename } from "../../domain/blog/markdown";
 
 /**
  * ブログ記事（src/content/blog/*.md）をGitHubリポジトリへ読み書きするモジュール。
@@ -9,11 +14,6 @@
 const REPO = "ExaDrawk/MegaDrawk";
 const ARTICLE_DIR = "src/content/blog";
 const GITHUB_API = "https://api.github.com";
-
-/** ファイル名はスラッグ＋.mdのみ（パス操作の余地を残さない） */
-export function isValidArticleFilename(name: string): boolean {
-  return /^[a-z0-9][a-z0-9-]*\.md$/.test(name);
-}
 
 function githubHeaders(token: string): HeadersInit {
   return {
@@ -29,14 +29,20 @@ function githubHeaders(token: string): HeadersInit {
 function errorResponse(message: string, status: number): Response {
   return new Response(JSON.stringify({ error: message }), {
     status,
-    headers: { "Content-Type": "application/json; charset=utf-8" },
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-store",
+    },
   });
 }
 
 function successResponse(body: unknown): Response {
   return new Response(JSON.stringify(body), {
     status: 200,
-    headers: { "Content-Type": "application/json; charset=utf-8" },
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-store",
+    },
   });
 }
 
@@ -141,6 +147,7 @@ export async function saveArticle(
     return errorResponse("記事管理は現在利用できません。", 500);
   }
   if (
+    !input ||
     typeof input.name !== "string" ||
     !isValidArticleFilename(input.name) ||
     typeof input.content !== "string" ||
@@ -153,6 +160,14 @@ export async function saveArticle(
   }
   if (input.sha !== null && typeof input.sha !== "string") {
     return errorResponse("更新元の記事が特定できません。", 400);
+  }
+  try {
+    readArticleDraft(input.content);
+  } catch (error) {
+    return errorResponse(
+      error instanceof Error ? error.message : "記事の設定を確認してください。",
+      400,
+    );
   }
   let response: Response;
   try {
@@ -193,7 +208,8 @@ export async function saveArticle(
       502,
     );
   }
-  return successResponse({ ok: true });
+  const saved = (await response.json()) as { content?: { sha?: string } };
+  return successResponse({ ok: true, sha: saved.content?.sha });
 }
 
 export async function deleteArticle(

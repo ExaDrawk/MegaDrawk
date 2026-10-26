@@ -13,13 +13,15 @@ UI（pages/layouts/views/components）→ ドメイン（domain/config/lib）→
 - コードハイライトはAstro標準のShikiを二重テーマ（github-light/github-dark、defaultColor: false）で生成し、globals.cssが[data-theme]で切り替えます。Shikiはstyle属性を出力するため、scripts/security.mjsがShiki形式のstyle属性のみ許可し、値ごとのSHA-256ハッシュをCSPのstyle-src-attrへ出力します。
 - 読了時間・関連記事・タグ集計・前後記事のロジックはsrc/lib/blogUtils.tsの純粋関数（単体テスト対象）。記事ごとのOG画像はsrc/pages/og/[id].png.tsがビルド時にsatori＋sharpで生成し、フォントはscripts/assets/fonts/から読み込みます（リポジトリにコミット、ブラウザへは配信しない）。
 - コメントはアカウント不要・公開型。functions/api/comments/[postId].tsがGET（一覧）とPOST（投稿）を提供し、D1（megadrawk-commentsデータベース、COMMENTS_DBバインディング）に保存する。POSTはTurnstile検証・入力検証（domain/comment/types.tsのCOMMENT_LIMITS、本文は2,000文字まで）・IPハッシュ（IP_HASH_SALT）によるレート制限（60秒間隔、10分間に3件、1日10件、同一記事1日3件、いずれも日本時間の暦日で集計）と同一本文再送抑止（24時間）を経由する。PUT（編集）は投稿後10分以内の同一IPハッシュのみ本文を更新し、edited_atを記録する。返信はトップレベルコメントへの1階層のみで、返信への返信はサーバー側でルートに正規化する。管理者（SITE.ownerNameと同一名のコメント）への返信は、そのコメントへの返信が3件までの間レート制限を免除され、4件目以降は原則の制限が適用される（名前は公開値のため偽装可能だが、免除は3件までに限られる）。削除はDELETEにX-Admin-Tokenヘッダ（ADMIN_DELETE_TOKEN）で認証して実行する。生IPは保存せずSHA-256ハッシュのみ保持。
-- 下書き（draft: true）は本番ビルド・RSS・サイトマップから除外され、開発サーバーでのみ表示されます。
+- 非公開記事（draft: true）は公開一覧・RSS・サイトマップ・OG画像から除外されます。記事のURLは公開時と同じ `/blog/<id>` で、管理者セッションがある場合のみネット上で閲覧できます。未認証時は本文・記事素材とも404を返し、秘密設定の欠如時も静的ファイルへフォールバックしません。開発サーバーでは従来どおり確認できます。
+- 記事専用の画像やZIPは `src/content/blog-assets/<id>/` に置き、本文では `/blog-assets/<id>/<filename>` を参照します。`scripts/prepare-static.mjs` が公開記事の素材だけをdistへ配置します。非公開記事のHTMLと素材は `.astro/private-blog.json` にまとめ、Functionsの内部データとしてバンドルします。distには残さないため、Functionsを経由しないアクセスでも漏れません。非公開の素材をpublicや共有のクライアントJSへ置かないでください。
+- 配信時は必ず `npm run build` を使用します（`astro build`単独の出力は配信禁止）。`functions/blog/[id].ts` と `functions/blog-assets/[[path]].ts` が既存の `checkAdminAccess` で認証し、認証後の応答には `private, no-store` と `noindex` を付けます。公開状態の変更は再ビルド・デプロイ完了後に反映されます。すでに閲覧・保存された公開記事のコピーまでは取り消せません。
 
 ## 管理画面（/admin）
 
 - /admin（メニュー）、/admin/comments（コメント管理）、/admin/articles（記事管理）の全ページがパスワードゲートの裏にあり、ポップアップ（表示名は「パスワード」）で入力を求める。認証はPOST /api/admin/sessionがADMIN_DELETE_TOKENと照合し、SHA-256導出値のHttpOnlyセッションCookie（Secure/SameSite=Strict/400日）を発行する形式。パスワード・トークンともにJavaScriptからは読めず、localStorageにも保存されない。全管理APIはcheckAdminAccessでヘッダ（API直接利用）またはセッションCookieを検証する。ログアウトはDELETE /api/admin/session、強制失効はADMIN_DELETE_TOKENの上書きで行える。Cookieは400日で設計しており、運営者のPCでは常時開ける運用を想定する。
 - コメント管理: 全コメントの一覧・削除（返信ごと削除）と、管理人コメントの投稿。管理人コメントはis_admin=1として保存され、公開ページに「管理人」バッジが表示される。一般フォームからは名前「Drawk」を予約語として拒否し、返信免除の判定もis_admin参照のためなりすましでは免除を得られない。
-- 記事管理: src/infra/articles/github.tsがGitHub Contents APIでsrc/content/blogを読み書きし、mainへコミットする。保存から反映まで1〜2分かかる。ファイル名はスラッグ（英小文字・数字・ハイフン）+.mdのみ許可。
+- 記事管理: src/infra/articles/github.tsがGitHub Contents APIでsrc/content/blogを読み書きし、mainへコミットする。「公開状態」で公開・非公開を選び、対応する保存ボタンで確定する。「記事を確認」から配信済みの記事を開ける。保存から反映まで通常1〜2分かかるため、未保存の変更や反映前の内容はプレビューへ反映されない。保存応答の最新SHAを保持し、連続保存でも古いSHAを送らない。ファイル名はスラッグ（英小文字・数字・ハイフン）+.mdのみ許可。
 - 重要: Cloudflare Workersのfetchは既定のUser-Agentを送らない。GitHub APIはUA必須で、無いと403を返す（src/infra/articles/github.tsのgithubHeadersで User-Agent を必ず送ること）。 FunctionsのFetch例外はCloudflareの素の502ページになるため、外部API呼び出しは必ずtry/catchしてJSON応答に変換すること（2026-10-25に実障害として確認）。コメントデータは各利用者のブラウザのlocalStorage（キーは変更なし）に残ります。
 
 ## セキュリティ

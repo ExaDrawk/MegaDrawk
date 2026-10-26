@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="440" viewBox="0 0 1000 440" role="img" aria-labelledby="title desc">
+  <title id="title">譜面と音源を同じフォルダにまとめる</title>
+  <desc id="desc">MegaDrawk_Import_Demoフォルダの中にdemo.tjaとdemo.wavを保存する。demo.tjaのWAVE指定はdemo.wav。</desc>
+  <rect width="1000" height="440" rx="20" fill="#eef5f8"/>
+  <g font-family="sans-serif" fill="#16364a">
+    <text x="48" y="65" font-size="28" font-weight="700">譜面と音源は、セットで用意</text>
+    <path d="M52 102h42l14 16h52v46H52z" fill="#237a9b"/>
+    <text x="184" y="147" font-size="28" font-weight="700">MegaDrawk_Import_Demo /</text>
+    <path d="M104 185v151m0-118h55m-55 118h55" fill="none" stroke="#7794a2" stroke-width="3"/>
+    <rect x="180" y="184" width="770" height="96" rx="12" fill="white"/>
+    <text x="208" y="225" font-size="27" font-weight="700">demo.tja</text>
+    <text x="208" y="257" font-size="20">譜面ファイル　WAVE:demo.wav</text>
+    <rect x="180" y="302" width="770" height="96" rx="12" fill="white"/>
+    <text x="208" y="343" font-size="27" font-weight="700">demo.wav</text>
+    <text x="208" y="375" font-size="20">音源ファイル　譜面内の指定と名前をそろえる</text>
+  </g>
+</svg>

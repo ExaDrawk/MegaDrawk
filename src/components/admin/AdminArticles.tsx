@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { ActionButton } from "@/components/ui/Action";
 import { AdminGate } from "@/components/admin/AdminGate";
+import {
+  readArticleDraft,
+  setArticleDraft,
+  isValidArticleFilename,
+} from "@/domain/blog/markdown";
 
 /**
  * 記事管理画面（/admin/articles）。
@@ -32,6 +37,27 @@ function AdminArticles() {
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
+  let draft: boolean | null = null;
+  try {
+    draft = readArticleDraft(content);
+  } catch {
+    /* 編集中の未完成な設定は保存時に検証する。 */
+  }
+
+  function changeVisibility(value: boolean) {
+    try {
+      setContent(setArticleDraft(content, value));
+      setDirty(true);
+      setErrorText("");
+      setSaveMessage("");
+    } catch (error) {
+      setErrorText(
+        error instanceof Error
+          ? error.message
+          : "記事の設定を確認してください。",
+      );
+    }
+  }
 
   const load = useCallback(async () => {
     setState("loading");
@@ -99,6 +125,7 @@ function AdminArticles() {
     setSaving(true);
     setSaveMessage("");
     try {
+      readArticleDraft(content);
       const response = await fetch("/api/admin/articles", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -110,18 +137,22 @@ function AdminArticles() {
       });
       const payload = (await response.json().catch(() => null)) as {
         error?: string;
+        sha?: string;
       } | null;
       if (!response.ok) {
         setSaveMessage(payload?.error ?? "保存に失敗しました。");
         return;
       }
       setSaveMessage(
-        "保存しました。GitHubにコミットしたので、1〜2分でサイトに反映されます。",
+        "保存しました。公開状態と内容は、配信の更新後（通常1〜2分）に反映されます。",
       );
+      if (payload?.sha) setCurrentSha(payload.sha);
       setDirty(false);
       await load();
     } catch {
-      setSaveMessage("保存に失敗しました。");
+      setSaveMessage(
+        "保存に失敗しました。通信状態を確認して、もう一度お試しください。",
+      );
     } finally {
       setSaving(false);
     }
@@ -172,6 +203,11 @@ function AdminArticles() {
 
       {state === "ready" && (
         <>
+          {errorText && (
+            <p role="alert" data-color="color-danger">
+              {errorText}
+            </p>
+          )}
           <section className="surface p-5 sm:p-6">
             <h2 className="section-title">エディタ</h2>
             <div className="mt-4 grid gap-4">
@@ -191,6 +227,27 @@ function AdminArticles() {
                 />
               </label>
               <label className="form-field">
+                <span className="form-label">公開状態</span>
+                <select
+                  className="form-control"
+                  value={
+                    draft === null ? "invalid" : draft ? "private" : "public"
+                  }
+                  onChange={(event) =>
+                    changeVisibility(event.target.value === "private")
+                  }
+                  disabled={saving || !content}
+                >
+                  {draft === null && (
+                    <option value="invalid" disabled>
+                      記事の設定を確認してください
+                    </option>
+                  )}
+                  <option value="private">非公開（管理者のみ）</option>
+                  <option value="public">公開</option>
+                </select>
+              </label>
+              <label className="form-field">
                 <span className="form-label">
                   本文（Markdown・frontmatter込み）
                 </span>
@@ -207,18 +264,28 @@ function AdminArticles() {
               <div className="flex flex-wrap items-center gap-3">
                 <ActionButton
                   onClick={() => void save()}
-                  disabled={saving || !filename || !content}
+                  disabled={saving || !filename || !content || draft === null}
                   aria-busy={saving}
                 >
                   {saving
                     ? "保存中..."
-                    : currentSha
-                      ? "保存して公開"
-                      : "新規作成して公開"}
+                    : draft
+                      ? "非公開で保存"
+                      : "公開して保存"}
                 </ActionButton>
                 <ActionButton variant="secondary" onClick={newArticle}>
                   新規記事
                 </ActionButton>
+                {currentSha && isValidArticleFilename(filename) && (
+                  <a
+                    className="text-link"
+                    href={`/blog/${filename.slice(0, -3)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    記事を確認
+                  </a>
+                )}
                 {dirty && (
                   <span className="text-xs" data-color="color-text-muted">
                     未保存の変更があります

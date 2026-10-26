@@ -1,5 +1,6 @@
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { preparePrivateBlog } from "./private-blog.mjs";
 import {
   inlineScriptHashes,
   inlineStyleHashes,
@@ -41,6 +42,7 @@ const headers = securityHeaders([...hashes], [...styleHashes], {
   adsense: Boolean(process.env.PUBLIC_ADSENSE_CLIENT?.trim()),
   styleAttrHashes: [...attrHashes],
 });
+await preparePrivateBlog(path.resolve("."), headers);
 await writeFile(
   path.join(root, "_headers"),
   "/*\n" +

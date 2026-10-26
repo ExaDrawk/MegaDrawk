@@ -16,6 +16,11 @@ import type { BlogPost } from "@/domain/blog/post";
 
 export type BlogEntry = CollectionEntry<"blog">;
 
+/** 本文生成用。非公開記事はビルド後に静的配信領域から取り除く。 */
+export async function getAllBlogEntries(): Promise<readonly BlogEntry[]> {
+  return getCollection("blog");
+}
+
 /** コレクションのエントリをドメインモデルへ写像する。 */
 export function toBlogPost(entry: BlogEntry): BlogPost {
   const body = entry.body ?? "";
