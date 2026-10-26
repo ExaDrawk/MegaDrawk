@@ -57,14 +57,15 @@ export function MarkdownToolbar({
     const end = textarea.selectionEnd ?? value.length;
     const selected = value.slice(start, end);
     const result = transform(selected, start, end);
-    const nextValue = value.slice(0, start) + result.text + value.slice(end);
     pendingSelectionRef.current = {
       start: result.selectStart,
       end: result.selectEnd,
     };
-    // DOMを直接更新してinputイベントを発火する。
-    // 制御付きコンポーネントでも、onChange→state更新がDOMと競合せず
-    // ネイティブのUndo/Redoも保持される。
+    // DOM値をネイティブセッターで更新してinputイベントを発火した上で、
+    // onChangeも明示的に呼ぶ（環境によってイベント発火の挙動が異なるため二重化。
+    // 同じ値での2回呼び出しはstateとして冪等）。
+    // テキストエリアは非制御で使うため、state再描画との競合が起きない。
+    const nextValue = value.slice(0, start) + result.text + value.slice(end);
     const nativeValueSetter = Object.getOwnPropertyDescriptor(
       HTMLTextAreaElement.prototype,
       "value",

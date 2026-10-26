@@ -40,6 +40,7 @@ function AdminArticles() {
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const [openCounter, setOpenCounter] = useState(0);
   let draft: boolean | null = null;
   try {
     draft = readArticleDraft(content);
@@ -103,6 +104,8 @@ function AdminArticles() {
       };
       setFilename(payload.name);
       setContent(payload.content);
+      if (textareaRef.current) textareaRef.current.value = payload.content;
+      setOpenCounter((count) => count + 1);
       setCurrentSha(payload.sha);
       setDirty(false);
       setSaveMessage("");
@@ -114,10 +117,11 @@ function AdminArticles() {
 
   function newArticle() {
     const today = new Date().toISOString().slice(0, 10);
+    const template = `---\ntitle: "記事タイトル"\ndescription: "この記事の要約を1〜2文で。"\ndate: "${today}"\ntags: []\ndraft: true\n---\n\n本文をMarkdownで書きます。\n`;
     setFilename(`${today}-new-post.md`);
-    setContent(
-      `---\ntitle: "記事タイトル"\ndescription: "この記事の要約を1〜2文で。"\ndate: "${today}"\ntags: []\ndraft: true\n---\n\n本文をMarkdownで書きます。\n`,
-    );
+    setContent(template);
+    if (textareaRef.current) textareaRef.current.value = template;
+    setOpenCounter((count) => count + 1);
     setCurrentSha(null);
     setDirty(false);
     setSaveMessage("");
@@ -267,7 +271,8 @@ function AdminArticles() {
                   </div>
                   <textarea
                     ref={textareaRef}
-                    value={content}
+                    defaultValue={content}
+                    key={openCounter}
                     onChange={(event) => {
                       setContent(event.target.value);
                       setDirty(true);

@@ -36,6 +36,7 @@ export function BlogPostEditor() {
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dirtyRef = useRef(false);
   const bodyTextareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const [bodyRestoreCounter, setBodyRestoreCounter] = useState(0);
   const previewBody = draftInput.body;
 
   function updateField<K extends keyof BlogPostDraftInput>(
@@ -70,6 +71,7 @@ export function BlogPostEditor() {
       if (storedDraft) {
         setDraftInput(storedDraft.draft);
         setSavedAt(storedDraft.savedAt);
+        setBodyRestoreCounter((count) => count + 1);
       }
       setStorageState("ready");
     } catch {
@@ -115,6 +117,7 @@ export function BlogPostEditor() {
       setStorageState("ready");
       if (resetInput) {
         setDraftInput(getInitialBlogPostDraftInput());
+        setBodyRestoreCounter((count) => count + 1);
         setResult(null);
         setCopied(false);
       }
@@ -232,8 +235,9 @@ export function BlogPostEditor() {
               <textarea
                 id="draft-body"
                 ref={bodyTextareaRef}
+                key={"body-" + bodyRestoreCounter}
                 aria-labelledby="draft-body-label"
-                value={previewBody}
+                defaultValue={previewBody}
                 onChange={(event) => updateField("body", event.target.value)}
                 placeholder="Markdownで書けます。## 見出し、**強調**、```コードブロック``` など。"
                 rows={12}
