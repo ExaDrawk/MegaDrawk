@@ -10,6 +10,7 @@ import {
 } from "@/domain/blog/markdown";
 import {
   assetUrl,
+  availableImageName,
   markdownImage,
   validateImage,
   IMAGE_LIMITS,
@@ -328,20 +329,11 @@ function AdminArticles() {
       let total = pendingRef.current.reduce((n, p) => n + p.size, 0);
       for (const file of files) {
         const bytes = new Uint8Array(await file.arrayBuffer());
-        let name = file.name
-          .replace(/[^a-zA-Z0-9_.-]/g, "-")
-          .replace(/^[^a-zA-Z0-9]+/, "");
-        if (!name) name = "image.png";
+        const name = availableImageName(file.name, names);
         validateImage(name, bytes);
         total += bytes.length;
         if (total > IMAGE_LIMITS.total)
           throw new Error("画像の合計は15MiB以内にしてください。");
-        const base = name.slice(0, name.lastIndexOf(".")),
-          ext = name.slice(name.lastIndexOf("."));
-        let suffix = 1;
-        while (names.has(name)) {
-          name = `${base}-${suffix++}${ext}`;
-        }
         names.add(name);
         const data = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();

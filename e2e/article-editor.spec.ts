@@ -204,3 +204,34 @@ test("reauthentication keeps the mounted editor and unsaved text", async ({
   await expect(body).toHaveValue(content + "再認証後も保持");
   await expect(body).toHaveAttribute("data-identity", "before-auth");
 });
+
+test("Japanese image names work with drag-and-drop and clipboard paste", async ({
+  page,
+}) => {
+  await setup(page);
+  await page.getByText("画像（0）", { exact: true }).click();
+  await page.locator(".image-dropzone").evaluate((element, base64) => {
+    const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+    const transfer = new DataTransfer();
+    transfer.items.add(new File([bytes], "画像.png", { type: "image/png" }));
+    element.dispatchEvent(
+      new DragEvent("drop", { bubbles: true, dataTransfer: transfer }),
+    );
+  }, png.toString("base64"));
+  await expect(
+    page.getByRole("textbox", { name: "image.pngの代替テキスト" }),
+  ).toBeVisible();
+  await page
+    .getByRole("textbox", { name: "本文（Markdown）" })
+    .evaluate((element, base64) => {
+      const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+      const transfer = new DataTransfer();
+      transfer.items.add(new File([bytes], "画像.png", { type: "image/png" }));
+      element.dispatchEvent(
+        new ClipboardEvent("paste", { bubbles: true, clipboardData: transfer }),
+      );
+    }, png.toString("base64"));
+  await expect(
+    page.getByRole("textbox", { name: "image-1.pngの代替テキスト" }),
+  ).toBeVisible();
+});

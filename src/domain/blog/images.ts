@@ -8,6 +8,22 @@ export interface ArticleImage {
   sha: string;
   url: string;
 }
+export function availableImageName(
+  raw: string,
+  existing: ReadonlySet<string>,
+): string {
+  const dot = raw.lastIndexOf(".");
+  const extension = dot < 0 ? "" : raw.slice(dot).toLowerCase();
+  const base =
+    (dot < 0 ? raw : raw.slice(0, dot))
+      .normalize("NFKD")
+      .replace(/[^a-zA-Z0-9_-]/g, "-")
+      .replace(/^-+|-+$/g, "") || "image";
+  let name = `${base}${extension}`,
+    suffix = 1;
+  while (existing.has(name)) name = `${base}-${suffix++}${extension}`;
+  return name;
+}
 export function validImageName(name: string): boolean {
   return (
     /^[a-zA-Z0-9][a-zA-Z0-9_.-]*\.(png|jpe?g|webp|gif)$/i.test(name) &&

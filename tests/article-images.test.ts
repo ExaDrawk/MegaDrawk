@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   IMAGE_LIMITS,
+  availableImageName,
   markdownImage,
   scrollRatio,
   validateImage,
@@ -78,6 +79,10 @@ function github(
 describe("article image rules", () => {
   it("validates signatures, paths and limits", () => {
     expect(() => validateImage("image.png", png)).not.toThrow();
+    expect(availableImageName("画像.PNG", new Set())).toBe("image.png");
+    expect(availableImageName("画像.png", new Set(["image.png"]))).toBe(
+      "image-1.png",
+    );
     for (const name of ["../image.png", "image.jpg", "image.svg"])
       expect(() => validateImage(name, png)).toThrow();
     expect(() =>
