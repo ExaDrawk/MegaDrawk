@@ -1,0 +1,40 @@
+#!/bin/sh
+# 管理画面（GitHub API経由の保存）が正本である記事ファイルを、
+# ローカルからのpushで上書き・削除できないようにするガード。
+#
+# - src/content/blog/** と src/content/blog-assets/** の追加・変更・削除を検知したら
+#   ALLOW_BLOG_OVERRIDE=1 を付けたpushでのみ許可する（例: ALLOW_BLOG_OVERRIDE=1 git push）
+# - 記事は管理画面からの保存が正本。ローカル侧の作業で旧版をpushする事故を構造的に防ぐ。
+
+remote_ref="refs/heads/main"
+zero="0000000000000000000000000000000000000000"
+
+while read local_ref local_sha remote_ref_arg remote_sha; do
+  [ "$remote_ref_arg" = "$remote_ref" ] || continue
+  [ "$local_sha" = "$zero" ] && continue
+
+  if [ "$ALLOW_BLOG_OVERRIDE" = "1" ]; then
+    echo "pre-push: ALLOW_BLOG_OVERRIDE=1 のため記事ファイルの上書きを許可します"
+    continue
+  fi
+
+  # リモート最新を取得して比較する（取得できない場合は警告して通す）
+  git fetch origin main >/dev/null 2>&1 || {
+    echo "pre-push: 警告: origin の取得に失敗したため記事ガードをスキップします"
+    exit 0
+  }
+
+  changed="$(git diff --name-status "origin/main..$local_sha" -- \
+    'src/content/blog/*' 'src/content/blog-assets/*' 2>/dev/null)"
+  [ -n "$changed" ] || continue
+
+  echo ""
+  echo "=== push を拒否しました: 記事ファイル（管理画面保存が正本）の変更を検出 ==="
+  echo "$changed"
+  echo ""
+  echo "記事の追加・編集・削除は管理画面（/admin/articles）から行ってください。"
+  echo "ローカルから意図的に記事を変更する場合は ALLOW_BLOG_OVERRIDE=1 git push で上書きできます。"
+  exit 1
+done
+
+exit 0

@@ -19,6 +19,12 @@ UI（pages/layouts/views/components）→ ドメイン（domain/config/lib）→
 
 ## 管理画面（/admin）
 
+### 記事ファイルの上書きガード（pre-pushフック）
+
+- 記事（src/content/blog/**、src/content/blog-assets/**）は管理画面からの保存が正本。ローカルからのgit pushでこれらを変更・削除しようとすると、scripts/hooks/pre-push（.git/hooks/pre-pushへ配置）がpushを拒否する。
+- 意図的にローカルから記事を変更する場合のみ、ALLOW_BLOG_OVERRIDE=1 git push で上書きできる。
+- フックはこのクローン固有のため、再クローン時は cp scripts/hooks/pre-push .git/hooks/pre-push で再設置する。
+
 - /admin（メニュー）、/admin/comments（コメント管理）、/admin/articles（記事管理）の全ページがパスワードゲートの裏にあり、ポップアップ（表示名は「パスワード」）で入力を求める。認証はPOST /api/admin/sessionがADMIN_DELETE_TOKENと照合し、SHA-256導出値のHttpOnlyセッションCookie（Secure/SameSite=Strict/400日）を発行する形式。パスワード・トークンともにJavaScriptからは読めず、localStorageにも保存されない。全管理APIはcheckAdminAccessでヘッダ（API直接利用）またはセッションCookieを検証する。ログアウトはDELETE /api/admin/session、強制失効はADMIN_DELETE_TOKENの上書きで行える。Cookieは400日で設計しており、運営者のPCでは常時開ける運用を想定する。
 - コメント管理: 全コメントの一覧・削除（返信ごと削除）と、管理人コメントの投稿。管理人コメントはis_admin=1として保存され、公開ページに「管理人」バッジが表示される。一般フォームからは名前「Drawk」を予約語として拒否し、返信免除の判定もis_admin参照のためなりすましでは免除を得られない。
 - 記事管理: src/infra/articles/github.tsとimages.tsがGitHub APIでsrc/content/blogと記事素材を読み書きし、mainへコミットする。「公開状態」で公開・非公開を選び、対応する保存ボタンで確定する。「記事を確認」から配信済みの記事を開ける。保存から反映まで通常1〜2分かかるため、「記事を確認」の配信内容は更新まで変わらない（編集画面のプレビューは即時更新）。保存応答の最新SHAを保持し、連続保存でも古いSHAを送らない。ファイル名はスラッグ（英小文字・数字・ハイフン）+.mdのみ許可。
