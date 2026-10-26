@@ -75,8 +75,8 @@ test("blog post page renders markdown, toc, reading time and per-post og image",
     "content",
     "ブログをはじめました",
   );
-  // 記事は1件なので前後ナビゲーション・関連記事は出ない
-  await expect(page.locator(".post-navigation")).toHaveCount(0);
+  // 記事の追加に合わせて前後ナビゲーションは出る（関連記事はタグ共有がまだ無いので出ない）
+  await expect(page.locator(".post-navigation")).toHaveCount(1);
   await expect(page.locator(".post-related")).toHaveCount(0);
 });
 
@@ -96,11 +96,6 @@ test("comment form is account-free and degrades gracefully without turnstile con
   const comments = page.getByRole("region", { name: "コメント欄" });
   await comments.scrollIntoViewIfNeeded();
   await expect(comments).toBeVisible();
-  // 公開導線の案内（GitHubアカウントは不要）
-  await expect(comments.getByRole("link", { name: /X（/ })).toBeVisible();
-  await expect(
-    comments.getByRole("link", { name: "お問い合わせフォーム" }),
-  ).toBeVisible();
   // ローカル検証ビルドはTurnstileサイトキー未設定のため、スパム防止UIなしでは
   // 送信できない（本番ビルドではウィジェットが表示され投稿できる）
   await expect(

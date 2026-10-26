@@ -6,7 +6,6 @@ import {
   validateCommentInput,
   type CommentItem,
 } from "@/domain/comment/types";
-import { SITE } from "@/config/site";
 import { SITE_FEATURES } from "@/config/features";
 import { useTurnstile } from "@/hooks/useTurnstile";
 import { ActionButton } from "@/components/ui/Action";
@@ -341,20 +340,7 @@ export function CommentSection({ postId }: CommentSectionProps) {
     <section className="mt-5" aria-label="コメント欄">
       <h3 className="section-title text-base">コメント</h3>
       <p className="mt-2 text-xs" data-color="color-text-muted">
-        誰でも投稿でき、このページに公開されます（投稿前の審査はありません。スパム防止のためIPをハッシュ化して保存します）。公開の場でのご連絡は
-        <a
-          className="text-link min-h-0"
-          href={`https://x.com/${SITE.social.xHandle.slice(1)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          X（{SITE.social.xHandle}）
-        </a>
-        や
-        <a className="text-link min-h-0" href="/contact">
-          お問い合わせフォーム
-        </a>
-        からもどうぞ。
+        誰でも投稿でき、このページに公開されます（投稿前の審査はありません。スパム防止のためIPをハッシュ化して保存します）。
       </p>
 
       <form
