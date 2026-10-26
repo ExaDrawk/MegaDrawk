@@ -1,3 +1,4 @@
+import { articleImages } from "../../../src/infra/articles/images";
 /// <reference types="@cloudflare/workers-types" />
 import {
   deleteArticle,
@@ -20,7 +21,10 @@ interface ArticlesEnv extends CommentsEnv {
 export const onRequestGet: PagesFunction<ArticlesEnv> = async (context) => {
   const denied = await checkAdminAccess(context.env, context.request);
   if (denied) return denied;
-  const file = new URL(context.request.url).searchParams.get("file");
+  const params = new URL(context.request.url).searchParams;
+  const file = params.get("file");
+  if (params.has("images"))
+    return articleImages(context.env.GITHUB_TOKEN, file, params.get("image"));
   if (file) {
     return getArticle(context.env.GITHUB_TOKEN, file);
   }
@@ -30,9 +34,17 @@ export const onRequestGet: PagesFunction<ArticlesEnv> = async (context) => {
 export const onRequestPut: PagesFunction<ArticlesEnv> = async (context) => {
   const denied = await checkAdminAccess(context.env, context.request);
   if (denied) return denied;
+  const origin = context.request.headers.get("Origin");
+  if (origin && origin !== new URL(context.request.url).origin)
+    return new Response(null, { status: 403 });
+  if (Number(context.request.headers.get("Content-Length")) > 22 * 1024 * 1024)
+    return new Response(null, { status: 413 });
   let body: SaveArticleInput;
   try {
-    body = JSON.parse(await context.request.text());
+    const text = await context.request.text();
+    if (new TextEncoder().encode(text).length > 22 * 1024 * 1024)
+      return new Response(null, { status: 413 });
+    body = JSON.parse(text);
   } catch {
     return new Response(
       JSON.stringify({ error: "送信内容を読み取れませんでした。" }),
@@ -48,6 +60,9 @@ export const onRequestPut: PagesFunction<ArticlesEnv> = async (context) => {
 export const onRequestDelete: PagesFunction<ArticlesEnv> = async (context) => {
   const denied = await checkAdminAccess(context.env, context.request);
   if (denied) return denied;
+  const origin = context.request.headers.get("Origin");
+  if (origin && origin !== new URL(context.request.url).origin)
+    return new Response(null, { status: 403 });
   const params = new URL(context.request.url).searchParams;
   return deleteArticle(
     context.env.GITHUB_TOKEN,

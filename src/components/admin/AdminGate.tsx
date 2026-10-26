@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { ActionButton } from "@/components/ui/Action";
 
 /**
@@ -14,6 +20,13 @@ export function AdminGate({ children }: { children: ReactNode }) {
   const [password, setPassword] = useState("");
   const [errorText, setErrorText] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const opened = useRef(false);
+  if (gateState === "open") opened.current = true;
+  useEffect(() => {
+    const expired = () => setGateState("locked");
+    window.addEventListener("admin-auth-required", expired);
+    return () => window.removeEventListener("admin-auth-required", expired);
+  }, []);
 
   const check = useCallback(async () => {
     setGateState("checking");
@@ -65,8 +78,9 @@ export function AdminGate({ children }: { children: ReactNode }) {
     }
   }
 
+  let overlay: ReactNode = null;
   if (gateState === "checking") {
-    return (
+    overlay = (
       <div className="surface p-6" aria-busy="true">
         <div className="skeleton mb-3 h-4 w-40 rounded" />
         <div className="skeleton h-24 rounded" />
@@ -75,7 +89,7 @@ export function AdminGate({ children }: { children: ReactNode }) {
   }
 
   if (gateState === "locked") {
-    return (
+    overlay = (
       <div
         className="admin-gate-overlay"
         role="dialog"
@@ -123,5 +137,12 @@ export function AdminGate({ children }: { children: ReactNode }) {
     );
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      <div hidden={gateState !== "open"} inert={gateState !== "open"}>
+        {opened.current ? children : null}
+      </div>
+      {overlay}
+    </>
+  );
 }

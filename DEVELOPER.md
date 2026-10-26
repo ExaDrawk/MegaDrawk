@@ -21,7 +21,7 @@ UI（pages/layouts/views/components）→ ドメイン（domain/config/lib）→
 
 - /admin（メニュー）、/admin/comments（コメント管理）、/admin/articles（記事管理）の全ページがパスワードゲートの裏にあり、ポップアップ（表示名は「パスワード」）で入力を求める。認証はPOST /api/admin/sessionがADMIN_DELETE_TOKENと照合し、SHA-256導出値のHttpOnlyセッションCookie（Secure/SameSite=Strict/400日）を発行する形式。パスワード・トークンともにJavaScriptからは読めず、localStorageにも保存されない。全管理APIはcheckAdminAccessでヘッダ（API直接利用）またはセッションCookieを検証する。ログアウトはDELETE /api/admin/session、強制失効はADMIN_DELETE_TOKENの上書きで行える。Cookieは400日で設計しており、運営者のPCでは常時開ける運用を想定する。
 - コメント管理: 全コメントの一覧・削除（返信ごと削除）と、管理人コメントの投稿。管理人コメントはis_admin=1として保存され、公開ページに「管理人」バッジが表示される。一般フォームからは名前「Drawk」を予約語として拒否し、返信免除の判定もis_admin参照のためなりすましでは免除を得られない。
-- 記事管理: src/infra/articles/github.tsがGitHub Contents APIでsrc/content/blogを読み書きし、mainへコミットする。「公開状態」で公開・非公開を選び、対応する保存ボタンで確定する。「記事を確認」から配信済みの記事を開ける。保存から反映まで通常1〜2分かかるため、未保存の変更や反映前の内容はプレビューへ反映されない。保存応答の最新SHAを保持し、連続保存でも古いSHAを送らない。ファイル名はスラッグ（英小文字・数字・ハイフン）+.mdのみ許可。
+- 記事管理: src/infra/articles/github.tsとimages.tsがGitHub APIでsrc/content/blogと記事素材を読み書きし、mainへコミットする。「公開状態」で公開・非公開を選び、対応する保存ボタンで確定する。「記事を確認」から配信済みの記事を開ける。保存から反映まで通常1〜2分かかるため、「記事を確認」の配信内容は更新まで変わらない（編集画面のプレビューは即時更新）。保存応答の最新SHAを保持し、連続保存でも古いSHAを送らない。ファイル名はスラッグ（英小文字・数字・ハイフン）+.mdのみ許可。
 - 重要: Cloudflare Workersのfetchは既定のUser-Agentを送らない。GitHub APIはUA必須で、無いと403を返す（src/infra/articles/github.tsのgithubHeadersで User-Agent を必ず送ること）。 FunctionsのFetch例外はCloudflareの素の502ページになるため、外部API呼び出しは必ずtry/catchしてJSON応答に変換すること（2026-10-25に実障害として確認）。コメントデータは各利用者のブラウザのlocalStorage（キーは変更なし）に残ります。
 
 ## セキュリティ
@@ -38,7 +38,7 @@ Turnstile（お問い合わせフォーム）のオリジン（challenges.cloudf
 
 ブラウザの保存データは信頼せず、JSON構造・入力上限・日時を読み書き時に検証します。Reactがユーザー入力をテキストとして出力し、草案の生成コードはJSON.stringifyで文字列をエスケープします。読み込み失敗後に元データを空の状態で上書きしません。
 
-/adminは公開可能なローカル草案ツールです。noindex、robots.txtのDisallow、Cache-Control:no-storeを設定しますが、これらは認証やアクセス制御ではありません。秘密情報や管理APIを置いてはいけません。共有投稿・認証・サーバー保存は現在存在せず、導入時には独立した認可・入力検証・CSRF対策が必要です。
+/adminは認証付き管理メニューです。ローカル草案ツールは/admin/posts/newにあり、草案をlocalStorageへ保存します。管理APIの認可はcheckAdminAccessで実施します。
 
 scripts/serve-static.mjsはローカル専用の証拠取得用サーバーです。生成済み_headersを適用し、書き込みメソッドとドットファイルへのアクセスを拒否します。公開はCloudflare Pagesの静的配信を使用します。
 
@@ -97,3 +97,14 @@ src/app、Next.js設定・型定義・middleware、OpenNext設定、Pages変換�
 Google Playの公開ページは非保証のHTMLインターフェースです。構造変更・地域制限・通信障害時は取得を失敗として扱い、既存スナップショットを維持します。ストアのcanonicalパッケージID、発行者、文字列長、画像オリジン、PNG署名とサイズを検証します。全アプリの検証後にJSONを一括置換します。アイコンは内容ハッシュ付きのローカルPNGへ保存し、以前の自動生成画像だけを整理します。更新ジョブのactionsはコミットSHAで固定し、権限はcontents:writeに限定しています。
 
 法的ページの監査ではCloudflare Web AnalyticsのCookieを使わない集計と配信用通信処理を区別しました。広告記載はLayoutと共通のSITE_FEATURESから実際のスクリプト有効状態に合わせ、localStorageがサーバー共有でない点、削除方法、連絡先・利用目的を記載しています。利用規約の一律免責と引用まで禁じる文言を撤去しました。参考はCloudflareのWeb Analytics公式資料、個人情報保護委員会の通則編・Q&A、消費者庁の消費者契約法解説です。
+
+## 記事編集ワークスペース（2026-10-26）
+
+- `/admin/articles` は全幅のMarkdown／プレビュー分割画面。境界をドラッグ、またはフォーカスして左右キーで幅を変更できます。スクロール連動は割合ベースで双方向、狭い画面はタブ切替です。
+- 保存は画面を再読込せず最新SHAと基準本文を更新します。通信中の追加入力は未保存として保持します。Ctrl/Cmd+Sに対応し、記事切替と離脱には未保存保護があります。認証切れでもエディタはマウントを維持し、再認証後に再保存できます。
+- 画像パネルのファイル選択・ドロップ・貼り付けでPNG/JPEG/WebP/GIFを追加できます。容量の正本は `src/domain/blog/images.ts`（1枚5MiB、合計15MiB）。名前・拡張子・データ署名をクライアントとサーバーで検証し、同名は自動上書きしません。既存SVG等の素材は保持します。
+- `GET /api/admin/articles?images&file=<article.md>` は画像一覧、追加の `image=<name>` は管理者限定の画像取得。どちらも既存認証を通り、画像はprivate/no-storeで返します。未配信の画像も確認できます。
+- `PUT /api/admin/articles` は従来のname/content/shaに加え、省略可能なadditions（name/base64）とdeletions（画像名）を受け取ります。Git blobs→tree→commit→non-forced ref updateの順で本文と画像を単一コミットに確定し、shaとcommitを返します。競合は409で、途中失敗ではmainを更新しません。
+- 画像削除は保存時に全記事の参照を保守的に確認します。同名の記述が残る場合も削除を拒否します。既存記事のファイル名は固定です。記事削除は画像を自動削除せず履歴と素材を保持します。
+- 記事／非公開記事／プレビューの画像は共通のdialogで拡大できます。原寸切替、Escape、フォーカス復帰に対応。画像以外へのリンクは通常の遷移を維持します。
+- UIの保存完了はGitHubへの確定です。公開URLへの反映はCloudflareのデプロイ完了後です。Pages設定と環境変数は既存の管理方式を維持し、wrangler.tomlを新設しません。

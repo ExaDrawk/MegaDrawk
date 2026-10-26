@@ -9,6 +9,7 @@ import "@/styles/fonts.css";
 import "@/styles/globals.css";
 interface Props {
   title?: string;
+  workspace?: boolean;
   description?: string;
   robots?: { index: boolean; follow: boolean };
   structuredData?: readonly object[];
@@ -21,6 +22,7 @@ interface Props {
 }
 const {
   title = "",
+  workspace = false,
   description = SITE.description,
   robots = { index: true, follow: true },
   structuredData = [],
@@ -181,10 +183,16 @@ const jsonLd = jsonLdScript([personSchema(), ...structuredData]);
     <SkipNav />
     <div class="page-container">
       <Header />
-      <main id="main-content" class="page-main">
+      <main
+        id="main-content"
+        class:list={["page-main", { "page-main--workspace": workspace }]}
+      >
         <slot />
       </main>
       <SiteFooter />
     </div>
+    <script>
+      import "@/lib/imageLightbox";
+    </script>
   </body>
 </html>

@@ -47,3 +47,13 @@ describe("sanitizeHtml", () => {
     );
   });
 });
+
+describe("preview trust boundary", () => {
+  it("removes unquoted handlers, executable containers and encoded unsafe URLs", () => {
+    const html = sanitizeHtml(
+      '<img src="/x.png" onerror=alert(1)><iframe src="/admin"></iframe><a href="jav&#x61;script:alert(1)">x</a><svg><script>alert(1)</script></svg><form><input name="password"></form>',
+    );
+    expect(html).not.toMatch(/onerror|iframe|javascript:|<svg|<form|password/);
+    expect(html).toContain("/x.png");
+  });
+});

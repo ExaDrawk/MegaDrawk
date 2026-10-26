@@ -1,3 +1,5 @@
+import { ARTICLE_DIR, GITHUB_API, REPO, githubHeaders } from "./githubClient";
+import { commitArticle } from "./images";
 /// <reference types="@cloudflare/workers-types" />
 import {
   isValidArticleFilename,
@@ -10,21 +12,6 @@ export { isValidArticleFilename } from "../../domain/blog/markdown";
  * PagesのGit連携がmainへのコミットを検知して自動再ビルドするため、
  * 保存から反映まで1〜2分かかる。
  */
-
-const REPO = "ExaDrawk/MegaDrawk";
-const ARTICLE_DIR = "src/content/blog";
-const GITHUB_API = "https://api.github.com";
-
-function githubHeaders(token: string): HeadersInit {
-  return {
-    Authorization: `Bearer ${token}`,
-    Accept: "application/vnd.github+json",
-    "Content-Type": "application/json",
-    // Workersのfetchは既定のUser-Agentを付けないため必須（無いとGitHubが403で拒否する）
-    "User-Agent": "megadrawk-admin",
-    "X-GitHub-Api-Version": "2022-11-28",
-  };
-}
 
 function errorResponse(message: string, status: number): Response {
   return new Response(JSON.stringify({ error: message }), {
@@ -137,6 +124,8 @@ export interface SaveArticleInput {
   readonly name: unknown;
   readonly content: unknown;
   readonly sha: unknown;
+  readonly additions?: unknown;
+  readonly deletions?: unknown;
 }
 
 export async function saveArticle(
@@ -169,47 +158,7 @@ export async function saveArticle(
       400,
     );
   }
-  let response: Response;
-  try {
-    response = await fetch(
-      `${GITHUB_API}/repos/${REPO}/contents/${ARTICLE_DIR}/${input.name}`,
-      {
-        method: "PUT",
-        headers: githubHeaders(token),
-        body: JSON.stringify({
-          message: `Update article ${input.name} via admin`,
-          content: Buffer.from(input.content, "utf8").toString("base64"),
-          branch: "main",
-          ...(typeof input.sha === "string" ? { sha: input.sha } : {}),
-        }),
-      },
-    );
-  } catch (error) {
-    return errorResponse(
-      `記事の保存で通信エラーが発生しました。(${String(error).slice(0, 80)})`,
-      502,
-    );
-  }
-  if (!response.ok) {
-    const detail = (await response.json().catch(() => null)) as {
-      message?: string;
-    } | null;
-    if (
-      response.status === 409 ||
-      detail?.message?.includes("does not match")
-    ) {
-      return errorResponse(
-        "記事が他の更新と競合しています。一覧を読み込み直してください。",
-        409,
-      );
-    }
-    return errorResponse(
-      `記事の保存に失敗しました。(github ${response.status})`,
-      502,
-    );
-  }
-  const saved = (await response.json()) as { content?: { sha?: string } };
-  return successResponse({ ok: true, sha: saved.content?.sha });
+  return commitArticle(token, input);
 }
 
 export async function deleteArticle(

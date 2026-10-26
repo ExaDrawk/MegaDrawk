@@ -24,12 +24,20 @@ describe("article publication controls", () => {
     const writes: { content: string; sha: string }[] = [];
     vi.spyOn(window, "scrollTo").mockImplementation(() => {});
     vi.stubGlobal(
+      "ResizeObserver",
+      class {
+        observe() {}
+        disconnect() {}
+      },
+    );
+    vi.stubGlobal(
       "fetch",
       vi.fn(async (url: string, options?: RequestInit) => {
         if (options?.method === "PUT") {
           writes.push(JSON.parse(String(options.body)));
           return Response.json({ ok: true, sha: "new-sha" });
         }
+        if (url.includes("?images")) return Response.json({ images: [] });
         if (url.includes("?file="))
           return Response.json({ name: "demo.md", sha: "old-sha", content });
         return Response.json({
@@ -38,7 +46,10 @@ describe("article publication controls", () => {
       }),
     );
     render(<AdminArticlesScreen />);
-    fireEvent.click(await screen.findByRole("button", { name: "demo.md" }));
+    await screen.findByRole("option", { name: "demo.md" });
+    fireEvent.change(screen.getByRole("combobox", { name: "記事を選択" }), {
+      target: { value: "demo.md" },
+    });
     const visibility = await screen.findByRole("combobox", {
       name: "公開状態",
     });

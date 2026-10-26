@@ -8,19 +8,31 @@ import {
   setArticleDraft,
   isValidArticleFilename,
 } from "@/domain/blog/markdown";
+import {
+  assetUrl,
+  markdownImage,
+  validateImage,
+  IMAGE_LIMITS,
+  scrollRatio,
+  validImageName,
+  type ArticleImage,
+  type ImageAddition,
+} from "@/domain/blog/images";
 
-/**
- * 記事管理画面（/admin/articles）。
- * 認可はHttpOnlyセッションCookie（AdminGateが発行）で行う。
- * Markdownをそのまま編集し、GitHubのmainへコミットする。
- * 保存するとCloudflare Pagesが自動再ビルドし、1〜2分で反映される。
- */
-
+async function adminFetch(url: string, options?: RequestInit) {
+  const response = await fetch(url, options);
+  if (response.status === 401)
+    window.dispatchEvent(new Event("admin-auth-required"));
+  return response;
+}
 interface ArticleMeta {
   name: string;
   sha: string;
 }
-
+interface PendingImage extends ImageAddition {
+  preview: string;
+  size: number;
+}
 export function AdminArticlesScreen() {
   return (
     <AdminGate>
@@ -28,344 +40,777 @@ export function AdminArticlesScreen() {
     </AdminGate>
   );
 }
-
 function AdminArticles() {
   const [articles, setArticles] = useState<ArticleMeta[]>([]);
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
-  const [errorText, setErrorText] = useState("");
+  const [error, setError] = useState("");
   const [filename, setFilename] = useState("");
   const [content, setContent] = useState("");
-  const [currentSha, setCurrentSha] = useState<string | null>(null);
-  const [dirty, setDirty] = useState(false);
+  const [sha, setSha] = useState<string | null>(null);
+  const [baseline, setBaseline] = useState("");
   const [saving, setSaving] = useState(false);
-  const [saveMessage, setSaveMessage] = useState("");
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-  const [openCounter, setOpenCounter] = useState(0);
+  const [opening, setOpening] = useState(false);
+  const [message, setMessage] = useState("");
+  const [savedAt, setSavedAt] = useState("");
+  const [images, setImages] = useState<ArticleImage[]>([]);
+  const [imageState, setImageState] = useState<"loading" | "ready" | "error">(
+    "ready",
+  );
+  const [pending, setPending] = useState<PendingImage[]>([]);
+  const [deletions, setDeletions] = useState<string[]>([]);
+  const [alts, setAlts] = useState<Record<string, string>>({});
+  const [linked, setLinked] = useState(true);
+  const [tab, setTab] = useState("edit");
+  const [split, setSplit] = useState(50);
+  const [switchTarget, setSwitchTarget] = useState<string | null>(null);
+  const [adding, setAdding] = useState(false);
+  const [deleteRequested, setDeleteRequested] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
+  const panesRef = useRef<HTMLDivElement>(null);
+  const syncing = useRef(false);
+  const activeScroll = useRef<"edit" | "preview">("edit");
+  const saveRef = useRef<() => void>(() => {});
+  const pendingRef = useRef(pending);
+  pendingRef.current = pending;
+  const assetEpoch = useRef(0);
+  const dirty =
+    content !== baseline || pending.length > 0 || deletions.length > 0;
   let draft: boolean | null = null;
   try {
     draft = readArticleDraft(content);
   } catch {
-    /* 編集中の未完成な設定は保存時に検証する。 */
+    /* Incomplete YAML stays editable. */
   }
-
-  function changeVisibility(value: boolean) {
-    try {
-      setContent(setArticleDraft(content, value));
-      setDirty(true);
-      setErrorText("");
-      setSaveMessage("");
-    } catch (error) {
-      setErrorText(
-        error instanceof Error
-          ? error.message
-          : "記事の設定を確認してください。",
-      );
+  function update(next: string) {
+    setContent(next);
+    setMessage("");
+    const element = textareaRef.current;
+    if (element && element.value !== next) {
+      const start = element.selectionStart,
+        end = element.selectionEnd,
+        top = element.scrollTop;
+      element.value = next;
+      element.setSelectionRange(start, end);
+      element.scrollTop = top;
     }
   }
-
   const load = useCallback(async () => {
-    setState("loading");
-    setErrorText("");
     try {
-      const response = await fetch("/api/admin/articles");
-      if (response.status === 401) {
-        window.location.reload();
-        return;
-      }
-      if (!response.ok) throw new Error("load failed");
-      const payload = (await response.json()) as { articles?: ArticleMeta[] };
-      setArticles(payload.articles ?? []);
+      const response = await adminFetch("/api/admin/articles");
+      if (!response.ok)
+        throw new Error(
+          response.status === 401
+            ? "認証が切れました。入力を保持したまま再認証してください。"
+            : "記事一覧を読み込めませんでした。",
+        );
+      const payload = (await response.json()) as { articles: ArticleMeta[] };
+      setArticles(payload.articles);
       setState("ready");
-    } catch {
+    } catch (e) {
+      setError(
+        e instanceof Error ? e.message : "記事一覧を読み込めませんでした。",
+      );
       setState("error");
-      setErrorText("記事一覧を読み込めませんでした。");
     }
   }, []);
-
   useEffect(() => {
     void load();
   }, [load]);
-
-  async function openArticle(name: string) {
-    setErrorText("");
+  async function loadImages(name: string) {
+    const epoch = ++assetEpoch.current;
+    setImageState("loading");
     try {
-      const response = await fetch(
-        `/api/admin/articles?file=${encodeURIComponent(name)}`,
+      const response = await adminFetch(
+        `/api/admin/articles?images&file=${encodeURIComponent(name)}`,
       );
-      if (response.status === 401) {
-        window.location.reload();
-        return;
+      if (!response.ok) throw new Error("画像一覧を読み込めませんでした。");
+      const payload = (await response.json()) as { images: ArticleImage[] };
+      if (epoch === assetEpoch.current) {
+        setImages(payload.images);
+        setImageState("ready");
       }
-      if (!response.ok) throw new Error("open failed");
-      const payload = (await response.json()) as {
-        name: string;
-        sha: string;
-        content: string;
-      };
-      setFilename(payload.name);
-      setContent(payload.content);
-      if (textareaRef.current) textareaRef.current.value = payload.content;
-      setOpenCounter((count) => count + 1);
-      setCurrentSha(payload.sha);
-      setDirty(false);
-      setSaveMessage("");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch {
-      setErrorText("記事の読み込みに失敗しました。");
+    } catch (e) {
+      if (epoch === assetEpoch.current) {
+        setImageState("error");
+        setError(
+          e instanceof Error ? e.message : "画像一覧を読み込めませんでした。",
+        );
+      }
     }
   }
-
-  function newArticle() {
-    const today = new Date().toISOString().slice(0, 10);
-    const template = `---\ntitle: "記事タイトル"\ndescription: "この記事の要約を1〜2文で。"\ndate: "${today}"\ntags: []\ndraft: true\n---\n\n本文をMarkdownで書きます。\n`;
-    setFilename(`${today}-new-post.md`);
-    setContent(template);
-    if (textareaRef.current) textareaRef.current.value = template;
-    setOpenCounter((count) => count + 1);
-    setCurrentSha(null);
-    setDirty(false);
-    setSaveMessage("");
+  function clearImages() {
+    ++assetEpoch.current;
+    setImages([]);
+    setPending([]);
+    setDeletions([]);
+    setAlts({});
+    setImageState("ready");
   }
-
+  async function open(name: string) {
+    setSwitchTarget(null);
+    setError("");
+    setOpening(true);
+    try {
+      if (name === "new") {
+        const date = new Date().toISOString().slice(0, 10);
+        const text = `---\ntitle: "記事タイトル"\ndescription: "この記事の要約"\ndate: "${date}"\ntags: []\ndraft: true\n---\n\n`;
+        setFilename(`${date}-new-post.md`);
+        setSha(null);
+        setBaseline("");
+        update(text);
+        clearImages();
+      } else {
+        const response = await adminFetch(
+          `/api/admin/articles?file=${encodeURIComponent(name)}`,
+        );
+        if (!response.ok)
+          throw new Error(
+            "記事を読み込めませんでした。認証と通信状態を確認してください。",
+          );
+        const payload = (await response.json()) as {
+          name: string;
+          sha: string;
+          content: string;
+        };
+        setFilename(payload.name);
+        setSha(payload.sha);
+        setBaseline(payload.content);
+        update(payload.content);
+        clearImages();
+        void loadImages(payload.name);
+      }
+      setSavedAt("");
+      setMessage("");
+      if (textareaRef.current) {
+        textareaRef.current.scrollTop = 0;
+        textareaRef.current.setSelectionRange(0, 0);
+      }
+      if (previewRef.current) previewRef.current.scrollTop = 0;
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "記事を読み込めませんでした。");
+    } finally {
+      setOpening(false);
+    }
+  }
+  function requestOpen(name: string) {
+    if (dirty) setSwitchTarget(name);
+    else void open(name);
+  }
   async function save() {
-    if (saving || !filename.trim() || !content.trim()) return;
+    if (
+      saving ||
+      adding ||
+      opening ||
+      !isValidArticleFilename(filename) ||
+      !content.trim()
+    )
+      return;
     setSaving(true);
-    setSaveMessage("");
+    setError("");
+    setMessage("");
+    const snapshot = {
+      name: filename,
+      content,
+      sha,
+      additions: pending.map(({ name, base64 }) => ({ name, base64 })),
+      deletions: [...deletions],
+    };
     try {
       readArticleDraft(content);
-      const response = await fetch("/api/admin/articles", {
+      const response = await adminFetch("/api/admin/articles", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: filename.trim(),
-          content,
-          sha: currentSha,
-        }),
+        body: JSON.stringify(snapshot),
       });
-      const payload = (await response.json().catch(() => null)) as {
-        error?: string;
+      const payload = (await response.json()) as {
         sha?: string;
-      } | null;
-      if (!response.ok) {
-        setSaveMessage(payload?.error ?? "保存に失敗しました。");
-        return;
-      }
-      setSaveMessage(
-        "保存しました。公開状態と内容は、配信の更新後（通常1〜2分）に反映されます。",
+        commit?: string;
+        error?: string;
+      };
+      if (!response.ok)
+        throw new Error(
+          payload.error ??
+            "保存に失敗しました。認証と通信状態を確認してください。",
+        );
+      if (!payload.sha)
+        throw new Error(
+          "保存結果を確認できません。本文を保持しています。最新版を確認してください。",
+        );
+      const newSha = payload.sha;
+      setSha(newSha);
+      setBaseline(snapshot.content);
+      setArticles((list) => [
+        { name: snapshot.name, sha: newSha },
+        ...list.filter((a) => a.name !== snapshot.name),
+      ]);
+      setPending((list) =>
+        list.filter((p) => !snapshot.additions.some((a) => a.name === p.name)),
       );
-      if (payload?.sha) setCurrentSha(payload.sha);
-      setDirty(false);
-      await load();
-    } catch {
-      setSaveMessage(
-        "保存に失敗しました。通信状態を確認して、もう一度お試しください。",
+      setDeletions((list) =>
+        list.filter((name) => !snapshot.deletions.includes(name)),
+      );
+      setImages((list) => [
+        ...list.filter((i) => !snapshot.deletions.includes(i.name)),
+        ...snapshot.additions.map((a) => ({
+          name: a.name,
+          sha: newSha,
+          url: assetUrl(snapshot.name, a.name),
+        })),
+      ]);
+      setSavedAt(new Date().toLocaleTimeString("ja-JP"));
+      setMessage("保存しました。サイトへの反映には通常1〜2分かかります。");
+    } catch (e) {
+      setError(
+        e instanceof Error
+          ? e.message
+          : "保存に失敗しました。変更は保持されています。",
       );
     } finally {
       setSaving(false);
     }
   }
-
-  async function remove(name: string, sha: string) {
-    if (
-      !confirm(
-        `${name}を削除します。サイトからも消えます（元に戻すにはGit履歴から復元）。よろしいですか？`,
-      )
-    ) {
-      return;
-    }
-    const response = await fetch(
-      `/api/admin/articles?file=${encodeURIComponent(name)}&sha=${encodeURIComponent(sha)}`,
-      { method: "DELETE" },
-    );
-    if (!response.ok) {
-      setErrorText("削除に失敗しました。");
-      return;
-    }
-    if (filename === name) {
-      setFilename("");
-      setContent("");
-      setCurrentSha(null);
-    }
-    setSaveMessage(`${name}を削除しました。1〜2分で反映されます。`);
-    await load();
+  saveRef.current = () => {
+    void save();
+  };
+  useEffect(() => {
+    const key = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        saveRef.current();
+      }
+    };
+    window.addEventListener("keydown", key);
+    return () => window.removeEventListener("keydown", key);
+  }, []);
+  useEffect(() => {
+    const leave = (e: BeforeUnloadEvent) => {
+      if (dirty) {
+        e.preventDefault();
+      }
+    };
+    window.addEventListener("beforeunload", leave);
+    return () => window.removeEventListener("beforeunload", leave);
+  }, [dirty]);
+  function sync(source: "edit" | "preview") {
+    if (!linked || syncing.current) return;
+    activeScroll.current = source;
+    const from = source === "edit" ? textareaRef.current : previewRef.current;
+    const to = source === "edit" ? previewRef.current : textareaRef.current;
+    if (!from || !to) return;
+    const top =
+      scrollRatio(from.scrollTop, from.scrollHeight, from.clientHeight) *
+      Math.max(0, to.scrollHeight - to.clientHeight);
+    if (Math.abs(to.scrollTop - top) < 1) return;
+    syncing.current = true;
+    to.scrollTop = top;
+    requestAnimationFrame(() => {
+      syncing.current = false;
+    });
   }
-
+  useEffect(() => {
+    const observer = new ResizeObserver(() => sync(activeScroll.current));
+    if (previewRef.current?.firstElementChild)
+      observer.observe(previewRef.current.firstElementChild);
+    if (panesRef.current) observer.observe(panesRef.current);
+    return () => observer.disconnect();
+    // Source scroll position is authoritative when preview dimensions change.
+  }, [linked]);
+  async function addFiles(files: File[]) {
+    if (!isValidArticleFilename(filename) || adding || saving) return;
+    setAdding(true);
+    setError("");
+    try {
+      const next: PendingImage[] = [];
+      const names = new Set(
+        [...images, ...pendingRef.current].map((i) => i.name),
+      );
+      let total = pendingRef.current.reduce((n, p) => n + p.size, 0);
+      for (const file of files) {
+        const bytes = new Uint8Array(await file.arrayBuffer());
+        let name = file.name
+          .replace(/[^a-zA-Z0-9_.-]/g, "-")
+          .replace(/^[^a-zA-Z0-9]+/, "");
+        if (!name) name = "image.png";
+        validateImage(name, bytes);
+        total += bytes.length;
+        if (total > IMAGE_LIMITS.total)
+          throw new Error("画像の合計は15MiB以内にしてください。");
+        const base = name.slice(0, name.lastIndexOf(".")),
+          ext = name.slice(name.lastIndexOf("."));
+        let suffix = 1;
+        while (names.has(name)) {
+          name = `${base}-${suffix++}${ext}`;
+        }
+        names.add(name);
+        const data = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(String(reader.result));
+          reader.onerror = () =>
+            reject(new Error("画像を読み込めませんでした。"));
+          reader.readAsDataURL(file);
+        });
+        next.push({
+          name,
+          base64: data.split(",")[1]!,
+          preview: data,
+          size: bytes.length,
+        });
+      }
+      setPending((list) => [...list, ...next]);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "画像を追加できませんでした。");
+    } finally {
+      setAdding(false);
+    }
+  }
+  function insert(name: string) {
+    const el = textareaRef.current;
+    if (!el) return;
+    const start = el.selectionStart,
+      end = el.selectionEnd;
+    const insertion = markdownImage(
+      alts[name] ?? name,
+      assetUrl(filename, name),
+    );
+    update(content.slice(0, start) + insertion + content.slice(end));
+    el.focus();
+    el.setSelectionRange(start + insertion.length, start + insertion.length);
+  }
+  async function deleteCurrent() {
+    if (!sha || saving) return;
+    setSaving(true);
+    setError("");
+    try {
+      const response = await adminFetch(
+        `/api/admin/articles?file=${encodeURIComponent(filename)}&sha=${encodeURIComponent(sha)}`,
+        { method: "DELETE" },
+      );
+      if (!response.ok)
+        throw new Error("削除できませんでした。変更は保持されています。");
+      setArticles((list) => list.filter((a) => a.name !== filename));
+      setFilename("");
+      setSha(null);
+      update("");
+      setBaseline("");
+      clearImages();
+      setDeleteRequested(false);
+      setMessage("記事を削除しました。サイトへの反映を待っています。");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "削除に失敗しました。");
+    } finally {
+      setSaving(false);
+    }
+  }
+  function resize(clientX: number) {
+    const rect = panesRef.current?.getBoundingClientRect();
+    if (rect)
+      setSplit(
+        Math.round(
+          Math.min(
+            70,
+            Math.max(30, ((clientX - rect.left) / rect.width) * 100),
+          ),
+        ),
+      );
+  }
+  const allImages = [
+    ...images,
+    ...pending.map((i) => ({
+      name: i.name,
+      sha: "",
+      url: assetUrl(filename, i.name),
+    })),
+  ];
+  const previewUrls = Object.fromEntries(
+    allImages.map((i) => [
+      i.url,
+      pending.find((p) => p.name === i.name)?.preview ??
+        `/api/admin/articles?images&file=${encodeURIComponent(filename)}&image=${encodeURIComponent(i.name)}`,
+    ]),
+  );
   return (
-    <div className="grid gap-6">
-      {state === "loading" && (
-        <div className="surface p-6" aria-busy="true">
-          <div className="skeleton mb-3 h-4 w-40 rounded" />
-          <div className="skeleton h-24 rounded" />
-        </div>
-      )}
-
-      {state === "error" && (
-        <div className="status-panel" data-status="error" role="alert">
-          <p className="text-sm">{errorText}</p>
-          <ActionButton className="mt-3" onClick={() => void load()}>
-            再読み込み
+    <div className="article-workspace">
+      {deleteRequested && (
+        <div role="alert" className="status-panel">
+          <p>
+            この記事を削除します。未保存の変更も失われます。復元にはGit履歴を使います。
+          </p>
+          <ActionButton onClick={() => setDeleteRequested(false)}>
+            編集を続ける
+          </ActionButton>
+          <ActionButton
+            variant="secondary"
+            onClick={() => void deleteCurrent()}
+          >
+            記事を削除
           </ActionButton>
         </div>
       )}
-
-      {state === "ready" && (
-        <>
-          {errorText && (
-            <p role="alert" data-color="color-danger">
-              {errorText}
-            </p>
-          )}
-          <section className="surface p-5 sm:p-6">
-            <h2 className="section-title">エディタ</h2>
-            <div className="mt-4 grid gap-4">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <label className="form-field">
-                  <span className="form-label">
-                    ファイル名（例: 2026-10-26-hello.md）
-                  </span>
-                  <input
-                    value={filename}
-                    onChange={(event) => {
-                      setFilename(event.target.value);
-                      setDirty(true);
-                    }}
-                    placeholder="2026-10-26-new-post.md"
-                    className="form-control"
-                    autoComplete="off"
-                  />
-                </label>
-                <label className="form-field">
-                  <span className="form-label">公開状態</span>
-                  <select
-                    className="form-control"
-                    value={
-                      draft === null ? "invalid" : draft ? "private" : "public"
-                    }
-                    onChange={(event) =>
-                      changeVisibility(event.target.value === "private")
-                    }
-                    disabled={saving || !content}
-                  >
-                    {draft === null && (
-                      <option value="invalid" disabled>
-                        記事の設定を確認してください
-                      </option>
-                    )}
-                    <option value="private">非公開（管理者のみ）</option>
-                    <option value="public">公開</option>
-                  </select>
-                </label>
-              </div>
-              <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
-                <div className="grid gap-2">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="form-label">本文（Markdown）</span>
-                    <MarkdownToolbar
-                      textareaRef={textareaRef}
-                      value={content}
-                      onChange={(next) => {
-                        setContent(next);
-                        setDirty(true);
-                      }}
-                    />
-                  </div>
-                  <textarea
-                    ref={textareaRef}
-                    defaultValue={content}
-                    key={openCounter}
-                    onChange={(event) => {
-                      setContent(event.target.value);
-                      setDirty(true);
-                    }}
-                    className="form-control min-h-[36rem] font-mono text-sm"
-                    spellCheck={false}
-                  />
-                </div>
-                <div className="surface p-5 sm:p-6 lg:sticky lg:top-6">
-                  <p className="section-label">プレビュー</p>
-                  <div className="mt-3 max-h-[36rem] overflow-y-auto pr-1">
-                    <MarkdownPreview markdown={content} />
-                  </div>
-                </div>
-              </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <ActionButton
-                  onClick={() => void save()}
-                  disabled={saving || !filename || !content || draft === null}
-                  aria-busy={saving}
-                >
-                  {saving
-                    ? "保存中..."
-                    : draft
-                      ? "非公開で保存"
-                      : "公開して保存"}
-                </ActionButton>
-                <ActionButton variant="secondary" onClick={newArticle}>
-                  新規記事
-                </ActionButton>
-                {currentSha && isValidArticleFilename(filename) && (
-                  <a
-                    className="text-link"
-                    href={`/blog/${filename.slice(0, -3)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    記事を確認
-                  </a>
-                )}
-                {dirty && (
-                  <span className="text-xs" data-color="color-text-muted">
-                    未保存の変更があります
-                  </span>
-                )}
-              </div>
-              {saveMessage ? (
-                <p
-                  className="text-sm"
-                  data-color="color-text-secondary"
-                  role="status"
-                >
-                  {saveMessage}
-                </p>
-              ) : null}
-            </div>
-          </section>
-
-          <section className="surface p-5 sm:p-6">
-            <h2 className="section-title">記事一覧</h2>
-            <div className="mt-4 flex flex-col gap-2">
-              {articles.length === 0 ? (
-                <p className="text-sm" data-color="color-text-muted">
-                  記事はまだありません。
-                </p>
-              ) : (
-                articles.map((article) => (
-                  <div
-                    key={article.name}
-                    className="surface-muted flex items-center justify-between gap-3 p-3"
-                  >
-                    <button
-                      type="button"
-                      className="text-link min-h-0 text-sm"
-                      onClick={() => void openArticle(article.name)}
-                    >
-                      {article.name}
-                    </button>
-                    <button
-                      type="button"
-                      className="text-xs"
-                      data-color="color-danger"
-                      onClick={() => void remove(article.name, article.sha)}
-                    >
-                      削除
-                    </button>
-                  </div>
-                ))
-              )}
-            </div>
-          </section>
-        </>
+      {state === "loading" && <p role="status">記事を読み込み中…</p>}
+      {state === "error" && (
+        <ActionButton onClick={() => void load()}>一覧を再取得</ActionButton>
       )}
+      <div className="editor-controls">
+        <label>
+          記事
+          <select
+            aria-label="記事を選択"
+            value={articles.some((a) => a.name === filename) ? filename : ""}
+            disabled={saving || opening || adding}
+            onChange={(e) => requestOpen(e.target.value)}
+          >
+            <option value="" disabled>
+              記事を選択
+            </option>
+            {articles.map((a) => (
+              <option key={a.name} value={a.name}>
+                {a.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <ActionButton
+          variant="secondary"
+          disabled={saving || opening || adding}
+          onClick={() => requestOpen("new")}
+        >
+          新規記事
+        </ActionButton>
+        <label>
+          ファイル名
+          <input
+            aria-label="ファイル名"
+            value={filename}
+            readOnly={sha !== null}
+            disabled={saving || adding || opening}
+            onChange={(e) => setFilename(e.target.value)}
+          />
+        </label>
+        <label>
+          公開状態
+          <select
+            aria-label="公開状態"
+            value={draft === null ? "invalid" : draft ? "private" : "public"}
+            disabled={!content || opening}
+            onChange={(e) => {
+              try {
+                update(setArticleDraft(content, e.target.value === "private"));
+              } catch (err) {
+                setError(String(err));
+              }
+            }}
+          >
+            {draft === null && <option value="invalid">設定を確認</option>}
+            <option value="private">非公開（管理者のみ）</option>
+            <option value="public">公開</option>
+          </select>
+        </label>
+        <ActionButton
+          disabled={
+            saving ||
+            adding ||
+            opening ||
+            draft === null ||
+            !isValidArticleFilename(filename)
+          }
+          onClick={() => void save()}
+          aria-busy={saving}
+        >
+          {saving ? "保存中..." : draft ? "非公開で保存" : "公開して保存"}
+        </ActionButton>
+        {sha && (
+          <a
+            className="text-link"
+            href={`/blog/${filename.slice(0, -3)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            記事を確認
+          </a>
+        )}
+      </div>
+      <div className="editor-status">
+        <span role="status">
+          {dirty
+            ? "未保存の変更があります"
+            : savedAt
+              ? `${savedAt} 保存済み`
+              : ""}
+          {message && `　${message}`}
+        </span>
+        <label>
+          <input
+            type="checkbox"
+            checked={linked}
+            onChange={(e) => setLinked(e.target.checked)}
+          />
+          スクロール連動
+        </label>
+      </div>
+      {error && (
+        <p role="alert" className="status-panel" data-status="error">
+          {error}{" "}
+          <button
+            type="button"
+            onClick={() => {
+              setError("");
+              void loadImages(filename);
+            }}
+          >
+            画像一覧を再取得
+          </button>
+        </p>
+      )}
+      {switchTarget && (
+        <div className="status-panel" role="alert">
+          <p>未保存の変更があります。別の記事を開くと変更が失われます。</p>
+          <ActionButton onClick={() => setSwitchTarget(null)}>
+            編集を続ける
+          </ActionButton>
+          <ActionButton
+            variant="secondary"
+            onClick={() => void open(switchTarget)}
+          >
+            変更を破棄して開く
+          </ActionButton>
+        </div>
+      )}
+      <div className="editor-mobile-tabs">
+        <button
+          type="button"
+          aria-pressed={tab === "edit"}
+          onClick={() => setTab("edit")}
+        >
+          編集
+        </button>
+        <button
+          type="button"
+          aria-pressed={tab === "preview"}
+          onClick={() => setTab("preview")}
+        >
+          プレビュー
+        </button>
+      </div>
+      <div
+        className="editor-panes"
+        ref={panesRef}
+        data-tab={tab}
+        data-split={split}
+      >
+        <section className="editor-source">
+          <div className="editor-pane-heading">
+            <label htmlFor="article-body">本文（Markdown）</label>
+            <MarkdownToolbar
+              textareaRef={textareaRef}
+              value={content}
+              onChange={update}
+            />
+          </div>
+          <textarea
+            id="article-body"
+            aria-label="本文（Markdown）"
+            ref={textareaRef}
+            defaultValue=""
+            spellCheck={false}
+            disabled={opening}
+            onChange={(e) => {
+              setContent(e.target.value);
+              setMessage("");
+            }}
+            onScroll={() => sync("edit")}
+            onPaste={(e) => {
+              const files = Array.from(e.clipboardData.files).filter((f) =>
+                f.type.startsWith("image/"),
+              );
+              if (files.length) {
+                e.preventDefault();
+                void addFiles(files);
+              }
+            }}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => {
+              e.preventDefault();
+              void addFiles(Array.from(e.dataTransfer.files));
+            }}
+            placeholder="記事を選ぶか、新規記事を作成してください。"
+          />
+        </section>
+        <div
+          className="editor-divider"
+          role="separator"
+          aria-label="編集欄の幅"
+          aria-orientation="vertical"
+          aria-valuemin={30}
+          aria-valuemax={70}
+          aria-valuenow={split}
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+              e.preventDefault();
+              setSplit((n) =>
+                Math.max(
+                  30,
+                  Math.min(70, n + (e.key === "ArrowRight" ? 1 : -1)),
+                ),
+              );
+            }
+          }}
+          onPointerDown={(e) => {
+            e.currentTarget.setPointerCapture(e.pointerId);
+            resize(e.clientX);
+          }}
+          onPointerMove={(e) => {
+            if (e.currentTarget.hasPointerCapture(e.pointerId))
+              resize(e.clientX);
+          }}
+          onPointerUp={(e) => {
+            if (e.currentTarget.hasPointerCapture(e.pointerId))
+              e.currentTarget.releasePointerCapture(e.pointerId);
+          }}
+        />
+        <section className="editor-rendered">
+          <div className="editor-pane-heading">プレビュー</div>
+          <div
+            className="editor-preview-scroll"
+            ref={previewRef}
+            onScroll={() => sync("preview")}
+            onLoadCapture={() => sync(activeScroll.current)}
+          >
+            {content ? (
+              <MarkdownPreview markdown={content} imageUrls={previewUrls} />
+            ) : (
+              <p>本文を入力するとプレビューが表示されます。</p>
+            )}
+          </div>
+        </section>
+      </div>
+      {sha && (
+        <button
+          type="button"
+          className="text-link justify-self-end"
+          disabled={saving || opening || adding}
+          onClick={() => setDeleteRequested(true)}
+        >
+          この記事を削除
+        </button>
+      )}
+      <details className="editor-images">
+        <summary>画像（{allImages.length}）</summary>
+        <div
+          className="image-dropzone"
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault();
+            void addFiles(Array.from(e.dataTransfer.files));
+          }}
+        >
+          <label>
+            画像を追加
+            <input
+              aria-label="画像を追加"
+              type="file"
+              multiple
+              accept="image/png,image/jpeg,image/webp,image/gif"
+              disabled={
+                !isValidArticleFilename(filename) ||
+                adding ||
+                saving ||
+                imageState !== "ready"
+              }
+              onChange={(e) => {
+                void addFiles(Array.from(e.target.files ?? []));
+                e.target.value = "";
+              }}
+            />
+          </label>
+          <p>
+            PNG・JPEG・WebP・GIF。1枚5MiB、合計15MiBまで。保存時に反映します。
+          </p>
+        </div>
+        {adding && <p role="status">画像を読み込み中…</p>}
+        {imageState === "loading" && <p role="status">画像一覧を読み込み中…</p>}
+        {imageState === "error" && (
+          <button type="button" onClick={() => void loadImages(filename)}>
+            画像一覧を再取得
+          </button>
+        )}
+        {imageState === "ready" && !allImages.length && (
+          <p>画像はまだありません。ここへ画像をドロップできます。</p>
+        )}
+        <div className="editor-image-grid">
+          {allImages.map((image) => {
+            const removed = deletions.includes(image.name),
+              used = content.includes(image.url);
+            return (
+              <div className="editor-image-card" key={image.name}>
+                <img
+                  src={previewUrls[image.url]}
+                  alt={alts[image.name] ?? image.name}
+                  loading="lazy"
+                />
+                <p>
+                  {image.name} ·{" "}
+                  {removed ? "削除予定" : used ? "本文で使用中" : "未使用"}
+                  {!image.sha && " · 追加予定"}
+                </p>
+                <label>
+                  代替テキスト
+                  <input
+                    aria-label={`${image.name}の代替テキスト`}
+                    value={alts[image.name] ?? image.name}
+                    onChange={(e) =>
+                      setAlts((v) => ({ ...v, [image.name]: e.target.value }))
+                    }
+                  />
+                </label>
+                <div>
+                  <button
+                    type="button"
+                    disabled={removed}
+                    onClick={() => insert(image.name)}
+                  >
+                    本文へ挿入
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void navigator.clipboard
+                        .writeText(new URL(image.url, location.origin).href)
+                        .then(() => setMessage("画像URLをコピーしました。"))
+                        .catch(() => setError("URLをコピーできませんでした。"));
+                    }}
+                  >
+                    URLをコピー
+                  </button>
+                  <button
+                    type="button"
+                    disabled={saving || used || !validImageName(image.name)}
+                    onClick={() => {
+                      if (!image.sha)
+                        setPending((list) =>
+                          list.filter((i) => i.name !== image.name),
+                        );
+                      else
+                        setDeletions((list) =>
+                          removed
+                            ? list.filter((n) => n !== image.name)
+                            : [...list, image.name],
+                        );
+                    }}
+                  >
+                    {!image.sha
+                      ? "追加を取消"
+                      : removed
+                        ? "削除を取消"
+                        : "保存時に削除"}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </details>
     </div>
   );
 }

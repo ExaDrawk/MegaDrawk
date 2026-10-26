@@ -8,12 +8,17 @@ import { markdownToPreview } from "@/lib/markdownPreview";
 export function MarkdownPreview({
   markdown,
   titleOverride,
+  imageUrls,
 }: {
   markdown: string;
   /** frontmatterより優先して表示するタイトル（草案エディター等で使用） */
   titleOverride?: string;
+  imageUrls?: Record<string, string>;
 }) {
-  const preview = useMemo(() => markdownToPreview(markdown), [markdown]);
+  const preview = useMemo(
+    () => markdownToPreview(markdown, imageUrls),
+    [markdown, imageUrls],
+  );
   const title = titleOverride ?? preview.title;
   return (
     <div aria-label="プレビュー">
