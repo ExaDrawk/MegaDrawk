@@ -3,7 +3,7 @@ title: "TJA Pocketにスキンを追加する方法｜ZIP・フォルダ取り�
 description: "TJA Pocketでスキンを使う3つの方法を画像付きで紹介します。ZIPの取り込み、解凍済みフォルダの取り込み、自分で配置したフォルダの参照登録から、設定での切り替えまでをまとめました。"
 date: "2026-10-26"
 tags: ["TJA Pocket", "使い方"]
-draft: true
+draft: false
 ---
 
 こんにちは、Drawkです。
