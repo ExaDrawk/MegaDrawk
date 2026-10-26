@@ -9,7 +9,7 @@ import {
   ListOrdered,
   Quote,
 } from "lucide-react";
-import type { RefObject } from "react";
+import { useLayoutEffect, useRef, type RefObject } from "react";
 
 interface MarkdownToolbarProps {
   textareaRef: RefObject<HTMLTextAreaElement | null>;
@@ -32,6 +32,22 @@ export function MarkdownToolbar({
   value,
   onChange,
 }: MarkdownToolbarProps) {
+  // Reactが再描画でDOMを更新した直後にカーソルを復元する（rAFより先行し、
+  // 連続タイピング中にカーソルが巻き戻る競合を防ぐ）
+  const pendingSelectionRef = useRef<{
+    start: number;
+    end: number;
+  } | null>(null);
+
+  useLayoutEffect(() => {
+    const pending = pendingSelectionRef.current;
+    const textarea = textareaRef.current;
+    if (!pending || !textarea) return;
+    pendingSelectionRef.current = null;
+    textarea.focus();
+    textarea.setSelectionRange(pending.start, pending.end);
+  }, [value, textareaRef]);
+
   const apply = (
     transform: (selected: string, start: number, end: number) => InsertResult,
   ) => {
@@ -41,11 +57,13 @@ export function MarkdownToolbar({
     const end = textarea.selectionEnd ?? value.length;
     const selected = value.slice(start, end);
     const result = transform(selected, start, end);
+    pendingSelectionRef.current = {
+      start: result.selectStart,
+      end: result.selectEnd,
+    };
     onChange(value.slice(0, start) + result.text + value.slice(end));
-    requestAnimationFrame(() => {
-      textarea.focus();
-      textarea.setSelectionRange(result.selectStart, result.selectEnd);
-    });
+    // フォーカスが外れている場合のみ戻す（通常はtextareaにフォーカスがある）
+    textarea.focus();
   };
 
   /** 選択範囲（無ければプレースホルダ）をprefix/suffixで囲む */
