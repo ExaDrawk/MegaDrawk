@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="520" viewBox="0 0 1000 520" role="img" aria-labelledby="title desc">
+  <title id="title">取り込むのはSimpleStyle (1080p)のフォルダ</title>
+  <desc id="desc">解凍したOpenTaiko-Skins-mainのSystemフォルダを開き、SimpleStyle (1080p)を選ぶ。その中にSkinConfig.ini、Graphics、Soundsなどがある。</desc>
+  <rect width="1000" height="520" rx="20" fill="#eef5f8"/>
+  <g font-family="sans-serif" fill="#16364a">
+    <text x="40" y="58" font-size="27" font-weight="700">解凍した中から、使うスキンだけ選ぶ</text>
+    <text x="48" y="119" font-size="26">OpenTaiko-Skins-main /</text>
+    <path d="M67 137v53h43m28 30v53h43" stroke="#7794a2" stroke-width="3" fill="none"/>
+    <text x="125" y="198" font-size="26">System /</text>
+    <rect x="196" y="230" width="756" height="244" rx="14" fill="white" stroke="#237a9b" stroke-width="3"/>
+    <text x="220" y="276" font-size="28" font-weight="700">SimpleStyle (1080p) /</text>
+    <text x="220" y="322" font-size="22">SkinConfig.ini</text>
+    <text x="220" y="361" font-size="22">Graphics /　Sounds /　Fonts /　Modules /</text>
+    <text x="220" y="400" font-size="22">その他の設定ファイル・README.txt</text>
+    <text x="220" y="445" font-size="21" fill="#237a9b" font-weight="700">このフォルダを、中身ごと取り込む</text>
+  </g>
+</svg>
