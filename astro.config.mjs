@@ -1,6 +1,7 @@
 import { defineConfig } from "astro/config";
 import react from "@astrojs/react";
 import tailwindcss from "@tailwindcss/vite";
+import { remarkAppCard } from "./src/infra/blog/remarkAppCard";
 export default defineConfig({
   output: "static",
   trailingSlash: "never",
@@ -12,6 +13,7 @@ export default defineConfig({
       themes: { light: "github-light", dark: "github-dark" },
       defaultColor: false,
     },
+    remarkPlugins: [remarkAppCard],
   },
   vite: { plugins: [tailwindcss()] },
 });

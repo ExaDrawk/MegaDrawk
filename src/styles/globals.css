@@ -1273,3 +1273,70 @@ html:has(.image-lightbox[open]) {
 .editor-panes[data-split="70"] {
   grid-template-columns: minmax(0, 70fr) 0.65rem minmax(0, 30fr);
 }
+/* 記事内アプリ紹介カード（[app:パッケージID] で埋め込み） */
+.app-card {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 1rem;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-lg);
+  background: var(--color-paper-2);
+  padding: 1rem 1.125rem;
+  margin: 2rem 0;
+}
+.app-card__icon {
+  display: block;
+  align-self: start;
+}
+.app-card__icon img {
+  display: block;
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+}
+.app-card__platform {
+  margin: 0 0 0.25rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+}
+.app-card__name {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+.app-card__name a {
+  color: var(--color-ink);
+  text-decoration: none;
+}
+.app-card__name a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.app-card__description {
+  margin: 0.5rem 0 0.5rem;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+.app-card__store {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.875rem;
+  color: var(--color-accent);
+  text-decoration: none;
+}
+.app-card__store:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+@media (max-width: 400px) {
+  .app-card {
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 0.75rem;
+  }
+  .app-card__icon img {
+    width: 48px;
+    height: 48px;
+    border-radius: 11px;
+  }
+}
