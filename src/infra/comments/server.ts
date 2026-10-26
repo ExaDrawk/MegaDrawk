@@ -457,7 +457,8 @@ export async function deleteComment(
 
 /** セッションCookieの名前と有効時間（秒）。 */
 export const ADMIN_SESSION_COOKIE = "admin_session";
-export const ADMIN_SESSION_MAX_AGE = 60 * 60 * 12;
+/* 400日。ブラウザのCookie最长期限。ユーザーのPCでは常に開ける運用とする */
+export const ADMIN_SESSION_MAX_AGE = 60 * 60 * 24 * 400;
 
 /**
  * セッションCookieの値。生のパスワードではなく、
