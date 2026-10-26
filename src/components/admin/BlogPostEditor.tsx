@@ -6,6 +6,8 @@ import {
   type BlogPostDraftResult,
 } from "@/domain/blog/admin";
 import { blogDraftStorageRepository } from "@/infra/storage/blogDraftStorage";
+import { MarkdownToolbar } from "@/components/admin/MarkdownToolbar";
+import { MarkdownPreview } from "@/components/admin/MarkdownPreview";
 import { ActionButton } from "@/components/ui/Action";
 
 const FIELD_LABELS: Record<keyof BlogPostDraftInput, string> = {
@@ -33,6 +35,7 @@ export function BlogPostEditor() {
   const [isPending, startTransition] = useTransition();
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dirtyRef = useRef(false);
+  const bodyTextareaRef = useRef<HTMLTextAreaElement | null>(null);
   const previewBody = draftInput.body;
 
   function updateField<K extends keyof BlogPostDraftInput>(
@@ -221,8 +224,14 @@ export function BlogPostEditor() {
               <span className="form-label" id="draft-body-label">
                 {FIELD_LABELS.body}
               </span>
+              <MarkdownToolbar
+                textareaRef={bodyTextareaRef}
+                value={draftInput.body}
+                onChange={(next) => updateField("body", next)}
+              />
               <textarea
                 id="draft-body"
+                ref={bodyTextareaRef}
                 aria-labelledby="draft-body-label"
                 value={previewBody}
                 onChange={(event) => updateField("body", event.target.value)}
@@ -383,26 +392,16 @@ export function BlogPostEditor() {
             </div>
 
             <div className="surface p-5 shadow-none">
-              <p className="text-xs" data-color="color-text-muted">
-                簡易プレビュー（見た目は実際の記事ページで確認してください）
-              </p>
-              <div className="mt-3 space-y-4 text-sm leading-7">
-                {previewBody.trim() ? (
-                  previewBody
-                    .split(/\n{2,}/)
-                    .map((paragraph) => paragraph.trim())
-                    .filter(Boolean)
-                    .map((paragraph, index) => (
-                      <p key={`${paragraph.slice(0, 24)}-${index}`}>
-                        {paragraph}
-                      </p>
-                    ))
-                ) : (
-                  <p className="text-sm" data-color="color-text-secondary">
-                    本文を入力すると、ここにプレビューが表示されます。
-                  </p>
-                )}
-              </div>
+              {previewBody.trim() ? (
+                <MarkdownPreview
+                  markdown={previewBody}
+                  titleOverride={draftInput.title}
+                />
+              ) : (
+                <p className="text-sm" data-color="color-text-secondary">
+                  本文を入力すると、ここにプレビューが表示されます。
+                </p>
+              )}
             </div>
           </div>
         </article>

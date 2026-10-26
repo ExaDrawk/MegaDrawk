@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ActionButton } from "@/components/ui/Action";
 import { AdminGate } from "@/components/admin/AdminGate";
+import { MarkdownToolbar } from "@/components/admin/MarkdownToolbar";
+import { MarkdownPreview } from "@/components/admin/MarkdownPreview";
 import {
   readArticleDraft,
   setArticleDraft,
@@ -37,6 +39,7 @@ function AdminArticles() {
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   let draft: boolean | null = null;
   try {
     draft = readArticleDraft(content);
@@ -211,56 +214,75 @@ function AdminArticles() {
           <section className="surface p-5 sm:p-6">
             <h2 className="section-title">エディタ</h2>
             <div className="mt-4 grid gap-4">
-              <label className="form-field">
-                <span className="form-label">
-                  ファイル名（例: 2026-10-26-hello.md）
-                </span>
-                <input
-                  value={filename}
-                  onChange={(event) => {
-                    setFilename(event.target.value);
-                    setDirty(true);
-                  }}
-                  placeholder="2026-10-26-new-post.md"
-                  className="form-control"
-                  autoComplete="off"
-                />
-              </label>
-              <label className="form-field">
-                <span className="form-label">公開状態</span>
-                <select
-                  className="form-control"
-                  value={
-                    draft === null ? "invalid" : draft ? "private" : "public"
-                  }
-                  onChange={(event) =>
-                    changeVisibility(event.target.value === "private")
-                  }
-                  disabled={saving || !content}
-                >
-                  {draft === null && (
-                    <option value="invalid" disabled>
-                      記事の設定を確認してください
-                    </option>
-                  )}
-                  <option value="private">非公開（管理者のみ）</option>
-                  <option value="public">公開</option>
-                </select>
-              </label>
-              <label className="form-field">
-                <span className="form-label">
-                  本文（Markdown・frontmatter込み）
-                </span>
-                <textarea
-                  value={content}
-                  onChange={(event) => {
-                    setContent(event.target.value);
-                    setDirty(true);
-                  }}
-                  className="form-control min-h-96 font-mono text-sm"
-                  spellCheck={false}
-                />
-              </label>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="form-field">
+                  <span className="form-label">
+                    ファイル名（例: 2026-10-26-hello.md）
+                  </span>
+                  <input
+                    value={filename}
+                    onChange={(event) => {
+                      setFilename(event.target.value);
+                      setDirty(true);
+                    }}
+                    placeholder="2026-10-26-new-post.md"
+                    className="form-control"
+                    autoComplete="off"
+                  />
+                </label>
+                <label className="form-field">
+                  <span className="form-label">公開状態</span>
+                  <select
+                    className="form-control"
+                    value={
+                      draft === null ? "invalid" : draft ? "private" : "public"
+                    }
+                    onChange={(event) =>
+                      changeVisibility(event.target.value === "private")
+                    }
+                    disabled={saving || !content}
+                  >
+                    {draft === null && (
+                      <option value="invalid" disabled>
+                        記事の設定を確認してください
+                      </option>
+                    )}
+                    <option value="private">非公開（管理者のみ）</option>
+                    <option value="public">公開</option>
+                  </select>
+                </label>
+              </div>
+              <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+                <div className="grid gap-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="form-label">本文（Markdown）</span>
+                    <MarkdownToolbar
+                      textareaRef={textareaRef}
+                      value={content}
+                      onChange={(next) => {
+                        setContent(next);
+                        setDirty(true);
+                      }}
+                    />
+                  </div>
+                  <textarea
+                    ref={textareaRef}
+                    value={content}
+                    onChange={(event) => {
+                      setContent(event.target.value);
+                      setDirty(true);
+                    }}
+                    className="form-control min-h-[36rem] font-mono text-sm"
+                    spellCheck={false}
+                  />
+                </div>
+                <div className="surface p-5 sm:p-6 lg:sticky lg:top-6">
+                  <p className="section-label">プレビュー</p>
+                  <div className="mt-3 max-h-[36rem] overflow-y-auto pr-1">
+                    <MarkdownPreview markdown={content} />
+                  </div>
+                </div>
+              </div>
               <div className="flex flex-wrap items-center gap-3">
                 <ActionButton
                   onClick={() => void save()}
