@@ -107,3 +107,5 @@ tags: []
 左右のスクロールと保存後の入力保持を確認します。
 
 ![editor-check.png](</blog-assets/2026-10-26-editor-verification/editor-check.png>)
+
+保存通信中に追加した未保存の文章。
