@@ -70,7 +70,7 @@ ZIPをすでに解凍してある場合は、フォルダごと取り込めま�
 3. **`SimpleStyle (1080p)`** を開き、**「このフォルダを使用」** を押します。
 4. アクセス許可の確認が出たら **「許可」** を選びます。
 
-[![説明用のSimpleStyle (1080p)フォルダを開いたAndroidの選択画面。下部にこのフォルダを使用ボタンがある](/blog-assets/2026-10-26-tjapocket-skin-import/14-skin-folder.png)](/blog-assets/2026-10-26-tjapocket-skin-import/14-skin-folder.png)
+[![説明用のSimpleStyle (1080p)フォルダを開いたAndroidの選択画面。下部にこのフォルダを使用ボタンがある](/blog-assets/2026-10-26-tjapocket-skin-import/21-skin-folder-clean.png)](/blog-assets/2026-10-26-tjapocket-skin-import/21-skin-folder-clean.png)
 
 スキン本体の目印は **`SkinConfig.ini`** です。同じフォルダに `Graphics` や `Sounds` なども入っています。ファイルを移動する場合も、設定ファイルだけを取り出さず、スキンのフォルダを中身ごと移してください。
 
@@ -92,7 +92,7 @@ ZIPをすでに解凍してある場合は、フォルダごと取り込めま�
 2. **「追加」** を押し、読み込み元にしたいフォルダを開きます。
 3. **「このフォルダを使用」→「許可」** を選びます。
 
-[![説明用のMegaDrawk_SkinGuideフォルダを読み込み元として選ぶ画面。中にはSimpleStyle (1080p)だけが入っている](/blog-assets/2026-10-26-tjapocket-skin-import/17-source-parent.png)](/blog-assets/2026-10-26-tjapocket-skin-import/17-source-parent.png)
+[![説明用のMegaDrawk_SkinGuideフォルダを読み込み元として選ぶ画面。中にはSimpleStyle (1080p)だけが入っている](/blog-assets/2026-10-26-tjapocket-skin-import/22-source-parent-clean.png)](/blog-assets/2026-10-26-tjapocket-skin-import/22-source-parent-clean.png)
 
 **スキン本体を指定しても、その親フォルダを指定しても使えます。** 更新後の検証版では、登録したフォルダの配下をたどり、`SkinConfig.ini` のある場所を探します。たとえば、次のように間に `System` フォルダが挟まっていても検出対象になります。
 
@@ -120,7 +120,7 @@ ZIPをすでに解凍してある場合は、フォルダごと取り込めま�
 
 設定へ戻り、**「外観」→「スキン」**を開いて、使いたい **「SimpleStyle (1080p)」** を選びます。
 
-[![外観設定のスキン欄にSimpleStyle (1080p)が表示されている](/blog-assets/2026-10-26-tjapocket-skin-import/20-selected-skin.png)](/blog-assets/2026-10-26-tjapocket-skin-import/20-selected-skin.png)
+[![外観設定のスキン欄にSimpleStyle (1080p)が表示されている](/blog-assets/2026-10-26-tjapocket-skin-import/23-selected-skin-clean.png)](/blog-assets/2026-10-26-tjapocket-skin-import/23-selected-skin-clean.png)
 
 選択後は「戻る」で選曲画面へ戻り、表示を確認してください。ほかのスキンに戻す場合も、同じ設定から選び直せます。
 
