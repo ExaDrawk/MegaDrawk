@@ -365,3 +365,4 @@
 - [x] src/lib/appCard.ts（カードHTML生成・HTMLエスケープ）+ remarkプラグイン（src/infra/blog/remarkAppCard.ts）+ astro.config登録
 - [x] 未知のパッケージIDは本文のまま残す（誤記に寛容）
 - [x] 単体5件追加、ローカルビルドで描画確認済み（カード生成・未知IDフォールバック）
+- [x] リベンス時の競合（利用者が管理画面から保存した記事）はリモート版を優先して解消
