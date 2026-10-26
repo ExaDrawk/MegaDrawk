@@ -57,13 +57,26 @@ export function MarkdownToolbar({
     const end = textarea.selectionEnd ?? value.length;
     const selected = value.slice(start, end);
     const result = transform(selected, start, end);
+    const nextValue = value.slice(0, start) + result.text + value.slice(end);
     pendingSelectionRef.current = {
       start: result.selectStart,
       end: result.selectEnd,
     };
-    onChange(value.slice(0, start) + result.text + value.slice(end));
-    // フォーカスが外れている場合のみ戻す（通常はtextareaにフォーカスがある）
+    // DOMを直接更新してinputイベントを発火する。
+    // 制御付きコンポーネントでも、onChange→state更新がDOMと競合せず
+    // ネイティブのUndo/Redoも保持される。
+    const nativeValueSetter = Object.getOwnPropertyDescriptor(
+      HTMLTextAreaElement.prototype,
+      "value",
+    )?.set;
+    if (nativeValueSetter) {
+      nativeValueSetter.call(textarea, nextValue);
+    } else {
+      textarea.value = nextValue;
+    }
+    textarea.dispatchEvent(new Event("input", { bubbles: true }));
     textarea.focus();
+    onChange(nextValue);
   };
 
   /** 選択範囲（無ければプレースホルダ）をprefix/suffixで囲む */
