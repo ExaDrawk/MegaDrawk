@@ -15,7 +15,7 @@ document.addEventListener("click", (event) => {
   const url = new URL(source, location.href);
   if (!["http:", "https:", "data:"].includes(url.protocol)) return;
   event.preventDefault();
-  const previous = image ?? link ?? document.activeElement;
+  const previous = link ?? image ?? document.activeElement;
   const dialog = document.createElement("dialog");
   dialog.className = "image-lightbox";
   dialog.setAttribute("aria-label", image?.alt || "画像の拡大表示");
@@ -31,7 +31,13 @@ document.addEventListener("click", (event) => {
   const close = document.createElement("button");
   close.type = "button";
   close.textContent = "閉じる";
-  close.onclick = () => dialog.close();
+  const finish = () => {
+    if (dialog.open) dialog.close();
+    dialog.remove();
+    if (previous instanceof HTMLElement)
+      previous.focus({ preventScroll: true });
+  };
+  close.onclick = finish;
   header.appendChild(zoom);
   header.appendChild(close);
   const figure = document.createElement("figure"),
@@ -49,17 +55,13 @@ document.addEventListener("click", (event) => {
   dialog.appendChild(figure);
   document.body.appendChild(dialog);
   dialog.addEventListener("click", (e) => {
-    if (e.target === dialog) dialog.close();
+    if (e.target === dialog || e.target === figure) finish();
   });
-  dialog.addEventListener(
-    "close",
-    () => {
-      dialog.remove();
-      if (previous instanceof HTMLElement)
-        previous.focus({ preventScroll: true });
-    },
-    { once: true },
-  );
+  dialog.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    finish();
+  });
+  dialog.addEventListener("close", finish, { once: true });
   dialog.showModal();
   close.focus();
 });

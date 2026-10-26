@@ -167,6 +167,14 @@ test("article images open a keyboard-accessible in-page viewer", async ({
   await expect(dialog).toHaveAttribute("data-original", "true");
   await page.keyboard.press("Escape");
   await expect(dialog).toHaveCount(0);
+  await expect(image).toBeFocused();
+  await image.click();
+  await dialog.getByRole("button", { name: "閉じる", exact: true }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(image).toBeFocused();
+  await image.click();
+  await dialog.locator("figure").click({ position: { x: 10, y: 10 } });
+  await expect(dialog).toHaveCount(0);
   expect(page.url()).toContain("/blog/2026-10-25-hello-megadrawk");
 });
 
