@@ -147,4 +147,22 @@ describe("conditional origins", () => {
     })["Content-Security-Policy"];
     expect(csp.length).toBeLessThan(2000);
   });
+
+  it("keeps the current production CSP within the line limit with ads enabled", () => {
+    const hash = (i: number) => `'sha256-${String(i).padStart(43, "0")}='`;
+    const csp = securityHeaders(
+      Array.from({ length: 11 }, (_, i) => hash(i)),
+      [hash(12)],
+      {
+        adsense: true,
+        turnstile: true,
+        styleAttrHashes: [hash(13)],
+      },
+    )["Content-Security-Policy"];
+    expect(
+      Buffer.byteLength(`  Content-Security-Policy: ${csp}`),
+    ).toBeLessThanOrEqual(2000);
+    expect(csp).toContain("pagead2.googlesyndication.com");
+    expect(csp).toContain("googleads.g.doubleclick.net");
+  });
 });

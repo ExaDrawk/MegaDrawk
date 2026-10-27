@@ -84,16 +84,18 @@ export function securityHeaders(hashes, styleHashes = [], options = {}) {
   // 広告オリジンはAdSense有効なビルドでのみ許可する。
   // （CSPはCloudflare Pagesの_headersで1行2,000文字上限のため、縮減も兼ねる）
   const adsense = Boolean(options.adsense);
-  const adScriptOrigins = adsense ? " " + adScripts.join(" ") : "";
+  // Scheme-less host sources inherit HTTPS from the protected page and save
+  // space in Cloudflare Pages' 2,000-byte header line limit.
+  const compact = (origins) =>
+    origins.map((origin) => origin.replace(/^https:\/\//, "")).join(" ");
+  const adScriptOrigins = adsense ? " " + compact(adScripts) : "";
   const adImgOrigins = adsense
-    ? " " +
-      adScripts.join(" ") +
-      " https://googleads.g.doubleclick.net https://tpc.googlesyndication.com"
+    ? " " + compact([...adScripts, "https://googleads.g.doubleclick.net"])
     : "";
   const adConnectOrigins = adsense
-    ? " " + adScripts.join(" ") + " https://googleads.g.doubleclick.net"
+    ? " " + compact([...adScripts, "https://googleads.g.doubleclick.net"])
     : "";
-  const adFrameOrigins = adsense ? " " + adFrames.join(" ") : "";
+  const adFrameOrigins = adsense ? " " + compact(adFrames) : "";
   // style属性はShikiの出力のみで、値ごとのハッシュで許可リスト化する。
   const styleAttrHashes = [...new Set(options.styleAttrHashes ?? [])];
   const styleSrcAttr = styleAttrHashes.length

@@ -42,6 +42,11 @@ const headers = securityHeaders([...hashes], [...styleHashes], {
   adsense: Boolean(process.env.PUBLIC_ADSENSE_CLIENT?.trim()),
   styleAttrHashes: [...attrHashes],
 });
+for (const [key, value] of Object.entries(headers)) {
+  if (Buffer.byteLength(`  ${key}: ${value}`, "utf8") > 2000) {
+    throw new Error(`Cloudflare Pages header line exceeds 2,000 bytes: ${key}`);
+  }
+}
 await preparePrivateBlog(path.resolve("."), headers);
 await writeFile(
   path.join(root, "_headers"),
