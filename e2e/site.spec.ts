@@ -14,29 +14,36 @@ for (const route of ["/", "/about"])
         await expect(slides.nth(index)).toHaveAttribute("alt", name);
       }
       await expect(page.locator("h1")).toHaveText("MEGADRAWK");
-    } else {
-      for (const name of [
-        "どこでも六法",
-        "証ぴた 証明写真作成・印刷",
-        "TJA Pocket",
-        "Multi-Subtitles for YouTube",
-      ]) {
-        await expect(page.getByText(name).first()).toBeVisible();
+      for (const id of ["roppo", "syopita", "tjapocket"]) {
+        await expect(
+          page
+            .locator(
+              'a[href="https://play.google.com/store/apps/details?id=com.drawk.' +
+                id +
+                '"]',
+            )
+            .first(),
+        ).toBeVisible();
       }
+    } else {
+      await expect(
+        page.getByRole("heading", { level: 1, name: "About", exact: true }),
+      ).toBeVisible();
       await expect(
         page.getByRole("heading", { name: "プロフィール" }),
       ).toBeVisible();
-    }
-    for (const id of ["roppo", "syopita", "tjapocket"]) {
+      await expect(page.getByText(/私の名前はDrawkです/)).toBeVisible();
+      await expect(page.getByText(/これまでに、六法アプリ/)).toBeVisible();
+      await expect(page.getByText(/他にも、ジオラマ制作/)).toBeVisible();
       await expect(
-        page
-          .locator(
-            'a[href="https://play.google.com/store/apps/details?id=com.drawk.' +
-              id +
-              '"]',
-          )
-          .first(),
+        page.getByRole("heading", { name: "このサイトについて" }),
       ).toBeVisible();
+      await expect(
+        page.getByText(
+          "MEGADRAWKは、私のブログやアプリの紹介を行うサイトです。",
+        ),
+      ).toBeVisible();
+      await expect(page.getByText("掲載しているアプリ")).toHaveCount(0);
     }
     expect(await page.locator("main").innerText()).not.toMatch(
       /条文スコープ|テスト公開|病歴|高安動脈炎|Bentall|ベントール|機械弁|身体障害|リンヴォック|プレドニン|闘病/,
@@ -55,36 +62,6 @@ for (const [route, name] of [
     ).toBeVisible();
   });
 
-test("app list uses Play Store icons, descriptions and screenshots", async ({
-  page,
-}) => {
-  await page.goto("/about");
-  await expect(page.locator(".app-list__item")).toHaveCount(4);
-  await expect(
-    page.locator(
-      '.app-list__icon[src^="https://play-lh.googleusercontent.com/"]',
-    ),
-  ).toHaveCount(3);
-  await expect(
-    page.locator(
-      '.app-list__shot[src^="https://play-lh.googleusercontent.com/"]',
-    ),
-  ).toHaveCount(3);
-  await expect(
-    page.getByRole("link", { name: "TJA PocketをGoogle Playで見る" }),
-  ).toBeVisible();
-  await expect(
-    page.getByText(
-      "TJAファイルで遊べるリズムゲーム。スキンや音色、操作感を自分好みに。",
-    ),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("link", {
-      name: "Multi-Subtitles for YouTubeをChrome ウェブストアで見る",
-    }),
-  ).toBeVisible();
-});
-
 test("homepage runway is full-width and navigable", async ({ page }) => {
   await page.goto("/");
   const info = await page.evaluate(() => ({
@@ -96,7 +73,15 @@ test("homepage runway is full-width and navigable", async ({ page }) => {
   }));
   expect(info.main).toBeGreaterThanOrEqual(info.viewport - 1);
   expect(info.overflow).toBe(false);
-  await expect(page.locator(".runway__intro")).toBeVisible();
+  await expect(page.locator(".runway__masthead")).toBeVisible();
+  await expect(page.locator(".runway__heading")).toHaveText(
+    "私の個人制作アプリ",
+  );
+  await expect(page.locator(".runway__brand-wordmark")).toHaveAttribute(
+    "src",
+    "/logo-horizontal.svg",
+  );
+  await expect(page.locator(".runway__brand-icon")).toBeVisible();
   await expect(page.locator("[data-runway-name]")).toHaveText(/TJA Pocket/);
   await expect(page.locator("[data-runway-description]")).toContainText(
     "リズムゲーム",

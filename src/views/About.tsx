@@ -1,11 +1,8 @@
 import { SITE } from "@/config/site";
-import { ProjectList } from "@/components/ui/ProjectList";
 
 export const metadata = {
   title: "About",
-  description:
-    SITE.ownerName +
-    "のプロフィール、このサイトの内容、記事の編集方針、広告の取り扱い。",
+  description: SITE.ownerName + "のプロフィールと、" + SITE.name + "について。",
 };
 
 export default function AboutPage() {
@@ -20,39 +17,22 @@ export default function AboutPage() {
       <div className="profile">
         <h2 className="section-label">プロフィール</h2>
         <p>
-          {SITE.ownerName}
-          です。日本の大学生で、個人開発をしています。AndroidアプリとChrome拡張機能を作り、実際にGoogle
-          PlayとChromeウェブストアで公開しています。
+          私の名前は{SITE.ownerName}
+          です。趣味はいくつかありますが、最近はAndroidやWindows向けの個人開発をすることが多いです。
+        </p>
+        <p>
+          これまでに、六法アプリの「どこでも六法」、証明写真作成アプリの「証ぴた」、リズムゲームの「TJA
+          Pocket」などを制作してきました。
+        </p>
+        <p>
+          他にも、ジオラマ制作をたまにします。最近はアプリ開発が中心になっていますが、こちらもそのうち再開したいと思っています。
         </p>
       </div>
 
       <div className="prose-content">
         <h2>このサイトについて</h2>
-        <p>
-          {SITE.name}
-          は、制作したアプリの紹介と、使い方の解説、開発中の判断や試行錯誤の記録をまとめたサイトです。アプリの画面を実際の端末で確認し、操作手順はできるだけ具体的に書いています。アプリの更新で画面や仕様が変わった場合は、記事の内容も見直します。
-        </p>
-        <p>
-          記事は、実際に使った機能や確認できた動作をもとに書いています。未確認の推測を事実として書かないこと、バージョンや端末によって結果が変わる場合はその条件を添えることを方針にしています。誤りを見つけた場合は、
-          <a href="/contact">お問い合わせ</a>
-          からご連絡いただければ確認して訂正します。
-        </p>
+        <p>{SITE.name}は、私のブログやアプリの紹介を行うサイトです。</p>
 
-        <h2>掲載しているアプリ</h2>
-        <p>
-          Google
-          Playで公開しているAndroidアプリと、Chromeウェブストアで公開している拡張機能です。ストアの掲載情報は自動で取得し、変更があればこのサイトにも反映しています。
-        </p>
-      </div>
-
-      <section className="about-projects" aria-labelledby="projects-heading">
-        <h2 id="projects-heading" className="section-label">
-          個人開発
-        </h2>
-        <ProjectList />
-      </section>
-
-      <div className="prose-content">
         <h2>運営者情報</h2>
         <p>
           運営者: {SITE.ownerName}

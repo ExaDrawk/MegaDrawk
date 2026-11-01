@@ -2,6 +2,7 @@
   const runway = document.querySelector("[data-runway]");
   const track = runway?.querySelector("[data-runway-track]");
   const progress = runway?.querySelector("[data-runway-progress]");
+  const caption = runway?.querySelector(".runway__caption");
   const captionName = runway?.querySelector("[data-runway-name]");
   const captionDescription = runway?.querySelector("[data-runway-description]");
   const thumbs = Array.from(
@@ -15,6 +16,7 @@
 
   let max = 0;
   let ticking = false;
+  let activeIndex = 0;
 
   const setActive = (index) => {
     thumbs.forEach((thumb, thumbIndex) => {
@@ -31,6 +33,12 @@
       if (captionDescription) {
         captionDescription.textContent = activeThumb.dataset.description ?? "";
       }
+    }
+    if (caption && activeIndex !== index) {
+      activeIndex = index;
+      caption.classList.remove("is-changing");
+      void caption.getBoundingClientRect();
+      caption.classList.add("is-changing");
     }
   };
 
