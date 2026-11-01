@@ -2,7 +2,7 @@ import { SITE } from "@/config/site";
 
 export const metadata = {
   title: "About",
-  description: SITE.ownerName + "のプロフィールと、" + SITE.name + "について。",
+  description: SITE.ownerName + "のプロフィール、運営者情報、広告の取り扱い。",
 };
 
 export default function AboutPage() {
@@ -15,7 +15,6 @@ export default function AboutPage() {
       </header>
 
       <div className="profile">
-        <h2 className="section-label">プロフィール</h2>
         <p>
           私の名前は{SITE.ownerName}
           です。趣味はいくつかありますが、最近はAndroidやWindows向けの個人開発をすることが多いです。
@@ -30,9 +29,6 @@ export default function AboutPage() {
       </div>
 
       <div className="prose-content">
-        <h2>このサイトについて</h2>
-        <p>{SITE.name}は、私のブログやアプリの紹介を行うサイトです。</p>
-
         <h2>運営者情報</h2>
         <p>
           運営者: {SITE.ownerName}

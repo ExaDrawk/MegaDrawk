@@ -74,6 +74,7 @@
   };
 
   const goTo = (index) => {
+    setActive(index);
     if (desktop.matches) {
       const total = Math.max(1, runway.offsetHeight - window.innerHeight);
       const target =

@@ -29,21 +29,16 @@ for (const route of ["/", "/about"])
       await expect(
         page.getByRole("heading", { level: 1, name: "About", exact: true }),
       ).toBeVisible();
-      await expect(
-        page.getByRole("heading", { name: "プロフィール" }),
-      ).toBeVisible();
       await expect(page.getByText(/私の名前はDrawkです/)).toBeVisible();
       await expect(page.getByText(/これまでに、六法アプリ/)).toBeVisible();
       await expect(page.getByText(/他にも、ジオラマ制作/)).toBeVisible();
+      await expect(page.getByText("掲載しているアプリ")).toHaveCount(0);
+      await expect(
+        page.getByRole("heading", { name: "プロフィール" }),
+      ).toHaveCount(0);
       await expect(
         page.getByRole("heading", { name: "このサイトについて" }),
-      ).toBeVisible();
-      await expect(
-        page.getByText(
-          "MEGADRAWKは、私のブログやアプリの紹介を行うサイトです。",
-        ),
-      ).toBeVisible();
-      await expect(page.getByText("掲載しているアプリ")).toHaveCount(0);
+      ).toHaveCount(0);
     }
     expect(await page.locator("main").innerText()).not.toMatch(
       /条文スコープ|テスト公開|病歴|高安動脈炎|Bentall|ベントール|機械弁|身体障害|リンヴォック|プレドニン|闘病/,
