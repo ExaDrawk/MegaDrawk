@@ -3,7 +3,7 @@ title: "TJA Pocketで苦手な小節を練習する｜特訓モードと速度�
 description: "TJA Pocketの特訓モード、再生速度・スクロール速度、オート演奏、ポーズメニューを使った練習方法をまとめました。苦手な小節を切り出して、無理のない速さから仕上げる手順を紹介します。"
 date: "2026-10-28"
 tags: ["TJA Pocket", "使い方"]
-draft: false
+draft: true
 ---
 
 こんにちは、Drawkです。
