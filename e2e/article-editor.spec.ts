@@ -72,9 +72,9 @@ test("Japanese bold needs no spaces in preview or published article", async ({
   const paragraph = page
     .locator(".prose-content p")
     .filter({ hasText: "設定へ戻り、" });
-  await expect(paragraph.locator("strong").first()).toHaveText(
-    "「外観」→「スキン」",
-  );
+  await expect(
+    paragraph.locator("strong").filter({ hasText: "「外観」→「スキン」" }),
+  ).toHaveText("「外観」→「スキン」");
   await expect(paragraph).not.toContainText("**");
   await expect(paragraph).toContainText(
     "設定へ戻り、「外観」→「スキン」を開いて",

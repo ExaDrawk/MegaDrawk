@@ -283,3 +283,9 @@
 - 違反した原則: ユーザーの編集権限の尊重、既存状態の保護、PoLA。
 - 根本原因: コンテンツ量の増加を優先し、公開状態を管理者の判断に委ねず既定で公開した。
 - 再発防止ルール: 新しい記事は常に`draft: true`で追加し、公開は管理者が一覧から明示的に行う。記事の公開状態をエージェントの判断で変更しない。
+
+### 2026-11-01: AndroidアプリをActivity直接起動して譜面読み込みエラー
+- ミスの内容: 実機Pixel 8aで`am start -n com.drawk.tjapocket.debug/com.drawk.tjapocket.native.NativeGameActivity`を使うと、アプリが「譜面を読み込めませんでした」で終了した。`monkey -p ... -c android.intent.category.LAUNCHER 1`では正常に起動した。
+- 違反した原則: PoLA、未確認完了禁止（通常の起動経路を確認しなかった）。
+- 根本原因: アプリの通常起動インテント（MAIN/LAUNCHER）とActivity直接起動で、初期状態・追加データの扱いが異なる。
+- 再発防止ルール: 実機・エミュレーターのアプリ起動はホーム画面と同じLAUNCHERインテント（monkey）で行う。Activity直接起動は、アプリ内部の状態を理解している場合だけ使う。
