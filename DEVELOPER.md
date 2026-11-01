@@ -40,7 +40,9 @@ Cloudflareが本番で追加するWeb Analyticsには、公式のCSP要件に従
 
 Turnstile（お問い合わせフォーム）のオリジン（challenges.cloudflare.comのscript-srcとframe-src）は、ビルド時にPUBLIC_TURNSTILE_SITE_KEYが設定されている場合にのみCSPへ追加されます（scripts/security.mjsの正本とscripts/prepare-static.mjs）。フォームを無効化したビルドではCSPは広がりません。
 
-既存AdSense連携に必要な外部オリジンを限定列挙しています。広告配信は外部サービスの応答・同意設定にも依存し、広告コード未設定の検証を実広告配信成功とは扱いません。広告が動的に追加するスタイルが厳格CSPに抵触する場合は、実際の違反を確認して広告側の構成を調整します。全ページのCSPを安易に緩めないでください。
+AdSenseの広告コードは、`src/config/ads.ts`の`isAdEligiblePath`が許可したページ（トップ・About・ブログ一覧・記事・タグ）にのみ出力します。プライバシーポリシー・利用規約・お問い合わせ・404・管理画面には出力しません（コンテンツのないページへの広告掲載を避けるため）。CSPの広告オリジンは、ビルド時に`PUBLIC_ADSENSE_CLIENT`が設定されている場合だけ追加します。欧州経済領域・英国・スイス向けの同意取得に使うGoogle認定CMP（Funding Choices）の`fundingchoicesmessages.google.com`も許可対象です。旧GPT用の`googletagservices.com`と`partner.googleadservices.com`はCSPの行長を抑えるため除外しています。広告配信は外部サービスの応答・同意設定にも依存し、広告コード未設定の検証を実広告配信成功とは扱いません。承認後に実際のCSP違反（securitypolicyviolation）を確認し、必要なオリジンだけを追加してください。全ページのCSPを安易に緩めないでください。
+
+記事内の手動広告枠は`PUBLIC_ADSENSE_ARTICLE_SLOT`（数字のスロットID）を設定したビルドだけ出力します。サイト承認前に空の広告枠が見えないよう、承認前は未設定のままにします。スロットIDは`src/components/ads/AdSlot.astro`が読み、記事本文の直後に1枠だけ表示します。
 
 ブラウザの保存データは信頼せず、JSON構造・入力上限・日時を読み書き時に検証します。Reactがユーザー入力をテキストとして出力し、草案の生成コードはJSON.stringifyで文字列をエスケープします。読み込み失敗後に元データを空の状態で上書きしません。
 

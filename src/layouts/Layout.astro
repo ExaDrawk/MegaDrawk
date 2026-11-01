@@ -1,6 +1,7 @@
 ---
 import { SITE } from "@/config/site";
 import { SITE_FEATURES } from "@/config/features";
+import { isAdEligiblePath } from "@/config/ads";
 import Header from "@/components/layout/SiteHeader.astro";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SkipNav } from "@/components/ui/SkipNav";
@@ -39,6 +40,8 @@ const canonical = new URL(
 ).href;
 const ogImageUrl = new URL(ogImage, SITE.url).href;
 const adsense = SITE_FEATURES.adsenseClient;
+// 広告コードはコンテンツのあるページだけに読み込む（法務・連絡・404・管理画面を除く）。
+const showAds = Boolean(adsense) && isAdEligiblePath(Astro.url.pathname);
 const beaconToken = SITE_FEATURES.cfWebAnalyticsToken;
 const jsonLd = jsonLdScript([personSchema(), ...structuredData]);
 ---
@@ -52,6 +55,7 @@ const jsonLd = jsonLdScript([personSchema(), ...structuredData]);
     <meta name="description" content={description} />
     <meta name="keywords" content={SITE.keywords.join(", ")} />
     <meta name="author" content={SITE.ownerName} />
+    {adsense && <meta name="google-adsense-account" content={adsense} />}
     <meta name="theme-color" content={SITE.themeColor} />
     <meta
       name="robots"
@@ -159,7 +163,7 @@ const jsonLd = jsonLdScript([personSchema(), ...structuredData]);
         });
       })();
     </script>
-    {adsense && (
+    {showAds && (
       <script
         is:inline
         async

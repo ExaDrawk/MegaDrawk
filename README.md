@@ -13,7 +13,8 @@ npm run dev
 
 開発サーバーは http://127.0.0.1:4321 です。機能は.env.localで有効化します（未設定の機能は出力されません。不正な値はビルドエラーになります）。
 
-- `PUBLIC_ADSENSE_CLIENT`: 広告。`ca-pub-` + 16桁。
+- `PUBLIC_ADSENSE_CLIENT`: 広告。`ca-pub-` + 16桁。トップ・About・ブログ・記事・タグページにのみ広告コードを出力します。
+- `PUBLIC_ADSENSE_ARTICLE_SLOT`: 記事内の手動広告ユニットのスロットID（数字）。未設定なら広告枠を出力しません。
 - `PUBLIC_TURNSTILE_SITE_KEY`: お問い合わせフォーム。Turnstileサイトキー（`0x` + 22文字）。
 - `PUBLIC_CF_WEB_ANALYTICS_TOKEN`: アクセス解析。Cloudflare Web Analyticsのビーコントークン（32桁の16進）。
 
@@ -51,6 +52,12 @@ Cloudflare Pagesではビルドコマンドを npm run build、出力ディレ�
 コメントはアカウント不要・誰でも投稿でき（返信も可能）、Cloudflare D1に保存して全員に公開します。スパム防止としてTurnstileとIPハッシュ化によるレート制限（60秒間隔・10分3件・1日10件・同一記事1日3件）を設けています（生IPは保存しません）。投稿後10分以内なら自分のコメントを編集できます。記事草案のみブラウザのlocalStorageに保存され、サーバーへは送信されません。
 
 設計・セキュリティ・運用上の制約は DEVELOPER.md を参照してください。
+
+## 広告
+
+`PUBLIC_ADSENSE_CLIENT` を設定すると、トップ・About・ブログ一覧・記事・タグページにAdSenseのローダーを出力します。プライバシーポリシー・利用規約・お問い合わせ・404・管理画面には出力しません。`public/ads.txt` にAdSenseの販売者情報を置き、広告用のCSPは `scripts/security.mjs` を正本としています。欧州経済領域・英国・スイス向けの同意は、AdSenseの「プライバシーとメッセージ」で設定したGoogle認定CMPで取得します。
+
+記事内の手動広告枠を使う場合は、AdSenseでディスプレイ広告ユニットを作成し、`PUBLIC_ADSENSE_ARTICLE_SLOT` にスロットIDを設定します。未設定なら広告枠は出力されません（サイト承認前に空の枠を見せないため）。
 
 ## アクセス解析
 

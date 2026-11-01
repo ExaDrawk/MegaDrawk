@@ -4,6 +4,16 @@ if (adsenseClient && !/^ca-pub-\d{16}$/.test(adsenseClient)) {
 }
 
 /**
+ * 記事内に置く手動広告ユニットのスロットID。未設定なら広告枠を出力しない。
+ * サイト承認後にAdSenseでユニットを作成し、Cloudflare Pagesの環境変数へ設定する。
+ */
+const adsenseArticleSlot =
+  import.meta.env.PUBLIC_ADSENSE_ARTICLE_SLOT?.trim() ?? "";
+if (adsenseArticleSlot && !/^\d{8,20}$/.test(adsenseArticleSlot)) {
+  throw new Error("Invalid PUBLIC_ADSENSE_ARTICLE_SLOT");
+}
+
+/**
  * Cloudflare Turnstileのサイトキー。未設定ならお問い合わせフォームを出力しない。
  * 正式キーは 0x + 22文字、テストキーは 1x〜3x + 22文字。
  */
@@ -24,6 +34,7 @@ if (cfWebAnalyticsToken && !/^[0-9a-f]{32}$/i.test(cfWebAnalyticsToken)) {
 
 export const SITE_FEATURES = {
   adsenseClient,
+  adsenseArticleSlot,
   turnstileSiteKey,
   cfWebAnalyticsToken,
 } as const;

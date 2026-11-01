@@ -11,7 +11,7 @@ export default function Privacy() {
         トップに戻る
       </a>
       <h1 className="page-title">プライバシーポリシー</h1>
-      <p className="document-meta">最終更新日: 2026年10月23日</p>
+      <p className="document-meta">最終更新日: 2026年11月1日</p>
       <div className="prose-content">
         <p>
           {SITE.ownerName}は、{SITE.domain}
@@ -76,8 +76,14 @@ export default function Privacy() {
         {SITE_FEATURES.adsenseClient ? (
           <>
             <p>
-              Google
-              AdSenseを利用します。Googleなどの広告配信事業者がCookie等を使用し、アクセス情報に応じた広告を表示する場合があります。
+              本サイトはGoogle
+              AdSenseを利用しており、記事やアプリ紹介など内容のあるページに広告を表示します。プライバシーポリシー・利用規約・お問い合わせ・エラーページには広告を表示しません。
+            </p>
+            <p>
+              Googleなどの第三者配信事業者はCookieを使用し、利用者が本サイトや他のサイトへ過去にアクセスした際の情報に基づいて広告を配信することがあります。Cookieを使用することで、利用者のブラウザを識別できるようになりますが、氏名・住所・メールアドレスなどの個人を特定する情報は含みません。
+            </p>
+            <p>
+              欧州経済領域、英国、スイスからアクセスした場合は、Googleの認定した同意管理ソリューションにより、広告やCookieの利用について同意を取得します。同意内容は、表示されるメッセージからいつでも変更できます。
             </p>
             <p>
               <a
@@ -95,7 +101,7 @@ export default function Privacy() {
               >
                 広告設定
               </a>
-              をご確認ください。Cookieはブラウザの設定でも管理できます。
+              をご確認ください。パーソナライズ広告はGoogleの広告設定で無効にできます。Cookieはブラウザの設定でも管理できます。Cookieを無効にしても、本サイトの記事は引き続きご利用いただけます。
             </p>
           </>
         ) : (

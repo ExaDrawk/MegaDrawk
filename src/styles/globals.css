@@ -103,6 +103,14 @@ h3 {
   color: var(--color-muted);
   margin: 1rem 0 2.5rem;
 }
+.post-author {
+  margin-right: 0.75rem;
+}
+.post-author a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 .site-header {
   background: var(--color-paper);
   position: relative;
@@ -821,6 +829,39 @@ textarea.form-control {
   font-size: 0.8125rem;
   color: var(--color-muted);
   white-space: nowrap;
+}
+/* 記事内の手動広告枠（AdSense承認後にスロットIDを設定したときだけ出力） */
+.ad-slot {
+  margin: 2.5rem 0;
+}
+.ad-slot__unit {
+  display: block;
+  width: 100%;
+  min-height: 280px;
+}
+/* 記事末の執筆者情報 */
+.post-author-box {
+  margin-top: 3rem;
+  border-top: 1px solid var(--color-rule);
+  padding-top: 1.5rem;
+  max-width: 42rem;
+}
+.post-author-box p {
+  margin: 0.5rem 0 0;
+  color: var(--color-text-secondary);
+  font-size: 0.9375rem;
+  line-height: 1.9;
+}
+.post-author-box a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.post-author-box__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  font-size: 0.875rem;
 }
 /* Markdown本文（Astro Shiki出力の二重テーマ切替） */
 .prose-content .astro-code {

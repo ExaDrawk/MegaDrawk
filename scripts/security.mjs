@@ -36,30 +36,49 @@ const adScripts = [
   "https://pagead2.googlesyndication.com",
   "https://adservice.google.com",
   "https://adservice.google.co.jp",
-  "https://www.googletagservices.com",
-  "https://partner.googleadservices.com",
   "https://tpc.googlesyndication.com",
   "https://www.google.com",
   "https://www.google.co.jp",
 ];
+// Googleの認定CMP（Funding Choices）。欧州・英国・スイス向けの同意取得に必要。
+const adConsent = ["https://fundingchoicesmessages.google.com"];
 const adFrames = [
   "https://googleads.g.doubleclick.net",
   "https://tpc.googlesyndication.com",
   "https://www.google.com",
   "https://www.google.co.jp",
+  ...adConsent,
 ];
 
-function inlineElementHashes(html, element) {
+function isExecutableScript(attributes) {
+  const type = attributes
+    .match(/\btype\s*=\s*["']?([^"'\s>]+)/i)?.[1]
+    ?.toLowerCase();
+  if (!type) return true;
   return [
-    ...html.matchAll(
-      new RegExp(`<${element}\\b([^>]*)>([\\s\\S]*?)<\\/${element}>`, "gi"),
-    ),
-  ]
-    .filter((match) => !/\bsrc\s*=/i.test(match[1]))
-    .map(
-      (match) =>
-        `'sha256-${createHash("sha256").update(match[2]).digest("base64")}'`,
-    );
+    "text/javascript",
+    "application/javascript",
+    "module",
+    "importmap",
+  ].includes(type);
+}
+
+function inlineElementHashes(html, element) {
+  return (
+    [
+      ...html.matchAll(
+        new RegExp(`<${element}\\b([^>]*)>([\\s\\S]*?)<\\/${element}>`, "gi"),
+      ),
+    ]
+      .filter((match) => !/\bsrc\s*=/i.test(match[1]))
+      // JSON-LDなどのデータブロックは実行されないため、CSPのハッシュ対象にしない。
+      // ページごとに内容が変わるデータをハッシュすると、記事の追加でCSPが肥大化する。
+      .filter((match) => element !== "script" || isExecutableScript(match[1]))
+      .map(
+        (match) =>
+          `'sha256-${createHash("sha256").update(match[2]).digest("base64")}'`,
+      )
+  );
 }
 
 export const inlineScriptHashes = (html) => inlineElementHashes(html, "script");
@@ -88,12 +107,19 @@ export function securityHeaders(hashes, styleHashes = [], options = {}) {
   // space in Cloudflare Pages' 2,000-byte header line limit.
   const compact = (origins) =>
     origins.map((origin) => origin.replace(/^https:\/\//, "")).join(" ");
-  const adScriptOrigins = adsense ? " " + compact(adScripts) : "";
+  const adScriptOrigins = adsense
+    ? " " + compact([...adScripts, ...adConsent])
+    : "";
   const adImgOrigins = adsense
     ? " " + compact([...adScripts, "https://googleads.g.doubleclick.net"])
     : "";
   const adConnectOrigins = adsense
-    ? " " + compact([...adScripts, "https://googleads.g.doubleclick.net"])
+    ? " " +
+      compact([
+        ...adScripts,
+        "https://googleads.g.doubleclick.net",
+        ...adConsent,
+      ])
     : "";
   const adFrameOrigins = adsense ? " " + compact(adFrames) : "";
   // style属性はShikiの出力のみで、値ごとのハッシュで許可リスト化する。

@@ -10,6 +10,10 @@ import {
 import { formatJaDate } from "@/lib/date";
 import { articleSchema } from "@/lib/structuredData";
 import { CommentSection } from "@/components/blog/CommentSection";
+import AuthorBox from "@/components/blog/AuthorBox.astro";
+import AdSlot from "@/components/ads/AdSlot.astro";
+import { SITE } from "@/config/site";
+import { SITE_FEATURES } from "@/config/features";
 
 export async function getStaticPaths() {
   const entries = await getAllBlogEntries();
@@ -47,6 +51,9 @@ const tocItems = headings.filter(
     <header class="page-header">
       <h1 class="page-title">{post.title}</h1>
       <p class="document-meta">
+        <span class="post-author">
+          執筆: <a href="/about">{SITE.ownerName}</a>
+        </span>
         <time datetime={post.date}>{formatJaDate(post.date)}</time>
         <span>・約{post.readingMinutes}分</span>
         {post.updatedAt !== post.date && (
@@ -81,6 +88,8 @@ const tocItems = headings.filter(
     <div class="prose-content">
       <Content />
     </div>
+
+    <AdSlot slot={SITE_FEATURES.adsenseArticleSlot} />
 
     {(newer || older) && (
       <nav class="post-navigation" aria-label="記事ナビゲーション">
@@ -128,6 +137,8 @@ const tocItems = headings.filter(
         </ul>
       </section>
     )}
+
+    <AuthorBox />
 
     {!post.draft && (
       <div class="post-comments">

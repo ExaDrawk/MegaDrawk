@@ -2,16 +2,28 @@
 export const SITE = {
   name: "MEGADRAWK",
   ownerName: "Drawk",
-  description: "Drawkのポートフォリオと個人開発。",
+  description:
+    "AndroidアプリとChrome拡張機能の紹介、使い方ガイド、個人開発の記録。",
   heroCopy:
-    "こんにちは。私はDrawkと申します。ここでは、私の制作物などを紹介します",
+    "個人開発のAndroidアプリとChrome拡張機能を紹介しています。使い方の解説と、制作の記録もまとめています。",
   domain: "megadrawk.com",
   url: "https://megadrawk.com",
   email: "contact@megadrawk.com",
   locale: "ja_JP",
   language: "ja",
   themeColor: "#ffffff",
-  keywords: ["MEGADRAWK", "Drawk", "ブログ", "ポートフォリオ", "制作記録"],
+  keywords: [
+    "MEGADRAWK",
+    "Drawk",
+    "個人開発",
+    "Androidアプリ",
+    "Chrome拡張機能",
+    "TJA Pocket",
+    "どこでも六法",
+    "証ぴた",
+    "ブログ",
+    "制作記録",
+  ],
   social: {
     x: "https://x.com/Drawk1234",
     xHandle: "@Drawk1234",

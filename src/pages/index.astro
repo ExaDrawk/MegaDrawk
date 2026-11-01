@@ -6,7 +6,7 @@ import { getPublishedBlogPosts } from "@/config/blog";
 import { itemListSchema, websiteSchema } from "@/lib/structuredData";
 
 // Reactビューはデータ取得を持たないため、最近の記事はpropsで渡す
-const recentPosts = (await getPublishedBlogPosts()).slice(0, 3).map((post) => ({
+const recentPosts = (await getPublishedBlogPosts()).slice(0, 5).map((post) => ({
   id: post.id,
   title: post.title,
   date: post.date,

@@ -38,6 +38,16 @@ describe("static CSP", () => {
     expect(inlineScriptHashes(`<script>${script.trim()}</script>`)).not.toEqual(
       [expected],
     );
+    // JSON-LDは実行されないデータなので、ページごとに内容が変わってもハッシュしない
+    expect(
+      inlineScriptHashes(
+        '<script type="application/ld+json">{"@type":"Article"}</script>',
+      ),
+    ).toEqual([]);
+    // 実行されるmoduleスクリプトは従来どおり対象
+    expect(
+      inlineScriptHashes('<script type="module">export {};</script>'),
+    ).toHaveLength(1);
   });
   it("does not allow inline attributes, eval, framing or external fonts", () => {
     const headers = securityHeaders([]);
@@ -124,11 +134,18 @@ describe("conditional origins", () => {
     const disabled = securityHeaders([])["Content-Security-Policy"];
     expect(disabled).not.toContain("googlesyndication");
     expect(disabled).not.toContain("doubleclick");
+    expect(disabled).not.toContain("fundingchoicesmessages.google.com");
     const enabled = securityHeaders([], [], {
       adsense: true,
     })["Content-Security-Policy"];
     expect(enabled).toContain("googlesyndication");
     expect(enabled).toContain("doubleclick");
+    // 欧州向けの同意取得（Google認定CMP）をブロックしない
+    expect(enabled).toContain("fundingchoicesmessages.google.com");
+    const frameDirective = enabled
+      .split("; ")
+      .find((directive) => directive.startsWith("frame-src"));
+    expect(frameDirective).toContain("fundingchoicesmessages.google.com");
   });
 
   it("keeps the CSP under the Cloudflare Pages 2,000-character line limit", () => {

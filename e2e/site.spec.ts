@@ -75,9 +75,9 @@ test("blog post page renders markdown, toc, reading time and per-post og image",
     "content",
     "ブログをはじめました",
   );
-  // 記事の追加に合わせて前後ナビゲーションは出る（関連記事はタグ共有がまだ無いので出ない）
+  // 記事の追加に合わせて前後ナビゲーションと、タグを共有する関連記事が出る
   await expect(page.locator(".post-navigation")).toHaveCount(1);
-  await expect(page.locator(".post-related")).toHaveCount(0);
+  await expect(page.locator(".post-related")).toHaveCount(1);
 });
 
 test("per-post og image is generated as png", async ({ request }) => {
@@ -109,7 +109,7 @@ test("tag pages list the posts that carry the tag", async ({ page }) => {
   await expect(
     page.getByRole("heading", { level: 1, name: "#サイト運営" }),
   ).toBeVisible();
-  await expect(page.getByText("1件の記事")).toBeVisible();
+  await expect(page.getByText(/\d+件の記事/)).toBeVisible();
   await expect(
     page.getByRole("link", { name: "ブログをはじめました" }),
   ).toBeVisible();

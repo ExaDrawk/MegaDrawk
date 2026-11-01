@@ -73,6 +73,15 @@ export function useTurnstile(
 
   useEffect(() => {
     let disposed = false;
+    // キー未設定のビルドでは外部スクリプトを読み込まない。
+    // 読み込みを試すとCSP違反と不要な通信が発生するため、UI側の失敗表示に切り替える。
+    if (!siteKey) {
+      setReady(false);
+      setFailed(true);
+      return;
+    }
+    setReady(false);
+    setFailed(false);
     loadTurnstile()
       .then((turnstile) => {
         if (disposed || !containerRef.current) {
