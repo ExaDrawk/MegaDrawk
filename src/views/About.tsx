@@ -2,7 +2,7 @@ import { SITE } from "@/config/site";
 
 export const metadata = {
   title: "About",
-  description: SITE.ownerName + "のプロフィール、運営者情報、広告の取り扱い。",
+  description: SITE.ownerName + "の運営者情報、広告の取り扱い。",
 };
 
 export default function AboutPage() {
