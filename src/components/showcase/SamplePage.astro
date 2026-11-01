@@ -1,6 +1,8 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import Showcase from "./Showcase.astro";
+import ShowcaseStage from "./ShowcaseStage.astro";
+import ShowcaseBento from "./ShowcaseBento.astro";
+import ShowcaseRunway from "./ShowcaseRunway.astro";
 import type { ShowcaseLayout } from "@/config/showcase";
 
 interface Props {
@@ -12,7 +14,9 @@ const { layout, title } = Astro.props;
 ---
 
 <Layout title={title} robots={{ index: false, follow: false }}>
-  <Showcase layout={layout} />
+  {layout === "stage" && <ShowcaseStage />}
+  {layout === "bento" && <ShowcaseBento />}
+  {layout === "runway" && <ShowcaseRunway />}
   <script>
     const forceLight = () => {
       document.documentElement.dataset.theme = "light";

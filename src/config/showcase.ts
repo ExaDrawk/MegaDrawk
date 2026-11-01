@@ -2,7 +2,7 @@
  * トップページ検討用のショーケース。
  * Google Play デベロッパーページに掲載されているメイン画像を直接参照する。
  */
-export type ShowcaseLayout = "bleed" | "column" | "triptych";
+export type ShowcaseLayout = "stage" | "bento" | "runway";
 
 export interface ShowcaseItem {
   readonly src: string;

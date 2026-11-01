@@ -1,0 +1,171 @@
+---
+import { SHOWCASE } from "@/config/showcase";
+---
+
+<section class="stage" data-stage aria-label="Google Playのアプリ">
+  <div class="stage__sticky">
+    <div class="stage__frames">
+      {SHOWCASE.map((item) => (
+        <a
+          class="stage__frame"
+          data-stage-frame
+          href={item.href}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <img
+            src={item.src}
+            alt={item.alt}
+            width="1664"
+            height="940"
+            loading="eager"
+            decoding="async"
+            referrerpolicy="no-referrer"
+          />
+        </a>
+      ))}
+    </div>
+    <div class="stage__rail" aria-hidden="true">
+      <span class="stage__progress"></span>
+    </div>
+  </div>
+</section>
+
+<style>
+  .stage {
+    display: grid;
+    gap: 24px;
+    padding-block: 48px 0;
+  }
+  .stage__sticky {
+    position: static;
+  }
+  .stage__frames {
+    display: grid;
+    gap: 24px;
+  }
+  .stage__frame {
+    display: block;
+    overflow: hidden;
+    background: var(--color-paper-2);
+  }
+  .stage__frame img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .stage__rail {
+    display: none;
+  }
+  .stage.is-enhanced {
+    display: block;
+    height: 320svh;
+    padding: 0;
+  }
+  .stage.is-enhanced .stage__sticky {
+    position: sticky;
+    top: 0;
+    display: grid;
+    place-items: center;
+    height: 100svh;
+    overflow: hidden;
+    background: var(--color-paper);
+  }
+  .stage.is-enhanced .stage__frames {
+    display: block;
+  }
+  .stage.is-enhanced .stage__frame {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    opacity: 0;
+    transform: scale(0.965);
+    transition:
+      opacity 0.8s ease,
+      transform 1.2s cubic-bezier(0.2, 0.7, 0.2, 1);
+    pointer-events: none;
+  }
+  .stage.is-enhanced .stage__frame.is-active {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+  }
+  .stage.is-enhanced .stage__frame img {
+    width: min(80vw, 1040px);
+    max-height: 72svh;
+    object-fit: contain;
+  }
+  .stage.is-enhanced .stage__rail {
+    display: block;
+    position: absolute;
+    top: 18%;
+    right: clamp(14px, 4vw, 54px);
+    width: 1px;
+    height: 64%;
+    background: var(--color-rule);
+  }
+  .stage.is-enhanced .stage__progress {
+    display: block;
+    width: 100%;
+    height: 33.333%;
+    background: var(--color-ink);
+    transform: translateY(0);
+    transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  @media (max-width: 760px) {
+    .stage.is-enhanced .stage__frame img {
+      width: 88vw;
+    }
+    .stage.is-enhanced .stage__rail {
+      top: 22%;
+      height: 56%;
+    }
+  }
+</style>
+
+<script>
+  const stage = document.querySelector<HTMLElement>("[data-stage]");
+  const reduceMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
+
+  if (stage && !reduceMotion) {
+    const frames = Array.from(
+      stage.querySelectorAll<HTMLElement>("[data-stage-frame]"),
+    );
+    const progress = stage.querySelector<HTMLElement>(".stage__progress");
+    stage.classList.add("is-enhanced");
+
+    let ticking = false;
+    const update = () => {
+      const rect = stage.getBoundingClientRect();
+      const total = Math.max(1, stage.offsetHeight - window.innerHeight);
+      const progressValue = Math.min(1, Math.max(0, -rect.top / total));
+      const index = Math.min(
+        frames.length - 1,
+        Math.floor(progressValue * frames.length),
+      );
+      frames.forEach((frame, frameIndex) => {
+        const active = frameIndex === index;
+        frame.classList.toggle("is-active", active);
+        frame.setAttribute("aria-hidden", active ? "false" : "true");
+        frame.tabIndex = active ? 0 : -1;
+      });
+      if (progress) {
+        progress.style.transform = `translateY(${index * 100}%)`;
+      }
+      ticking = false;
+    };
+
+    const requestUpdate = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(update);
+    };
+
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+    update();
+  }
+</script>
