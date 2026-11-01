@@ -96,6 +96,11 @@ test("homepage runway is full-width and navigable", async ({ page }) => {
   }));
   expect(info.main).toBeGreaterThanOrEqual(info.viewport - 1);
   expect(info.overflow).toBe(false);
+  await expect(page.locator(".runway__intro")).toBeVisible();
+  await expect(page.locator("[data-runway-name]")).toHaveText(/TJA Pocket/);
+  await expect(page.locator("[data-runway-description]")).toContainText(
+    "リズムゲーム",
+  );
   await expect(page.locator("[data-runway-thumb]")).toHaveCount(3);
   await expect(page.locator("[data-runway-thumb]").first()).toHaveClass(
     /is-active/,
@@ -103,6 +108,10 @@ test("homepage runway is full-width and navigable", async ({ page }) => {
   await page.locator("[data-runway-thumb]").nth(1).click();
   await expect(page.locator("[data-runway-thumb]").nth(1)).toHaveClass(
     /is-active/,
+  );
+  await expect(page.locator("[data-runway-name]")).toHaveText(/証ぴた/);
+  await expect(page.locator("[data-runway-description]")).toContainText(
+    "証明写真",
   );
 });
 

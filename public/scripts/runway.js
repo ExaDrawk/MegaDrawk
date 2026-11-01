@@ -2,6 +2,8 @@
   const runway = document.querySelector("[data-runway]");
   const track = runway?.querySelector("[data-runway-track]");
   const progress = runway?.querySelector("[data-runway-progress]");
+  const captionName = runway?.querySelector("[data-runway-name]");
+  const captionDescription = runway?.querySelector("[data-runway-description]");
   const thumbs = Array.from(
     runway?.querySelectorAll("[data-runway-thumb]") ?? [],
   );
@@ -20,6 +22,16 @@
       thumb.classList.toggle("is-active", active);
       thumb.setAttribute("aria-current", active ? "true" : "false");
     });
+    const activeThumb = thumbs[index];
+    if (activeThumb) {
+      if (captionName) {
+        captionName.textContent = activeThumb.dataset.name ?? "";
+        captionName.setAttribute("href", activeThumb.dataset.href ?? "#");
+      }
+      if (captionDescription) {
+        captionDescription.textContent = activeThumb.dataset.description ?? "";
+      }
+    }
   };
 
   const measure = () => {

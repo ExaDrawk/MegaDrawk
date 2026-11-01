@@ -1,11 +1,13 @@
 ---
 import { SHOWCASE } from "@/config/showcase";
+import { SITE } from "@/config/site";
 
 interface Props {
   readonly wide?: boolean;
 }
 
 const { wide = false } = Astro.props;
+const initial = SHOWCASE[0];
 ---
 
 <section
@@ -14,26 +16,47 @@ const { wide = false } = Astro.props;
   aria-label="Google Playのアプリ"
 >
   <div class="runway__sticky">
-    <div class="runway__viewport">
-      <div class="runway__track" data-runway-track>
-        {SHOWCASE.map((item) => (
-          <a
-            class="runway__slide"
-            href={item.href}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <img
-              src={item.src}
-              alt={item.alt}
-              width="1664"
-              height="940"
-              loading="eager"
-              decoding="async"
-              referrerpolicy="no-referrer"
-            />
-          </a>
-        ))}
+    <div class="runway__monitor">
+      <div class="runway__intro">
+        <p>{SITE.heroCopy}</p>
+      </div>
+
+      <div class="runway__viewport">
+        <div class="runway__track" data-runway-track>
+          {SHOWCASE.map((item) => (
+            <a
+              class="runway__slide"
+              href={item.href}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src={item.src}
+                alt={item.alt}
+                width="1664"
+                height="940"
+                loading="eager"
+                decoding="async"
+                referrerpolicy="no-referrer"
+              />
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <div class="runway__caption" aria-live="polite">
+        <a
+          class="runway__caption-name"
+          data-runway-name
+          href={initial?.href}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {initial?.name}
+        </a>
+        <p class="runway__caption-description" data-runway-description>
+          {initial?.description}
+        </p>
       </div>
     </div>
 
@@ -43,6 +66,9 @@ const { wide = false } = Astro.props;
           <button
             class:list={["runway__thumb", { "is-active": index === 0 }]}
             data-runway-thumb
+            data-name={item.name}
+            data-description={item.description}
+            data-href={item.href}
             type="button"
             aria-label={item.alt}
             aria-current={index === 0 ? "true" : "false"}
@@ -73,6 +99,22 @@ const { wide = false } = Astro.props;
   .runway__sticky {
     position: static;
   }
+  .runway__monitor {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    min-width: 0;
+    padding: 16px;
+    border: 1px solid var(--color-rule);
+    background: var(--color-paper);
+  }
+  .runway__intro p {
+    margin: 0;
+    max-width: 42rem;
+    font-size: 0.8125rem;
+    line-height: 1.9;
+    color: var(--color-muted);
+  }
   .runway__viewport {
     min-width: 0;
   }
@@ -96,6 +138,37 @@ const { wide = false } = Astro.props;
     display: block;
     width: 100%;
     height: auto;
+  }
+  .runway__caption {
+    display: grid;
+    gap: 10px;
+    padding-top: 14px;
+    border-top: 1px solid var(--color-rule);
+  }
+  .runway__caption-name {
+    width: fit-content;
+    font-size: clamp(1.125rem, 2vw, 1.5rem);
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: -0.02em;
+    color: var(--color-ink);
+    text-decoration: none;
+  }
+  .runway__caption-name::after {
+    content: " ↗";
+    font-size: 0.8em;
+    color: var(--color-muted);
+  }
+  .runway__caption-name:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .runway__caption-description {
+    margin: 0;
+    max-width: 42rem;
+    font-size: 0.8125rem;
+    line-height: 1.8;
+    color: var(--color-text-secondary);
   }
   .runway__controls {
     display: flex;
@@ -144,11 +217,15 @@ const { wide = false } = Astro.props;
     display: grid;
     grid-template-columns: minmax(0, 1.9fr) minmax(210px, 0.8fr);
     gap: clamp(24px, 3vw, 48px);
-    align-items: start;
-    height: 100svh;
+    align-items: stretch;
+    height: calc(100svh - var(--header-height));
     padding: clamp(22px, 3vw, 38px) clamp(22px, 3vw, 42px);
     overflow: hidden;
     background: var(--color-paper);
+  }
+  .runway.is-enhanced .runway__monitor {
+    height: 100%;
+    justify-content: space-between;
   }
   .runway.is-enhanced .runway__viewport {
     overflow: hidden;
