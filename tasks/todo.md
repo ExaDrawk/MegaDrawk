@@ -406,7 +406,7 @@
 - [x] minimatchを11.0.3へ更新し監査0件を維持
 - [x] 品質ゲート: 文字コード・整形・lint・型・単体210件・ビルド・監査0件・E2E52件
 - [x] 実AdSense実行時のCSP違反を実ブラウザで検出し、style-src/attrのinline許可（広告有効ビルドのみ）と`*.adtrafficquality.google`のscript/connect/frame許可で解消
-- [ ] 本番反映後にAdSenseのサイト状態・ads.txtステータス・CSP・広告コードの配置を実応答で確認
+- [x] 本番反映後にAdSenseのサイト状態・ads.txtステータス・CSP・広告コードの配置を実応答で確認（サイトは「準備中／審査待ち」、ads.txtは「不明」のまま、CSP違反なし、広告コードはコンテンツページのみ）
 - [ ] 承認後に手動広告ユニットを作成し、PUBLIC_ADSENSE_ARTICLE_SLOTを設定
 
 ## 2026-11-01 記事一覧・検索・一括公開状態（ユーザー指示）
@@ -419,4 +419,4 @@
 - [x] GET /api/admin/articles にfrontmatterメタデータを追加（壊れた記事はinvalidで隔離）
 - [x] PATCH /api/admin/articles でSHA照合付きの一括変更を1コミットで実行（競合409）
 - [x] 単体テスト（メタデータ解析・検索・一括変更・公開確認のキャンセル）
-- [ ] 品質ゲートと本番反映
+- [x] 品質ゲートと本番反映（単体214件・E2E52件・本番で一覧表示と冪等な一括非公開を確認）
