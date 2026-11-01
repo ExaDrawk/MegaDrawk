@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ActionButton } from "@/components/ui/Action";
 import { AdminGate } from "@/components/admin/AdminGate";
 import { MarkdownToolbar } from "@/components/admin/MarkdownToolbar";
 import { MarkdownPreview } from "@/components/admin/MarkdownPreview";
 import {
   readArticleDraft,
+  readArticleMeta,
   setArticleDraft,
   isValidArticleFilename,
 } from "@/domain/blog/markdown";
@@ -29,6 +30,37 @@ async function adminFetch(url: string, options?: RequestInit) {
 interface ArticleMeta {
   name: string;
   sha: string;
+  title: string;
+  description: string;
+  date: string;
+  updatedAt: string | null;
+  tags: string[];
+  draft: boolean;
+  invalid: boolean;
+}
+interface VisibilityUpdate {
+  name: string;
+  sha: string;
+  draft: boolean;
+}
+function articleMetaLine(article: ArticleMeta): string {
+  const tags = article.tags ?? [];
+  return [
+    article.name,
+    article.date || "",
+    article.updatedAt && article.updatedAt !== article.date
+      ? `更新 ${article.updatedAt}`
+      : "",
+    tags.length > 0
+      ? tags
+          .slice(0, 3)
+          .map((tag) => `#${tag}`)
+          .join(" ") + (tags.length > 3 ? ` +${tags.length - 3}` : "")
+      : "",
+    article.invalid ? "設定を確認" : "",
+  ]
+    .filter(Boolean)
+    .join(" ・ ");
 }
 interface PendingImage extends ImageAddition {
   preview: string;
@@ -66,6 +98,14 @@ function AdminArticles() {
   const [switchTarget, setSwitchTarget] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   const [deleteRequested, setDeleteRequested] = useState(false);
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "public" | "private"
+  >("all");
+  const [selected, setSelected] = useState<Set<string>>(() => new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [listMessage, setListMessage] = useState("");
+  const [publishRequest, setPublishRequest] = useState<string[] | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const panesRef = useRef<HTMLDivElement>(null);
@@ -82,6 +122,66 @@ function AdminArticles() {
     draft = readArticleDraft(content);
   } catch {
     /* Incomplete YAML stays editable. */
+  }
+  const visibleArticles = useMemo(() => {
+    const keyword = query.trim().toLowerCase();
+    return articles
+      .filter((article) =>
+        statusFilter === "all"
+          ? true
+          : statusFilter === "public"
+            ? !article.draft
+            : article.draft,
+      )
+      .filter((article) =>
+        keyword.length === 0
+          ? true
+          : [
+              article.title ?? "",
+              article.name,
+              article.description ?? "",
+              ...(article.tags ?? []),
+            ].some((value) => value.toLowerCase().includes(keyword)),
+      )
+      .sort(
+        (left, right) =>
+          (right.date || "").localeCompare(left.date || "") ||
+          left.name.localeCompare(right.name),
+      );
+  }, [articles, query, statusFilter]);
+  const selectableVisible = visibleArticles
+    .filter((article) => !article.invalid)
+    .map((article) => article.name);
+  const allVisibleSelected =
+    selectableVisible.length > 0 &&
+    selectableVisible.every((name) => selected.has(name));
+  useEffect(() => {
+    setSelected((previous) => {
+      const names = new Set(articles.map((article) => article.name));
+      const next = new Set([...previous].filter((name) => names.has(name)));
+      return next.size === previous.size ? previous : next;
+    });
+  }, [articles]);
+  function toggleSelected(name: string) {
+    setPublishRequest(null);
+    setSelected((previous) => {
+      const next = new Set(previous);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
+      return next;
+    });
+  }
+  function toggleSelectAll() {
+    setPublishRequest(null);
+    setSelected((previous) => {
+      const next = new Set(previous);
+      if (allVisibleSelected) {
+        for (const name of selectableVisible) next.delete(name);
+      } else {
+        for (const name of selectableVisible) next.add(name);
+      }
+      return next;
+    });
   }
   function update(next: string) {
     setContent(next);
@@ -241,8 +341,36 @@ function AdminArticles() {
       const newSha = payload.sha;
       setSha(newSha);
       setBaseline(snapshot.content);
+      const savedMeta: ArticleMeta = (() => {
+        try {
+          const meta = readArticleMeta(snapshot.content);
+          return {
+            name: snapshot.name,
+            sha: newSha,
+            title: meta.title,
+            description: meta.description,
+            date: meta.date,
+            updatedAt: meta.updatedAt,
+            tags: [...meta.tags],
+            draft: meta.draft,
+            invalid: false,
+          };
+        } catch {
+          return {
+            name: snapshot.name,
+            sha: newSha,
+            title: snapshot.name,
+            description: "",
+            date: "",
+            updatedAt: null,
+            tags: [],
+            draft: true,
+            invalid: true,
+          };
+        }
+      })();
       setArticles((list) => [
-        { name: snapshot.name, sha: newSha },
+        savedMeta,
         ...list.filter((a) => a.name !== snapshot.name),
       ]);
       setPending((list) =>
@@ -269,6 +397,68 @@ function AdminArticles() {
       );
     } finally {
       setSaving(false);
+    }
+  }
+  async function setVisibility(names: string[], draftValue: boolean) {
+    if (bulkBusy || saving || opening || adding || dirty) return;
+    const targets = articles.filter(
+      (article) => names.includes(article.name) && !article.invalid,
+    );
+    if (!targets.length) return;
+    setBulkBusy(true);
+    setError("");
+    setListMessage("");
+    try {
+      const updates: VisibilityUpdate[] = targets.map(({ name, sha }) => ({
+        name,
+        sha,
+        draft: draftValue,
+      }));
+      const response = await adminFetch("/api/admin/articles", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ updates }),
+      });
+      const payload = (await response.json()) as {
+        articles?: { name: string; sha: string; draft: boolean }[];
+        error?: string;
+      };
+      if (!response.ok) {
+        if (response.status === 409) await load();
+        throw new Error(payload.error ?? "公開状態を変更できませんでした。");
+      }
+      if (payload.articles) {
+        const byName = new Map(
+          payload.articles.map((article) => [article.name, article]),
+        );
+        setArticles((list) =>
+          list.map((article) =>
+            byName.has(article.name)
+              ? { ...article, ...byName.get(article.name)! }
+              : article,
+          ),
+        );
+        const current = payload.articles.find(
+          (article) => article.name === filename,
+        );
+        if (current && !dirty) {
+          const next = setArticleDraft(content, current.draft);
+          update(next);
+          setBaseline(next);
+          setSha(current.sha);
+        }
+      }
+      setSelected(new Set());
+      setPublishRequest(null);
+      setListMessage(
+        `${targets.length}件を${draftValue ? "非公開" : "公開"}にしました。反映には通常1〜2分かかります。`,
+      );
+    } catch (e) {
+      setError(
+        e instanceof Error ? e.message : "公開状態を変更できませんでした。",
+      );
+    } finally {
+      setBulkBusy(false);
     }
   }
   saveRef.current = () => {
@@ -381,6 +571,11 @@ function AdminArticles() {
       if (!response.ok)
         throw new Error("削除できませんでした。変更は保持されています。");
       setArticles((list) => list.filter((a) => a.name !== filename));
+      setSelected((previous) => {
+        const next = new Set(previous);
+        next.delete(filename);
+        return next;
+      });
       setFilename("");
       setSha(null);
       update("");
@@ -439,7 +634,203 @@ function AdminArticles() {
           </ActionButton>
         </div>
       )}
-      {state === "loading" && <p role="status">記事を読み込み中…</p>}
+      <section
+        className="admin-article-panel"
+        aria-labelledby="admin-article-list-heading"
+      >
+        <div className="admin-article-panel__header">
+          <h2 id="admin-article-list-heading" className="section-title">
+            記事一覧
+          </h2>
+          <p className="admin-article-panel__count">
+            {state === "ready"
+              ? `表示 ${visibleArticles.length} / 全 ${articles.length}件`
+              : ""}
+          </p>
+        </div>
+        <div className="admin-article-toolbar">
+          <label className="admin-article-search">
+            検索
+            <input
+              type="search"
+              aria-label="記事を検索"
+              placeholder="タイトル・ファイル名・タグで検索"
+              value={query}
+              disabled={state !== "ready"}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+          </label>
+          <label>
+            公開状態
+            <select
+              aria-label="一覧を絞り込む"
+              value={statusFilter}
+              disabled={state !== "ready"}
+              onChange={(e) =>
+                setStatusFilter(e.target.value as "all" | "public" | "private")
+              }
+            >
+              <option value="all">すべて</option>
+              <option value="public">公開</option>
+              <option value="private">非公開</option>
+            </select>
+          </label>
+          <ActionButton
+            variant="secondary"
+            disabled={state === "loading" || bulkBusy}
+            onClick={() => void load()}
+          >
+            再読み込み
+          </ActionButton>
+        </div>
+        {selected.size > 0 && (
+          <div className="admin-article-bulk">
+            <span>{selected.size}件を選択中</span>
+            <ActionButton
+              variant="secondary"
+              disabled={bulkBusy || saving || opening || adding || dirty}
+              onClick={() => void setVisibility([...selected], true)}
+            >
+              非公開にする
+            </ActionButton>
+            <ActionButton
+              disabled={bulkBusy || saving || opening || adding || dirty}
+              onClick={() => setPublishRequest([...selected])}
+            >
+              公開する
+            </ActionButton>
+            <ActionButton
+              variant="secondary"
+              onClick={() => {
+                setSelected(new Set());
+                setPublishRequest(null);
+              }}
+            >
+              選択解除
+            </ActionButton>
+          </div>
+        )}
+        {dirty && selected.size > 0 && (
+          <p className="admin-article-note">
+            未保存の変更があります。保存または破棄してから一括変更してください。
+          </p>
+        )}
+        {publishRequest && (
+          <div className="status-panel" role="alert">
+            <p>
+              {publishRequest.length}
+              件の記事を公開します。公開後は誰でも閲覧できます。
+            </p>
+            <ActionButton
+              variant="secondary"
+              onClick={() => setPublishRequest(null)}
+            >
+              キャンセル
+            </ActionButton>
+            <ActionButton
+              disabled={bulkBusy}
+              onClick={() => void setVisibility(publishRequest, false)}
+            >
+              公開する
+            </ActionButton>
+          </div>
+        )}
+        {listMessage && (
+          <p role="status" className="status-panel">
+            {listMessage}
+          </p>
+        )}
+        {state === "loading" && <p role="status">記事一覧を読み込み中…</p>}
+        {state === "ready" && visibleArticles.length === 0 && (
+          <p className="empty-state">条件に一致する記事がありません。</p>
+        )}
+        {state === "ready" && visibleArticles.length > 0 && (
+          <>
+            <label className="admin-article-list__selectall">
+              <input
+                type="checkbox"
+                checked={allVisibleSelected}
+                onChange={toggleSelectAll}
+              />
+              表示中をすべて選択
+            </label>
+            <ul className="admin-article-list">
+              {visibleArticles.map((article) => (
+                <li
+                  key={article.name}
+                  className="admin-article-row"
+                  data-status={article.draft ? "private" : "public"}
+                >
+                  <input
+                    type="checkbox"
+                    aria-label={`${article.title || article.name}を選択`}
+                    checked={selected.has(article.name)}
+                    disabled={article.invalid}
+                    onChange={() => toggleSelected(article.name)}
+                  />
+                  <div className="admin-article-row__main">
+                    <button
+                      type="button"
+                      className="admin-article-row__title"
+                      disabled={saving || opening || adding}
+                      onClick={() => requestOpen(article.name)}
+                    >
+                      {article.title || article.name}
+                    </button>
+                    <p className="admin-article-row__meta">
+                      {articleMetaLine(article)}
+                    </p>
+                  </div>
+                  <span
+                    className="admin-article-status"
+                    data-status={article.draft ? "private" : "public"}
+                  >
+                    {article.draft ? "非公開" : "公開"}
+                  </span>
+                  {article.draft ? (
+                    <button
+                      type="button"
+                      className="text-link"
+                      disabled={
+                        bulkBusy ||
+                        saving ||
+                        opening ||
+                        adding ||
+                        dirty ||
+                        article.invalid
+                      }
+                      onClick={() => setPublishRequest([article.name])}
+                    >
+                      公開する
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="text-link"
+                      disabled={
+                        bulkBusy ||
+                        saving ||
+                        opening ||
+                        adding ||
+                        dirty ||
+                        article.invalid
+                      }
+                      onClick={() => void setVisibility([article.name], true)}
+                    >
+                      非公開にする
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+        {state === "error" && (
+          <p role="alert" className="status-panel" data-status="error">
+            記事一覧を読み込めませんでした。
+          </p>
+        )}
+      </section>
       {state === "error" && (
         <ActionButton onClick={() => void load()}>一覧を再取得</ActionButton>
       )}

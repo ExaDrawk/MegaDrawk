@@ -29,6 +29,35 @@ export function readArticleDraft(markdown: string): boolean {
   return frontmatter(markdown).draft;
 }
 
+export interface ArticleMetadata {
+  readonly title: string;
+  readonly description: string;
+  readonly date: string;
+  readonly updatedAt: string | null;
+  readonly tags: readonly string[];
+  readonly draft: boolean;
+}
+
+/** 管理画面の一覧用にfrontmatterを読み取る。不正な記事は呼び出し側で隔離する。 */
+export function readArticleMeta(markdown: string): ArticleMetadata {
+  const { document, draft } = frontmatter(markdown);
+  const data = document.toJS() as Record<string, unknown> | null;
+  if (!data || typeof data !== "object")
+    throw new Error("記事の設定を読み取れません。");
+  const title = typeof data.title === "string" ? data.title.trim() : "";
+  const description =
+    typeof data.description === "string" ? data.description.trim() : "";
+  const date = typeof data.date === "string" ? data.date : "";
+  const updatedAt = typeof data.updatedAt === "string" ? data.updatedAt : null;
+  const tags = Array.isArray(data.tags)
+    ? data.tags.filter((tag): tag is string => typeof tag === "string")
+    : [];
+  if (!title) throw new Error("記事のタイトルがありません。");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date))
+    throw new Error("記事の日付が正しくありません。");
+  return { title, description, date, updatedAt, tags, draft };
+}
+
 /** YAMLとして更新し、本文・他の設定・コメントを保持する。 */
 export function setArticleDraft(markdown: string, draft: boolean): string {
   const { document, yaml, start } = frontmatter(markdown);

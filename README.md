@@ -46,6 +46,7 @@ Cloudflare Pagesではビルドコマンドを npm run build、出力ディレ�
 - サイト情報・ナビゲーション: src/config/site.ts
 - 記事: src/content/blog/*.md（frontmatterにtitle・description・date・tags・draft、本文はMarkdown）。ファイル名がそのままURL（/blog/{id}）になり、RSS・サイトマップ・記事ごとのSNSカード画像に自動反映されます。コードブロックはビルド時にShikiでハイライトされます。
 - 草案: /admin/posts/new で生成したMarkdownをsrc/content/blog/へ保存し、再ビルドします。画面からの公開・サーバーへの書き込み機能はありません。draft: trueの記事は開発サーバーでのみ表示されます。
+- 記事管理: /admin/articles で全記事を一覧表示し、タイトル・ファイル名・タグで検索、公開状態で絞り込み、複数記事の公開状態を一括変更できます。公開操作は確認パネルを経由します。
 - 外観: tokens.css と src/styles/globals.css。フォントはnpmパッケージから自己配信します。ダークテーマは [data-theme="dark"] でtokens.cssに定義しています。
 - OG画像・アイコン: public/images/og/default.png と public/apple-touch-icon.png。ブランド変更時は `npm run assets:generate` で再生成し、コミットします。記事ごとのカードはビルド時に自動生成されます。
 

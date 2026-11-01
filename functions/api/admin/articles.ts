@@ -5,6 +5,7 @@ import {
   getArticle,
   listArticles,
   saveArticle,
+  setArticlesDraft,
   type SaveArticleInput,
 } from "../../../src/infra/articles/github";
 import {
@@ -55,6 +56,36 @@ export const onRequestPut: PagesFunction<ArticlesEnv> = async (context) => {
     );
   }
   return saveArticle(context.env.GITHUB_TOKEN, body);
+};
+
+export const onRequestPatch: PagesFunction<ArticlesEnv> = async (context) => {
+  const denied = await checkAdminAccess(context.env, context.request);
+  if (denied) return denied;
+  const origin = context.request.headers.get("Origin");
+  if (origin && origin !== new URL(context.request.url).origin)
+    return new Response(null, { status: 403 });
+  if (Number(context.request.headers.get("Content-Length")) > 128 * 1024)
+    return new Response(null, { status: 413 });
+  let body: unknown;
+  try {
+    const text = await context.request.text();
+    if (new TextEncoder().encode(text).length > 128 * 1024)
+      return new Response(null, { status: 413 });
+    body = JSON.parse(text);
+  } catch {
+    return new Response(
+      JSON.stringify({ error: "送信内容を読み取れませんでした。" }),
+      {
+        status: 400,
+        headers: { "Content-Type": "application/json; charset=utf-8" },
+      },
+    );
+  }
+  const updates =
+    body && typeof body === "object"
+      ? (body as { updates?: unknown }).updates
+      : undefined;
+  return setArticlesDraft(context.env.GITHUB_TOKEN, updates);
 };
 
 export const onRequestDelete: PagesFunction<ArticlesEnv> = async (context) => {

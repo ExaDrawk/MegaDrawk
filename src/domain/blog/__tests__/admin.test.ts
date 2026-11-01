@@ -3,6 +3,7 @@ import {
   buildBlogPostDraft,
   getInitialBlogPostDraftInput,
 } from "@/domain/blog/admin";
+import { readArticleMeta } from "@/domain/blog/markdown";
 import { createSlug } from "@/domain/blog/post";
 
 describe("buildBlogPostDraft", () => {
@@ -75,6 +76,41 @@ describe("getInitialBlogPostDraftInput", () => {
       updatedAt: "",
       draft: false,
     });
+  });
+});
+
+describe("readArticleMeta", () => {
+  it("reads the fields used by the admin article list", () => {
+    const meta = readArticleMeta(
+      '---\ntitle: "Demo"\ndescription: "Summary"\ndate: "2026-11-01"\nupdatedAt: "2026-11-02"\ntags: ["TJA Pocket", "使い方"]\ndraft: true\n---\n\nBody',
+    );
+    expect(meta).toEqual({
+      title: "Demo",
+      description: "Summary",
+      date: "2026-11-01",
+      updatedAt: "2026-11-02",
+      tags: ["TJA Pocket", "使い方"],
+      draft: true,
+    });
+  });
+
+  it("defaults draft to false and optional fields to empty values", () => {
+    const meta = readArticleMeta(
+      '---\ntitle: "Demo"\ndate: "2026-11-01"\n---\n\nBody',
+    );
+    expect(meta.draft).toBe(false);
+    expect(meta.updatedAt).toBeNull();
+    expect(meta.description).toBe("");
+    expect(meta.tags).toEqual([]);
+  });
+
+  it("rejects articles without a title or with an invalid date", () => {
+    expect(() =>
+      readArticleMeta('---\ndate: "2026-11-01"\n---\n\nBody'),
+    ).toThrow("記事のタイトルがありません。");
+    expect(() =>
+      readArticleMeta('---\ntitle: "Demo"\ndate: "2026/11/01"\n---\n\nBody'),
+    ).toThrow("記事の日付が正しくありません。");
   });
 });
 

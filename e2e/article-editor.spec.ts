@@ -30,7 +30,23 @@ async function setup(page: Page) {
       return r.fulfill({ json: { images: [] } });
     if (url.searchParams.has("file"))
       return r.fulfill({ json: { name: "demo.md", sha: "old", content } });
-    return r.fulfill({ json: { articles: [{ name: "demo.md", sha: "old" }] } });
+    return r.fulfill({
+      json: {
+        articles: [
+          {
+            name: "demo.md",
+            sha: "old",
+            title: "編集テスト",
+            description: "テスト",
+            date: "2026-10-26",
+            updatedAt: null,
+            tags: [],
+            draft: true,
+            invalid: false,
+          },
+        ],
+      },
+    });
   });
   await page.goto("/admin/articles");
   await page
