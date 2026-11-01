@@ -1,0 +1,23 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Showcase from "./Showcase.astro";
+import type { ShowcaseLayout } from "@/config/showcase";
+
+interface Props {
+  readonly layout: ShowcaseLayout;
+  readonly title: string;
+}
+
+const { layout, title } = Astro.props;
+---
+
+<Layout title={title} robots={{ index: false, follow: false }}>
+  <Showcase layout={layout} />
+  <script>
+    const forceLight = () => {
+      document.documentElement.dataset.theme = "light";
+    };
+    forceLight();
+    document.addEventListener("DOMContentLoaded", forceLight);
+  </script>
+</Layout>

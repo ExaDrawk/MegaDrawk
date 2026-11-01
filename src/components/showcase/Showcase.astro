@@ -1,0 +1,76 @@
+---
+import { SHOWCASE, type ShowcaseLayout } from "@/config/showcase";
+
+interface Props {
+  readonly layout: ShowcaseLayout;
+}
+
+const { layout } = Astro.props;
+---
+
+<section
+  class:list={["showcase", `showcase--${layout}`]}
+  aria-label="Google Playのアプリ"
+>
+  {SHOWCASE.map((item) => (
+    <a
+      class="showcase__item"
+      href={item.href}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <img
+        src={item.src}
+        alt={item.alt}
+        width="1664"
+        height="940"
+        loading="eager"
+        decoding="async"
+        referrerpolicy="no-referrer"
+      />
+    </a>
+  ))}
+</section>
+
+<style>
+  .showcase {
+    margin: 0;
+  }
+  .showcase__item {
+    display: block;
+    min-width: 0;
+    background: var(--color-paper-2);
+  }
+  .showcase__item img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .showcase--bleed {
+    display: grid;
+    gap: 0;
+    margin-inline: calc(-1 * var(--space-page-x));
+  }
+  .showcase--column {
+    display: grid;
+    gap: 28px;
+    max-width: 880px;
+    margin: 0 auto;
+    padding-block: 48px 0;
+  }
+  .showcase--triptych {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    padding-block: 40px 0;
+  }
+  @media (max-width: 760px) {
+    .showcase--column {
+      gap: 16px;
+      padding-block: 24px 0;
+    }
+    .showcase--triptych {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>
