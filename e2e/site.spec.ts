@@ -3,14 +3,31 @@ for (const route of ["/", "/about"])
   test("published catalog on " + route, async ({ page }) => {
     await page.goto(route);
     await expect(page).toHaveTitle(/MEGADRAWK/);
-    for (const name of [
-      "どこでも六法",
-      "証ぴた 証明写真作成・印刷",
-      "TJA Pocket",
-      "Multi-Subtitles for YouTube",
-    ])
-      await expect(page.getByText(name).first()).toBeVisible();
-    for (const id of ["roppo", "syopita", "tjapocket"])
+    if (route === "/") {
+      const slides = page.locator(".runway__slide img");
+      await expect(slides).toHaveCount(3);
+      for (const [index, name] of [
+        "TJA Pocket",
+        "証ぴた 証明写真作成・印刷",
+        "どこでも六法",
+      ].entries()) {
+        await expect(slides.nth(index)).toHaveAttribute("alt", name);
+      }
+      await expect(page.locator("h1")).toHaveText("MEGADRAWK");
+    } else {
+      for (const name of [
+        "どこでも六法",
+        "証ぴた 証明写真作成・印刷",
+        "TJA Pocket",
+        "Multi-Subtitles for YouTube",
+      ]) {
+        await expect(page.getByText(name).first()).toBeVisible();
+      }
+      await expect(
+        page.getByRole("heading", { name: "プロフィール" }),
+      ).toBeVisible();
+    }
+    for (const id of ["roppo", "syopita", "tjapocket"]) {
       await expect(
         page
           .locator(
@@ -20,17 +37,10 @@ for (const route of ["/", "/about"])
           )
           .first(),
       ).toBeVisible();
+    }
     expect(await page.locator("main").innerText()).not.toMatch(
       /条文スコープ|テスト公開|病歴|高安動脈炎|Bentall|ベントール|機械弁|身体障害|リンヴォック|プレドニン|闘病/,
     );
-    if (route === "/")
-      await expect(
-        page.getByRole("heading", { level: 1, name: "MEGADRAWK" }),
-      ).toBeVisible();
-    else
-      await expect(
-        page.getByRole("heading", { name: "プロフィール" }),
-      ).toBeVisible();
   });
 for (const [route, name] of [
   ["/blog", "Blog"],
@@ -48,7 +58,7 @@ for (const [route, name] of [
 test("app list uses Play Store icons, descriptions and screenshots", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/about");
   await expect(page.locator(".app-list__item")).toHaveCount(4);
   await expect(
     page.locator(
@@ -73,8 +83,27 @@ test("app list uses Play Store icons, descriptions and screenshots", async ({
       name: "Multi-Subtitles for YouTubeをChrome ウェブストアで見る",
     }),
   ).toBeVisible();
-  await page.goto("/about");
-  await expect(page.locator(".app-list__item")).toHaveCount(4);
+});
+
+test("homepage runway is full-width and navigable", async ({ page }) => {
+  await page.goto("/");
+  const info = await page.evaluate(() => ({
+    main:
+      document.querySelector("#main-content")?.getBoundingClientRect().width ??
+      0,
+    viewport: document.documentElement.clientWidth,
+    overflow: document.documentElement.scrollWidth > innerWidth,
+  }));
+  expect(info.main).toBeGreaterThanOrEqual(info.viewport - 1);
+  expect(info.overflow).toBe(false);
+  await expect(page.locator("[data-runway-thumb]")).toHaveCount(3);
+  await expect(page.locator("[data-runway-thumb]").first()).toHaveClass(
+    /is-active/,
+  );
+  await page.locator("[data-runway-thumb]").nth(1).click();
+  await expect(page.locator("[data-runway-thumb]").nth(1)).toHaveClass(
+    /is-active/,
+  );
 });
 
 test("blog list shows view and comment counts", async ({ page }) => {

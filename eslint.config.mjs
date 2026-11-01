@@ -32,6 +32,17 @@ export default defineConfig(
       },
     },
   },
+  {
+    files: ["public/scripts/**/*.js"],
+    languageOptions: {
+      globals: {
+        document: "readonly",
+        window: "readonly",
+        requestAnimationFrame: "readonly",
+        HTMLElement: "readonly",
+      },
+    },
+  },
   ...tseslint.configs.recommended,
   ...astro.configs.recommended,
   {

@@ -11,6 +11,7 @@ import "@/styles/globals.css";
 interface Props {
   title?: string;
   workspace?: boolean;
+  wide?: boolean;
   description?: string;
   robots?: { index: boolean; follow: boolean };
   structuredData?: readonly object[];
@@ -24,6 +25,7 @@ interface Props {
 const {
   title = "",
   workspace = false,
+  wide = false,
   description = SITE.description,
   robots = { index: true, follow: true },
   structuredData = [],
@@ -189,7 +191,13 @@ const jsonLd = jsonLdScript([personSchema(), ...structuredData]);
       <Header />
       <main
         id="main-content"
-        class:list={["page-main", { "page-main--workspace": workspace }]}
+        class:list={[
+          "page-main",
+          {
+            "page-main--workspace": workspace,
+            "page-main--wide": wide,
+          },
+        ]}
       >
         <slot />
       </main>

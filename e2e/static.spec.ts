@@ -15,7 +15,8 @@ test("public pages are static, usable without JS, and have page-specific canonic
   ]) {
     const response = await page.goto("http://127.0.0.1:3000" + route);
     expect(response?.status()).toBe(200);
-    await expect(page.locator("h1")).toBeVisible();
+    await expect(page.locator("h1")).toHaveCount(1);
+    if (route !== "/") await expect(page.locator("h1")).toBeVisible();
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
       "href",
       "https://megadrawk.com" + (route === "/" ? "/" : route),

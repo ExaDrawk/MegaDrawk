@@ -27,13 +27,11 @@ for (const width of [320, 375, 414, 768, 1280])
     await page.goto("/");
     await page.evaluate(() => document.fonts.ready);
     await expect(page.locator(".site-brand .brand-wordmark")).toBeVisible();
-    await expect(
-      page.getByRole("heading", { level: 1, name: "MegaDrawk" }),
-    ).toBeVisible();
-    await expect(page.locator("h1 .brand-wordmark")).toHaveAttribute(
+    await expect(page.locator(".site-brand .brand-wordmark")).toHaveAttribute(
       "src",
       "/logo.svg",
     );
+    await expect(page.locator("h1")).toHaveText("MEGADRAWK");
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth,

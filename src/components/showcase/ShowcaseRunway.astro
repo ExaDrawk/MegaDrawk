@@ -1,46 +1,85 @@
 ---
 import { SHOWCASE } from "@/config/showcase";
+
+interface Props {
+  readonly wide?: boolean;
+}
+
+const { wide = false } = Astro.props;
 ---
 
-<section class="runway" data-runway aria-label="Google Playのアプリ">
+<section
+  class:list={["runway", { "runway--wide": wide }]}
+  data-runway
+  aria-label="Google Playのアプリ"
+>
   <div class="runway__sticky">
-    <div class="runway__track" data-runway-track>
-      {SHOWCASE.map((item) => (
-        <a
-          class="runway__slide"
-          href={item.href}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img
-            src={item.src}
-            alt={item.alt}
-            width="1664"
-            height="940"
-            loading="eager"
-            decoding="async"
-            referrerpolicy="no-referrer"
-          />
-        </a>
-      ))}
+    <div class="runway__viewport">
+      <div class="runway__track" data-runway-track>
+        {SHOWCASE.map((item) => (
+          <a
+            class="runway__slide"
+            href={item.href}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              src={item.src}
+              alt={item.alt}
+              width="1664"
+              height="940"
+              loading="eager"
+              decoding="async"
+              referrerpolicy="no-referrer"
+            />
+          </a>
+        ))}
+      </div>
     </div>
-    <div class="runway__progress" aria-hidden="true">
-      <span data-runway-progress></span>
+
+    <div class="runway__controls">
+      <div class="runway__index" role="group" aria-label="作品を選択">
+        {SHOWCASE.map((item, index) => (
+          <button
+            class:list={["runway__thumb", { "is-active": index === 0 }]}
+            data-runway-thumb
+            type="button"
+            aria-label={item.alt}
+            aria-current={index === 0 ? "true" : "false"}
+          >
+            <img
+              src={item.src}
+              alt=""
+              width="320"
+              height="180"
+              loading="eager"
+              decoding="async"
+              referrerpolicy="no-referrer"
+            />
+          </button>
+        ))}
+      </div>
+      <div class="runway__progress" aria-hidden="true">
+        <span data-runway-progress></span>
+      </div>
     </div>
   </div>
 </section>
 
 <style>
   .runway {
-    padding-block: 32px 0;
+    padding-block: 18px 0;
   }
   .runway__sticky {
     position: static;
   }
+  .runway__viewport {
+    min-width: 0;
+  }
   .runway__track {
     display: flex;
-    gap: 16px;
-    padding-bottom: 12px;
+    gap: 12px;
+    padding-bottom: 10px;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     scrollbar-width: none;
@@ -49,7 +88,7 @@ import { SHOWCASE } from "@/config/showcase";
     display: none;
   }
   .runway__slide {
-    flex: 0 0 86%;
+    flex: 0 0 88%;
     scroll-snap-align: center;
     background: var(--color-paper-2);
   }
@@ -57,6 +96,40 @@ import { SHOWCASE } from "@/config/showcase";
     display: block;
     width: 100%;
     height: auto;
+  }
+  .runway__controls {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px 16px 0;
+  }
+  .runway__index {
+    display: flex;
+    gap: 8px;
+  }
+  .runway__thumb {
+    flex: 0 0 auto;
+    width: calc((100% - 16px) / 3);
+    padding: 0;
+    border: 0;
+    background: none;
+    opacity: 0.46;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+  }
+  .runway__thumb img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .runway__thumb.is-active,
+  .runway__thumb:hover,
+  .runway__thumb:focus-visible {
+    opacity: 1;
+  }
+  .runway__thumb:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 3px;
   }
   .runway__progress {
     display: none;
@@ -68,13 +141,20 @@ import { SHOWCASE } from "@/config/showcase";
   .runway.is-enhanced .runway__sticky {
     position: sticky;
     top: 0;
-    display: flex;
-    align-items: center;
+    display: grid;
+    grid-template-columns: minmax(0, 1.9fr) minmax(210px, 0.8fr);
+    gap: clamp(24px, 3vw, 48px);
+    align-items: start;
     height: 100svh;
+    padding: clamp(22px, 3vw, 38px) clamp(22px, 3vw, 42px);
     overflow: hidden;
     background: var(--color-paper);
   }
+  .runway.is-enhanced .runway__viewport {
+    overflow: hidden;
+  }
   .runway.is-enhanced .runway__track {
+    width: 100%;
     gap: 32px;
     padding: 0;
     overflow: visible;
@@ -82,20 +162,35 @@ import { SHOWCASE } from "@/config/showcase";
     will-change: transform;
   }
   .runway.is-enhanced .runway__slide {
-    flex: 0 0 auto;
-    width: min(58vw, 760px);
+    flex: 0 0 100%;
+    width: 100%;
     scroll-snap-align: none;
+  }
+  .runway.is-enhanced .runway__controls {
+    position: static;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 0;
+  }
+  .runway.is-enhanced .runway__index {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .runway.is-enhanced .runway__thumb {
+    width: 100%;
+    opacity: 0.36;
+  }
+  .runway.is-enhanced .runway__thumb.is-active {
+    opacity: 1;
   }
   .runway.is-enhanced .runway__progress {
     display: block;
-    position: absolute;
-    left: 50%;
-    bottom: clamp(18px, 3vw, 34px);
-    width: min(42vw, 480px);
+    width: 100%;
     height: 1px;
+    margin-top: 4px;
     overflow: hidden;
     background: var(--color-rule);
-    transform: translateX(-50%);
   }
   .runway.is-enhanced .runway__progress span {
     display: block;
@@ -105,80 +200,14 @@ import { SHOWCASE } from "@/config/showcase";
     transform: scaleX(0);
     transform-origin: left;
   }
+  .runway--wide.is-enhanced .runway__sticky {
+    grid-template-columns: minmax(0, 2.15fr) minmax(240px, 0.85fr);
+  }
   @media (max-width: 900px) {
-    .runway {
-      padding-block: 24px 0;
-    }
     .runway__slide {
       flex-basis: 88%;
     }
   }
 </style>
 
-<script>
-  const runway = document.querySelector<HTMLElement>("[data-runway]");
-  const track = runway?.querySelector<HTMLElement>("[data-runway-track]");
-  const progress = runway?.querySelector<HTMLElement>("[data-runway-progress]");
-  const desktop = window.matchMedia(
-    "(min-width: 901px) and (prefers-reduced-motion: no-preference)",
-  );
-
-  if (runway && track) {
-    let max = 0;
-    let ticking = false;
-
-    const measure = () => {
-      max = Math.max(0, track.scrollWidth - runway.clientWidth);
-    };
-
-    const update = () => {
-      if (desktop.matches) {
-        const rect = runway.getBoundingClientRect();
-        const total = Math.max(1, runway.offsetHeight - window.innerHeight);
-        const progressValue = Math.min(1, Math.max(0, -rect.top / total));
-        track.style.transform = `translate3d(${-max * progressValue}px, 0, 0)`;
-        if (progress) {
-          progress.style.transform = `scaleX(${progressValue})`;
-        }
-      } else {
-        const scrollable = track.scrollWidth - track.clientWidth;
-        const progressValue =
-          scrollable > 0 ? track.scrollLeft / scrollable : 0;
-        if (progress) {
-          progress.style.transform = `scaleX(${progressValue})`;
-        }
-      }
-      ticking = false;
-    };
-
-    const requestUpdate = () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(update);
-    };
-
-    const enable = () => {
-      const enhanced = desktop.matches;
-      runway.classList.toggle("is-enhanced", enhanced);
-      if (enhanced) {
-        measure();
-        update();
-      } else {
-        track.style.transform = "";
-      }
-    };
-
-    window.addEventListener("scroll", requestUpdate, { passive: true });
-    window.addEventListener(
-      "resize",
-      () => {
-        measure();
-        requestUpdate();
-      },
-      { passive: true },
-    );
-    track.addEventListener("scroll", requestUpdate, { passive: true });
-    desktop.addEventListener("change", enable);
-    enable();
-  }
-</script>
+<script is:inline src="/scripts/runway.js" defer></script>
