@@ -5,7 +5,13 @@
     "name": "どこでも六法",
     "description": "日本の主要法令を検索し、条文・参照関係・履歴をすばやく確認できる六法アプリ。",
     "href": "https://play.google.com/store/apps/details?id=com.drawk.roppo",
-    "imageSrc": "/images/projects/roppo-5c361f8f6b6c.png"
+    "imageSrc": "/images/projects/roppo-5c361f8f6b6c.png",
+    "iconUrl": "https://play-lh.googleusercontent.com/rTRfTdOm6GjmTEEDQbVr7bhMo7l-PXrwykUeKesqSvsz3qZylKGOw7YSo1qjq2XlIehXasp_BWAuUs00OU_5=s256",
+    "screenshotUrls": [
+      "https://play-lh.googleusercontent.com/nypOIm6-tKBno6EwEq7ANei5laAIWOpe03as1Qx99lc6RwrMVna8o4F7swVfVERHK-iuo3SiJvXkjBuw9JMGWOw=w1052-h592",
+      "https://play-lh.googleusercontent.com/x9uNKbfjtTHCHXJO0qiBJCfCvfAENR-8BSC9EP8j_aBuKVjRuH-_svajng6OpnhG3LrdA6i5SxEugs81CahXNw=w1052-h592",
+      "https://play-lh.googleusercontent.com/LIaM-HkeG54EzRqYWxgH5IZHGZOQLpilN84qLnaTe06FbTWgceQkdIkmBX1NWkHYYb8oyeYyp_bJqIeOji1Y=w1052-h592"
+    ]
   },
   {
     "id": "syopita",
@@ -13,7 +19,13 @@
     "name": "証ぴた 証明写真作成・印刷",
     "description": "証明写真をL判・A4などの印刷シートやPDFに。用紙サイズ・枚数・間隔を指定。JPEG・PNG保存にも対応。",
     "href": "https://play.google.com/store/apps/details?id=com.drawk.syopita",
-    "imageSrc": "/images/projects/syopita-1d0a7c2b994d.png"
+    "imageSrc": "/images/projects/syopita-1d0a7c2b994d.png",
+    "iconUrl": "https://play-lh.googleusercontent.com/FEbC0gf8Ir2elIqKUxe21uH-14NrR959COfixEWa-kfT6puz6AWfE9GauG2ILbwVNOjlE0EhwBbHSyQqcm7pvg=s256",
+    "screenshotUrls": [
+      "https://play-lh.googleusercontent.com/Qb9DeCETcX98yOJQYu5haBToZOw9OeGbtp-l8wZVYKNdWUEqdUu_m-ionqYZ-gsBD-TZtoDD4X91oqqqMVJaCko=w1052-h592",
+      "https://play-lh.googleusercontent.com/7XuHvlXYKjpPFn4lPuPxeKUlXi-QNxoxVMS_Q7m5zarJ5kx6HeYUTwbq_aF3QZcCnhbyT7pIrn18DtPo2FE=w1052-h592",
+      "https://play-lh.googleusercontent.com/GIa257oitjQ3T40fQmyBPpS2kdtUCw0Md-JQItAmp4cKdzsMvuK4teHnbJauVzjKgi0QwuC3MSH3LQ4-5LC6ww=w1052-h592"
+    ]
   },
   {
     "id": "tjapocket",
@@ -21,6 +33,12 @@
     "name": "TJA Pocket",
     "description": "TJAファイルで遊べるリズムゲーム。スキンや音色、操作感を自分好みに。",
     "href": "https://play.google.com/store/apps/details?id=com.drawk.tjapocket",
-    "imageSrc": "/images/projects/tjapocket-8a6722bab9a5.png"
+    "imageSrc": "/images/projects/tjapocket-8a6722bab9a5.png",
+    "iconUrl": "https://play-lh.googleusercontent.com/WTDKyAihg5NxrI4s1C2tqv-VBwXTx7rF9PZDcZoNFs2DZavfTFr3NrP2EAmrYx7U9uY0rL4NRdxCJK4QZ6CHiA=s256",
+    "screenshotUrls": [
+      "https://play-lh.googleusercontent.com/VvvQ0a_sE0gTn8kwH4RE7eeFM80jzh5_Y6rK6EJf_u6cZ3wxiuYje3qirEOlxtJectqs1sZRwnDLm0V-GU2b=w1052-h592",
+      "https://play-lh.googleusercontent.com/baDtDwJw8O_bKE4QVovdpG513dNFsK09USLz_8EHOj0n7RDtaOrY2w0oCVMpTKx_ruz0hj6srZ7Ghzak_8EE=w1052-h592",
+      "https://play-lh.googleusercontent.com/Zb8n6HiijEu4CgOu24jDYHkVNGBjHaW8RjAO2b21zKZenU7XqS8CfMTQjhNCevWTkmci9InzVgj6Jc6IHTr6Bmk=w1052-h592"
+    ]
   }
 ]

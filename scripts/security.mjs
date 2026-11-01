@@ -151,7 +151,7 @@ export function securityHeaders(hashes, styleHashes = [], options = {}) {
     "script-src-attr 'none'",
     styleSrc,
     `style-src-attr ${styleSrcAttr}`,
-    `img-src 'self' data:${adImgOrigins} https://github.com https://avatars.githubusercontent.com`,
+    `img-src 'self' data:${adImgOrigins} https://play-lh.googleusercontent.com https://github.com https://avatars.githubusercontent.com`,
     "font-src 'self'",
     `connect-src 'self'${adConnectOrigins} https://cloudflareinsights.com`,
     `frame-src 'self'${adFrameOrigins}${turnstileOrigins}`,

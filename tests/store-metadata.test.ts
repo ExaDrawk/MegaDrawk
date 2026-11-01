@@ -3,9 +3,23 @@ import {
   parseStorePage,
   fetchStoreListing,
 } from "../scripts/store-metadata.mjs";
+type Screenshot = { index: number; src: string; srcset?: string };
+
 const make = (
   changes: Record<string, unknown> = {},
   canonical = "com.drawk.roppo",
+  screenshots: readonly Screenshot[] = [
+    {
+      index: 0,
+      src: "https://play-lh.googleusercontent.com/shot-a=w526-h296",
+      srcset: "https://play-lh.googleusercontent.com/shot-a=w1052-h592 2x",
+    },
+    {
+      index: 1,
+      src: "https://play-lh.googleusercontent.com/shot-b=w526-h296",
+      srcset: "https://play-lh.googleusercontent.com/shot-b=w1052-h592 2x",
+    },
+  ],
 ) =>
   '<meta property="og:url" content="https://play.google.com/store/apps/details?id=' +
   canonical +
@@ -17,7 +31,19 @@ const make = (
     image: "https://play-lh.googleusercontent.com/icon",
     ...changes,
   }) +
-  "</script>";
+  "</script>" +
+  screenshots
+    .map(
+      (screenshot) =>
+        '<img itemprop="image" data-screenshot-index="' +
+        screenshot.index +
+        '" src="' +
+        screenshot.src +
+        '"' +
+        (screenshot.srcset ? ' srcset="' + screenshot.srcset + '"' : "") +
+        ' alt="スクリーンショット画像">',
+    )
+    .join("");
 describe("Google Play metadata boundary", () => {
   it("retries transient responses while still verifying the package and publisher", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
@@ -49,6 +75,26 @@ describe("Google Play metadata boundary", () => {
       description: "法令を検索 & 閲覧",
       href: "https://play.google.com/store/apps/details?id=com.drawk.roppo",
     });
+  });
+  it("extracts ordered direct screenshots and the store icon URL", () => {
+    const parsed = parseStorePage(make(), "com.drawk.roppo");
+    expect(parsed.iconUrl).toBe(
+      "https://play-lh.googleusercontent.com/icon=s256",
+    );
+    expect(parsed.screenshotUrls).toEqual([
+      "https://play-lh.googleusercontent.com/shot-a=w1052-h592",
+      "https://play-lh.googleusercontent.com/shot-b=w1052-h592",
+    ]);
+  });
+  it("rejects screenshot images from untrusted origins", () => {
+    expect(() =>
+      parseStorePage(
+        make({}, "com.drawk.roppo", [
+          { index: 0, src: "https://evil.invalid/shot=w1052-h592" },
+        ]),
+        "com.drawk.roppo",
+      ),
+    ).toThrow();
   });
   it("strips distribution notes from the description at the sync boundary", () => {
     const html =

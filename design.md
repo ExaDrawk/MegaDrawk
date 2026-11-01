@@ -6,11 +6,11 @@ A small developer's published product index. The primary job is to find an app a
 
 ## Structure
 
-A compact header, a short introduction, official Google Play badges with app names and a text link for the Chrome extension, then a small light footer. Home and About share ProjectList. The empty blog remains available through navigation; it does not become a promotional panel on the home page. Profile and goal copy are preserved on About.
+A compact header, a short introduction, an editorial app index using each Google Play listing's icon, description and screenshot, then a small light footer. Home and About share ProjectList. The app index uses hairline rules and quiet store links, not marketing cards or badges. The Chrome extension uses a text-only row. The empty blog remains available through navigation; it does not become a promotional panel on the home page. Profile and goal copy are preserved on About.
 
 ## Tokens and typography
 
-The source of truth is tokens.css: near-white with a trace of cool blue, dark slate text, restrained blue links and visible light dividers. No yellow, beige or grey-brown paper tone. Text colors target at least 7:1 contrast on the base surface. IBM Plex Sans pairs with Noto Sans JP; system monospace is restricted to generated code. All fonts are served locally. At 320px the official Google Play badge reduces from 180px to 160px, while names and actions remain readable and touch sized.
+The source of truth is tokens.css: near-white with a trace of cool blue, dark slate text, restrained blue links and visible light dividers. No yellow, beige or grey-brown paper tone. Text colors target at least 7:1 contrast on the base surface. IBM Plex Sans pairs with Noto Sans JP; system monospace is restricted to generated code. All fonts are served locally. At 320px the app row stacks and the screenshot sits below the copy, while names and actions remain readable and touch sized.
 
 ## Interaction
 

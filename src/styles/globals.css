@@ -221,43 +221,90 @@ h3 {
   margin: 0;
   color: var(--color-muted);
 }
-.play-badge-list {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 1.25rem 1.75rem;
+.app-list {
   margin-top: 1rem;
 }
-.play-badge-item {
+.app-list__item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 2rem;
+  align-items: start;
+  padding: 2rem 0;
+  border-bottom: 1px solid var(--color-rule);
+}
+.app-list__item:last-child {
+  border-bottom: 0;
+}
+.app-list__item--text {
+  grid-template-columns: minmax(0, 1fr);
+}
+.app-list__content {
+  min-width: 0;
+}
+.app-list__identity {
   display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
+  align-items: center;
+  gap: 1rem;
 }
-.play-badge {
-  display: inline-block;
-  line-height: 0;
-}
-.play-badge img {
+.app-list__icon {
   display: block;
-  width: 180px;
-  height: auto;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  object-fit: cover;
+  background: var(--color-paper-2);
 }
-.play-badge__name {
+.app-list__eyebrow {
   margin: 0;
-  font-size: 0.875rem;
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  color: var(--color-muted);
+}
+.app-list__name {
+  margin: 0.15rem 0 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+.app-list__description {
+  margin: 0.875rem 0 0;
+  max-width: 38rem;
+  font-size: 0.9375rem;
+  line-height: 1.9;
   color: var(--color-text-secondary);
 }
-.play-badge:hover .play-badge__name {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-.store-text-link {
-  flex-basis: 100%;
-  margin-top: 0.25rem;
+.app-list__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 0.5rem;
   font-size: 0.875rem;
   color: var(--color-accent);
+  text-decoration: none;
+}
+.app-list__link:hover {
   text-decoration: underline;
-  text-underline-offset: 3px;
+  text-underline-offset: 4px;
+}
+.app-list__shot {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border: 1px solid var(--color-rule);
+  border-radius: 4px;
+}
+@media (max-width: 640px) {
+  .app-list__item {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    padding: 1.75rem 0;
+  }
+  .app-list__shot {
+    order: 2;
+  }
 }
 .recent-posts {
   margin-top: 4rem;
@@ -387,8 +434,11 @@ h3 {
   }
 }
 @media (max-width: 400px) {
-  .play-badge img {
-    width: 160px;
+  .app-list__identity {
+    gap: 0.75rem;
+  }
+  .app-list__name {
+    font-size: 1.0625rem;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -1390,31 +1440,78 @@ html:has(.image-lightbox[open]) {
 .editor-panes[data-split="70"] {
   grid-template-columns: minmax(0, 70fr) 0.65rem minmax(0, 30fr);
 }
-/* 記事内のGoogle Playバッジ（[app:パッケージID] で埋め込み） */
+/* 記事内のアプリ導線（[app:パッケージID] で埋め込み） */
 .app-card {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.45rem;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 180px;
+  gap: 1rem;
+  align-items: start;
   margin: 2rem 0;
+  padding: 1.25rem 0;
+  border-top: 1px solid var(--color-rule);
+  border-bottom: 1px solid var(--color-rule);
 }
-.app-card__badge {
-  display: inline-block;
-  line-height: 0;
+.app-card--text {
+  grid-template-columns: 48px minmax(0, 1fr);
 }
-.app-card__badge img {
+.app-card__icon {
   display: block;
-  width: 180px;
-  height: auto;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: var(--color-paper-2);
+}
+.app-card__body {
+  min-width: 0;
+}
+.app-card__eyebrow {
+  margin: 0;
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  color: var(--color-muted);
 }
 .app-card__name {
-  margin: 0;
+  margin: 0.15rem 0 0;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.app-card__description {
+  margin: 0.4rem 0 0;
   font-size: 0.875rem;
+  line-height: 1.8;
   color: var(--color-text-secondary);
 }
-@media (max-width: 400px) {
-  .app-card__badge img {
-    width: 160px;
+.app-card__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--color-accent);
+  text-decoration: none;
+}
+.app-card__link:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.app-card__shot {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border: 1px solid var(--color-rule);
+  border-radius: 4px;
+}
+@media (max-width: 640px) {
+  .app-card {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+  .app-card__shot {
+    grid-column: 1 / -1;
+    margin-top: 0.25rem;
   }
 }
 /* 記事の閲覧数・コメント数 */
@@ -1435,4 +1532,8 @@ html:has(.image-lightbox[open]) {
 }
 .post-stats__item svg {
   flex-shrink: 0;
+}
+.post-list-stats {
+  min-height: 1.1rem;
+  color: var(--color-muted);
 }

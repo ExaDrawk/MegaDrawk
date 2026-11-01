@@ -45,20 +45,58 @@ for (const [route, name] of [
     ).toBeVisible();
   });
 
-test("projects use the official Google Play badge", async ({ page }) => {
+test("app list uses Play Store icons, descriptions and screenshots", async ({
+  page,
+}) => {
   await page.goto("/");
-  const playLinks = page.getByRole("link", { name: /Google Play で開く/ });
-  await expect(playLinks).toHaveCount(3);
+  await expect(page.locator(".app-list__item")).toHaveCount(4);
   await expect(
-    page.locator('img[alt="Google Play で手に入れよう"]').first(),
+    page.locator(
+      '.app-list__icon[src^="https://play-lh.googleusercontent.com/"]',
+    ),
+  ).toHaveCount(3);
+  await expect(
+    page.locator(
+      '.app-list__shot[src^="https://play-lh.googleusercontent.com/"]',
+    ),
+  ).toHaveCount(3);
+  await expect(
+    page.getByRole("link", { name: "TJA PocketをGoogle Playで見る" }),
   ).toBeVisible();
   await expect(
-    page.getByRole("link", { name: /Multi-Subtitles for YouTube/ }),
+    page.getByText(
+      "TJAファイルで遊べるリズムゲーム。スキンや音色、操作感を自分好みに。",
+    ),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", {
+      name: "Multi-Subtitles for YouTubeをChrome ウェブストアで見る",
+    }),
   ).toBeVisible();
   await page.goto("/about");
-  await expect(
-    page.getByRole("link", { name: /Google Play で開く/ }),
-  ).toHaveCount(3);
+  await expect(page.locator(".app-list__item")).toHaveCount(4);
+});
+
+test("blog list shows view and comment counts", async ({ page }) => {
+  await page.route("**/api/post-stats**", async (route) => {
+    const url = new URL(route.request().url());
+    const ids = (url.searchParams.get("ids") ?? "").split(",").filter(Boolean);
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        stats: Object.fromEntries(
+          ids.map((id) => [id, { views: 1234, comments: 7 }]),
+        ),
+      }),
+    });
+  });
+  await page.goto("/blog");
+  const card = page.locator("article", {
+    hasText: "TJA Pocketに曲を追加する方法",
+  });
+  await expect(card.getByText(/閲覧 1,234/)).toBeVisible();
+  await expect(card.getByText(/コメント 7/)).toBeVisible();
 });
 
 const POST_ID = "2026-10-25-hello-megadrawk";

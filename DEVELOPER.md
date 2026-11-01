@@ -114,7 +114,9 @@ Google Playの公開ページは非保証のHTMLインターフェースです�
 - 記事ページのPostStats（src/components/blog/PostStats.tsx）が`POST /api/views/[postId]`で閲覧数を加算し、`GET /api/comments/[postId]?count=1`でコメント数を取得します。閲覧はsessionStorageの`post-view:<id>`で同一セッション1回だけ加算します。
 - 閲覧数の正本はD1の`post_views`表（post_id, views）。Pagesにはwrangler.tomlを置かない運用のため、`functions/api/views/[postId].ts`が初回アクセス時に`CREATE TABLE IF NOT EXISTS`で冪等に作成します。
 - コメント数は返信を含む全件です。投稿・編集後はCommentSectionが`comments:changed`を発火し、PostStatsが同じ記事の件数だけ更新します。
-- アプリ導線は公式Google Playバッジ（public/images/google-play-badge-ja.png）を使用し、自作のアプリ紹介カードは表示しません。Chrome拡張機能はテキストリンクのみです。
+- ブログ一覧（`/blog`・タグ）は`GET /api/post-stats?ids=...`で一覧分をまとめて取得し、各カードに閲覧・コメントを表示します。
+- アプリ導線はstore-listings.jsonの`iconUrl`・`screenshotUrls`（Google Play CDNの直接URL）と説明を使った編集的な行で表示し、バッジや自作カードは使いません。CSPの`img-src`には`https://play-lh.googleusercontent.com`を許可しています。Chrome拡張はローカルアイコンのテキスト行です。
+- 記事内の`[app:...]`も同じストア情報を直接参照し、アイコン・説明・スクリーンショットを表示します。
 
 ## 記事編集ワークスペース（2026-10-26）
 

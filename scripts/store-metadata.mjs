@@ -38,6 +38,7 @@ export async function fetchStoreListing(packageId, fetchPage = fetch) {
 export function parseStorePage(html, packageId) {
   const metadata = new Map();
   const applications = [];
+  const screenshotCandidates = [];
   function visit(node) {
     const attrs = Object.fromEntries(
       (node.attrs ?? []).map((a) => [a.name, a.value]),
@@ -49,6 +50,19 @@ export function parseStorePage(html, packageId) {
         node.childNodes.map((n) => n.value ?? "").join(""),
       );
       applications.push(...(Array.isArray(value) ? value : [value]));
+    }
+    if (
+      node.tagName === "img" &&
+      attrs.itemprop === "image" &&
+      attrs["data-screenshot-index"] !== undefined
+    ) {
+      const candidate = attrs.srcset?.split(/\s+/)[0] ?? attrs.src;
+      if (candidate) {
+        screenshotCandidates.push({
+          index: Number(attrs["data-screenshot-index"]),
+          url: candidate,
+        });
+      }
     }
     for (const child of node.childNodes ?? []) visit(child);
   }
@@ -90,10 +104,27 @@ export function parseStorePage(html, packageId) {
     icon.password
   )
     throw new Error("Unexpected icon origin");
+  const screenshotUrls = [...screenshotCandidates]
+    .filter((candidate) => Number.isInteger(candidate.index))
+    .sort((left, right) => left.index - right.index)
+    .map(({ url }) => {
+      const screenshot = new URL(url);
+      if (
+        screenshot.protocol !== "https:" ||
+        screenshot.hostname !== "play-lh.googleusercontent.com" ||
+        screenshot.username ||
+        screenshot.password
+      )
+        throw new Error("Unexpected screenshot origin");
+      return screenshot.href;
+    })
+    .filter((url, index, all) => all.indexOf(url) === index)
+    .slice(0, 3);
   return {
     name,
     description,
     iconUrl: icon.href + "=s256",
+    screenshotUrls,
     href: "https://play.google.com/store/apps/details?id=" + packageId,
   };
 }

@@ -28,4 +28,19 @@ describe("published product catalog", () => {
       expect(p.imageSrc).toMatch(/^\/images\/projects\/[a-z0-9-]+\.png$/);
     }
   });
+  it("uses direct Play Store icons and screenshots for Android apps", () => {
+    const playApps = PROJECTS.filter((p) => p.linkLabel === "Google Play");
+    expect(playApps).toHaveLength(3);
+    for (const p of playApps) {
+      expect(p.iconUrl).toMatch(/^https:\/\/play-lh\.googleusercontent\.com\//);
+      expect(p.screenshotUrl).toMatch(
+        /^https:\/\/play-lh\.googleusercontent\.com\//,
+      );
+    }
+    const extension = PROJECTS.find(
+      (p) => p.linkLabel === "Chrome ウェブストア",
+    );
+    expect(extension?.iconUrl).toBe("/images/projects/multi-subtitles.png");
+    expect(extension?.screenshotUrl).toBeNull();
+  });
 });

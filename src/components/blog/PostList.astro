@@ -1,0 +1,104 @@
+---
+import type { BlogPost } from "@/domain/blog/post";
+import { formatJaDate } from "@/lib/date";
+
+interface Props {
+  readonly posts: readonly BlogPost[];
+  readonly showTags?: boolean;
+}
+
+const { posts, showTags = true } = Astro.props;
+---
+
+<div class="space-y-6">
+  {posts.map((post) => (
+    <article class="surface p-6 rounded-md border border-[var(--color-border-subtle)]">
+      <div
+        class="flex flex-wrap items-center gap-2 text-xs font-mono"
+        data-color="color-text-muted"
+      >
+        <time datetime={post.date}>{formatJaDate(post.date)}</time>
+        <span>・約{post.readingMinutes}分</span>
+        {post.updatedAt !== post.date ? (
+          <span>/ 更新 {formatJaDate(post.updatedAt)}</span>
+        ) : null}
+        {post.draft ? (
+          <span class="font-semibold" data-color="color-primary">
+            （下書き）
+          </span>
+        ) : null}
+      </div>
+      <h2 class="text-xl font-bold tracking-tight mt-2">
+        <a class="hover:underline underline-offset-4" href={`/blog/${post.id}`}>
+          {post.title}
+        </a>
+      </h2>
+      <p class="mt-2 text-sm leading-relaxed" data-color="color-text-secondary">
+        {post.description}
+      </p>
+      {showTags && post.tags.length > 0 ? (
+        <div class="mt-4 flex flex-wrap gap-2" aria-label="タグ">
+          {post.tags.map((tag) => (
+            <a
+              class="px-2 py-0.5 text-xs font-mono rounded border border-[var(--color-border-subtle)] hover:underline"
+              data-color="color-text-muted"
+              href={`/tags/${tag}`}
+            >
+              {"#" + tag}
+            </a>
+          ))}
+        </div>
+      ) : null}
+      <div
+        class="post-list-stats mt-4 text-xs font-mono"
+        data-post-stats-id={post.id}
+        aria-live="polite"
+      ></div>
+    </article>
+  ))}
+</div>
+
+<script>
+  const nodes = Array.from(
+    document.querySelectorAll<HTMLElement>("[data-post-stats-id]"),
+  );
+  const ids = [
+    ...new Set(
+      nodes
+        .map((node) => node.dataset.postStatsId)
+        .filter((id): id is string => Boolean(id)),
+    ),
+  ];
+  if (ids.length > 0) {
+    const format = new Intl.NumberFormat("ja-JP");
+    void fetch(`/api/post-stats?ids=${encodeURIComponent(ids.join(","))}`)
+      .then((response) =>
+        response.ok
+          ? (response.json() as Promise<{
+              stats?: Record<string, { views?: unknown; comments?: unknown }>;
+            }>)
+          : null,
+      )
+      .then((payload) => {
+        if (!payload?.stats) return;
+        for (const node of nodes) {
+          const id = node.dataset.postStatsId;
+          if (!id) continue;
+          const stats = payload.stats[id];
+          if (!stats) continue;
+          const parts: string[] = [];
+          if (typeof stats.views === "number" && Number.isFinite(stats.views)) {
+            parts.push(`閲覧 ${format.format(stats.views)}`);
+          }
+          if (
+            typeof stats.comments === "number" &&
+            Number.isFinite(stats.comments)
+          ) {
+            parts.push(`コメント ${format.format(stats.comments)}`);
+          }
+          if (parts.length > 0) node.textContent = parts.join("・");
+        }
+      })
+      .catch(() => {});
+  }
+</script>

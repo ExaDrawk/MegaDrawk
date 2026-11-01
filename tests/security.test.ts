@@ -61,6 +61,7 @@ describe("static CSP", () => {
     expect(csp).toContain("base-uri 'none'");
     expect(csp).toContain("https://static.cloudflareinsights.com");
     expect(csp).toContain("https://cloudflareinsights.com");
+    expect(csp).toContain("https://play-lh.googleusercontent.com");
   });
   it("permits only the exact generated island style", () => {
     const hashes = inlineStyleHashes(

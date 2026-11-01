@@ -1,7 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import { getBlogTagCounts, getPublishedBlogPosts } from "@/config/blog";
-import { formatJaDate } from "@/lib/date";
+import PostList from "@/components/blog/PostList.astro";
 
 export async function getStaticPaths() {
   const tags = await getBlogTagCounts();
@@ -31,33 +31,7 @@ const posts = (await getPublishedBlogPosts()).filter((post) =>
 
     <div class="max-w-3xl">
       {posts.length > 0 ? (
-        <div class="space-y-6">
-          {posts.map((post) => (
-            <article class="surface p-6 rounded-md border border-[var(--color-border-subtle)]">
-              <div
-                class="flex flex-wrap items-center gap-2 text-xs font-mono"
-                data-color="color-text-muted"
-              >
-                <time datetime={post.date}>{formatJaDate(post.date)}</time>
-                <span>・約{post.readingMinutes}分</span>
-              </div>
-              <h2 class="text-xl font-bold tracking-tight mt-2">
-                <a
-                  class="hover:underline underline-offset-4"
-                  href={`/blog/${post.id}`}
-                >
-                  {post.title}
-                </a>
-              </h2>
-              <p
-                class="mt-2 text-sm leading-relaxed"
-                data-color="color-text-secondary"
-              >
-                {post.description}
-              </p>
-            </article>
-          ))}
-        </div>
+        <PostList posts={posts} showTags={false} />
       ) : (
         <p class="text-sm" data-color="color-text-secondary">
           このタグの記事はまだありません。

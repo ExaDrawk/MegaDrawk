@@ -46,6 +46,8 @@ for (const app of apps) {
       description: metadata.description,
       href: metadata.href,
       imageSrc,
+      iconUrl: metadata.iconUrl,
+      screenshotUrls: metadata.screenshotUrls,
     },
     bytes,
   });
