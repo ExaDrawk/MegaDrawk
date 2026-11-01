@@ -3,7 +3,7 @@ title: "TJA Pocketの設定ガイド｜判定位置・流速・音量を自分�
 description: "TJA Pocketの設定画面を、実際の画面とともに整理しました。判定位置、スクロール速度、再生速度、音量、キー割り当て、120fpsの考え方を、最初に触る順番で解説します。"
 date: "2026-10-27"
 tags: ["TJA Pocket", "使い方"]
-draft: false
+draft: true
 ---
 
 こんにちは、Drawkです。
