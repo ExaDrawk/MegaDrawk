@@ -63,6 +63,11 @@ export function CommentSection({ postId }: CommentSectionProps) {
         throw new Error("invalid comments payload");
       }
       setComments(payload.comments);
+      window.dispatchEvent(
+        new CustomEvent("comments:changed", {
+          detail: { postId, count: payload.comments.length },
+        }),
+      );
     } catch {
       setLoadError(true);
     } finally {
@@ -105,6 +110,11 @@ export function CommentSection({ postId }: CommentSectionProps) {
       const payload = (await response.json()) as { comments?: unknown };
       if (isCommentItemArray(payload.comments)) {
         setComments(payload.comments);
+        window.dispatchEvent(
+          new CustomEvent("comments:changed", {
+            detail: { postId, count: payload.comments.length },
+          }),
+        );
       }
     } catch {
       // 再取得の失敗では投稿自体は成功しているため、エラー表示はしない

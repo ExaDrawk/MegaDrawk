@@ -4,6 +4,7 @@ import {
   deleteComment,
   editComment,
   listComments,
+  countComments,
   checkAdminAccess,
   type CommentsEnv,
 } from "../../../src/infra/comments/server";
@@ -11,11 +12,14 @@ import {
 // 公開コメントAPIのルーター。ロジックはsrc/infra/comments/server.ts（テスト対象）。
 
 export const onRequestGet: PagesFunction<CommentsEnv> = async (context) => {
-  const limit = new URL(context.request.url).searchParams.get("limit");
+  const params = new URL(context.request.url).searchParams;
+  if (params.get("count") === "1") {
+    return countComments(context.env.COMMENTS_DB, context.params.postId);
+  }
   return listComments(
     context.env.COMMENTS_DB,
     context.params.postId,
-    limit,
+    params.get("limit"),
     context.request.headers.get("CF-Connecting-IP"),
     context.env.IP_HASH_SALT,
   );

@@ -1,35 +1,50 @@
 import { PROJECTS } from "@/config/projects";
-import { ProjectIcon } from "./ProjectIcon";
+
+const PLAY_BADGE = "/images/google-play-badge-ja.png";
+
+/**
+ * ストア掲載の導線。Google Playのアプリは公式バッジ、
+ * それ以外はストア名のテキストリンクだけを表示する。
+ */
 export function ProjectList() {
   return (
-    <div className="project-list">
-      {PROJECTS.map((project) => (
-        <article className="project" key={project.href}>
-          <ProjectIcon
-            src={project.imageSrc}
-            alt={project.name}
-            href={project.href}
-          />
-          <div className="project__copy">
-            <p className="project__platform">{project.platform}</p>
-            <h3>
-              <a href={project.href} target="_blank" rel="noopener noreferrer">
-                {project.name}
+    <div className="play-badge-list">
+      {PROJECTS.map((project) => {
+        if (project.href.includes("play.google.com")) {
+          return (
+            <div className="play-badge-item" key={project.href}>
+              <a
+                className="play-badge"
+                href={project.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`${project.name} を Google Play で開く`}
+              >
+                <img
+                  src={PLAY_BADGE}
+                  alt="Google Play で手に入れよう"
+                  width={646}
+                  height={250}
+                  loading="lazy"
+                  decoding="async"
+                />
               </a>
-            </h3>
-            <p>{project.description}</p>
-            <a
-              className="project__store"
-              href={project.href}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {project.linkLabel}
-              <span aria-hidden="true"> ↗</span>
-            </a>
-          </div>
-        </article>
-      ))}
+              <p className="play-badge__name">{project.name}</p>
+            </div>
+          );
+        }
+        return (
+          <a
+            className="store-text-link"
+            key={project.href}
+            href={project.href}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {project.name}（Chrome ウェブストア）
+          </a>
+        );
+      })}
     </div>
   );
 }

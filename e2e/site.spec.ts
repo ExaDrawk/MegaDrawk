@@ -9,16 +9,16 @@ for (const route of ["/", "/about"])
       "TJA Pocket",
       "Multi-Subtitles for YouTube",
     ])
-      await expect(
-        page.getByRole("heading", { name, exact: true }),
-      ).toBeVisible();
+      await expect(page.getByText(name).first()).toBeVisible();
     for (const id of ["roppo", "syopita", "tjapocket"])
       await expect(
-        page.locator(
-          'a.project__store[href="https://play.google.com/store/apps/details?id=com.drawk.' +
-            id +
-            '"]',
-        ),
+        page
+          .locator(
+            'a[href="https://play.google.com/store/apps/details?id=com.drawk.' +
+              id +
+              '"]',
+          )
+          .first(),
       ).toBeVisible();
     expect(await page.locator("main").innerText()).not.toMatch(
       /条文スコープ|テスト公開|病歴|高安動脈炎|Bentall|ベントール|機械弁|身体障害|リンヴォック|プレドニン|闘病/,
@@ -45,15 +45,20 @@ for (const [route, name] of [
     ).toBeVisible();
   });
 
-test("projects display their platform labels", async ({ page }) => {
+test("projects use the official Google Play badge", async ({ page }) => {
   await page.goto("/");
-  await expect(page.locator(".project__platform").first()).toHaveText(
-    "Androidアプリ",
-  );
-  const extension = page
-    .locator(".project", { hasText: "Multi-Subtitles for YouTube" })
-    .locator(".project__platform");
-  await expect(extension).toHaveText("Chrome拡張機能");
+  const playLinks = page.getByRole("link", { name: /Google Play で開く/ });
+  await expect(playLinks).toHaveCount(3);
+  await expect(
+    page.locator('img[alt="Google Play で手に入れよう"]').first(),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: /Multi-Subtitles for YouTube/ }),
+  ).toBeVisible();
+  await page.goto("/about");
+  await expect(
+    page.getByRole("link", { name: /Google Play で開く/ }),
+  ).toHaveCount(3);
 });
 
 const POST_ID = "2026-10-25-hello-megadrawk";

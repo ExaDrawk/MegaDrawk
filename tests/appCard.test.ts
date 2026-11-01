@@ -6,7 +6,6 @@ describe("findAppByPackageId", () => {
     const app = findAppByPackageId("com.drawk.tjapocket");
     expect(app?.name).toBe("TJA Pocket");
     expect(app?.href).toContain("id=com.drawk.tjapocket");
-    expect(app?.iconSrc).toMatch(/^\/images\/projects\/.+\.png$/);
   });
 
   it("returns null for an unknown package id", () => {
@@ -15,21 +14,24 @@ describe("findAppByPackageId", () => {
 });
 
 describe("buildAppCardHtml", () => {
-  it("builds a card with store link, icon and escaped texts", () => {
+  it("builds the official Google Play badge with the app name", () => {
     const html = buildAppCardHtml("com.drawk.tjapocket");
     expect(html).toContain('class="app-card"');
     expect(html).toContain(
       'href="https://play.google.com/store/apps/details?id=com.drawk.tjapocket"',
     );
-    expect(html).toContain('src="/images/projects/');
+    expect(html).toContain('src="/images/google-play-badge-ja.png"');
+    expect(html).toContain('alt="Google Play で手に入れよう"');
+    expect(html).toContain('aria-label="TJA Pocket を Google Play で開く"');
     expect(html).toContain("TJA Pocket");
     expect(html).toContain('rel="noopener noreferrer"');
+    expect(html).not.toContain("app-card__icon");
+    expect(html).not.toContain("app-card__description");
   });
 
   it("escapes html special characters in app data", () => {
-    // store-listingsの値に < > が入ってもカードが壊れない
     const html = buildAppCardHtml("com.drawk.tjapocket");
-    expect(html).not.toMatch(/<(?!(?:\/)?(?:div|a|p|h3|img|span)\b)/);
+    expect(html).not.toMatch(/<(?!(?:\/)?(?:aside|a|p|img)\b)/);
   });
 
   it("returns null for an unknown package id", () => {

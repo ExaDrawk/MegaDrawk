@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { createHash } from "node:crypto";
 import {
   createComment,
+  countComments,
   deleteComment,
   editComment,
   findRejectionReason,
@@ -42,6 +43,7 @@ interface MockDbOptions {
     created_at: string;
   } | null;
   replyCount?: number;
+  postCount?: number;
 }
 
 type MockDb = CommentsEnv["COMMENTS_DB"] & {
@@ -64,8 +66,11 @@ function makeDb(options: MockDbOptions = {}): MockDb {
           if (sql.includes("SELECT id, parent_id, post_id")) {
             return options.parent ?? null;
           }
-          if (sql.includes("COUNT(*)")) {
+          if (sql.includes("COUNT(*)") && sql.includes("WHERE parent_id")) {
             return { count: options.replyCount ?? 0 };
+          }
+          if (sql.includes("COUNT(*)") && sql.includes("WHERE post_id")) {
+            return { count: options.postCount ?? 0 };
           }
           if (sql.includes("SELECT id, post_id, ip_hash, created_at")) {
             return options.comment ?? null;
@@ -198,6 +203,19 @@ describe("listComments", () => {
       (await listComments(makeDb(), "x".repeat(201), null, null, undefined))
         .status,
     ).toBe(400);
+  });
+});
+
+describe("countComments", () => {
+  it("returns the total comment count including replies", async () => {
+    const response = await countComments(makeDb({ postCount: 7 }), "post-1");
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ count: 7 });
+  });
+
+  it("rejects a missing database or invalid post id", async () => {
+    expect((await countComments(undefined, "post-1")).status).toBe(500);
+    expect((await countComments(makeDb(), "")).status).toBe(400);
   });
 });
 

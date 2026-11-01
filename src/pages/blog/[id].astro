@@ -10,7 +10,7 @@ import {
 import { formatJaDate } from "@/lib/date";
 import { articleSchema } from "@/lib/structuredData";
 import { CommentSection } from "@/components/blog/CommentSection";
-import AuthorBox from "@/components/blog/AuthorBox.astro";
+import { PostStats } from "@/components/blog/PostStats";
 import AdSlot from "@/components/ads/AdSlot.astro";
 import { SITE } from "@/config/site";
 import { SITE_FEATURES } from "@/config/features";
@@ -70,6 +70,7 @@ const tocItems = headings.filter(
           ))}
         </p>
       )}
+      {!post.draft && <PostStats postId={post.id} client:load />}
     </header>
 
     {tocItems.length >= 2 && (
@@ -137,8 +138,6 @@ const tocItems = headings.filter(
         </ul>
       </section>
     )}
-
-    <AuthorBox />
 
     {!post.draft && (
       <div class="post-comments">

@@ -232,6 +232,28 @@ export async function listComments(
   });
 }
 
+/** 記事のコメント数（返信を含む）。 */
+export async function countComments(
+  db: D1Database | undefined,
+  rawPostId: unknown,
+): Promise<Response> {
+  if (!db) {
+    return errorResponse("コメント機能は現在利用できません。", 500);
+  }
+  if (
+    typeof rawPostId !== "string" ||
+    rawPostId.length === 0 ||
+    rawPostId.length > 200
+  ) {
+    return errorResponse("不正なリクエストです。", 400);
+  }
+  const row = await db
+    .prepare("SELECT COUNT(*) AS count FROM comments WHERE post_id = ?1")
+    .bind(rawPostId)
+    .first<{ count: number }>();
+  return successResponse({ count: row?.count ?? 0 });
+}
+
 export interface CreateCommentInput {
   readonly rawBody: string;
   readonly postId: unknown;

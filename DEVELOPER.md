@@ -109,6 +109,13 @@ Google Playの公開ページは非保証のHTMLインターフェースです�
 
 法的ページの監査ではCloudflare Web AnalyticsのCookieを使わない集計と配信用通信処理を区別しました。広告記載はLayoutと共通のSITE_FEATURESから実際のスクリプト有効状態に合わせ、localStorageがサーバー共有でない点、削除方法、連絡先・利用目的を記載しています。利用規約の一律免責と引用まで禁じる文言を撤去しました。参考はCloudflareのWeb Analytics公式資料、個人情報保護委員会の通則編・Q&A、消費者庁の消費者契約法解説です。
 
+## 記事の閲覧数・コメント数
+
+- 記事ページのPostStats（src/components/blog/PostStats.tsx）が`POST /api/views/[postId]`で閲覧数を加算し、`GET /api/comments/[postId]?count=1`でコメント数を取得します。閲覧はsessionStorageの`post-view:<id>`で同一セッション1回だけ加算します。
+- 閲覧数の正本はD1の`post_views`表（post_id, views）。Pagesにはwrangler.tomlを置かない運用のため、`functions/api/views/[postId].ts`が初回アクセス時に`CREATE TABLE IF NOT EXISTS`で冪等に作成します。
+- コメント数は返信を含む全件です。投稿・編集後はCommentSectionが`comments:changed`を発火し、PostStatsが同じ記事の件数だけ更新します。
+- アプリ導線は公式Google Playバッジ（public/images/google-play-badge-ja.png）を使用し、自作のアプリ紹介カードは表示しません。Chrome拡張機能はテキストリンクのみです。
+
 ## 記事編集ワークスペース（2026-10-26）
 
 - `/admin/articles` は全幅のMarkdown／プレビュー分割画面。境界をドラッグ、またはフォーカスして左右キーで幅を変更できます。スクロール連動は割合ベースで双方向、狭い画面はタブ切替です。
