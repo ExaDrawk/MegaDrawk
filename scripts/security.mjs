@@ -42,12 +42,15 @@ const adScripts = [
 ];
 // Googleの認定CMP（Funding Choices）。欧州・英国・スイス向けの同意取得に必要。
 const adConsent = ["https://fundingchoicesmessages.google.com"];
+// 無効トラフィック検知（SODAR）。connect/img/frameの複数経路で使われる。
+const adTrafficQuality = ["https://*.adtrafficquality.google"];
 const adFrames = [
   "https://googleads.g.doubleclick.net",
   "https://tpc.googlesyndication.com",
   "https://www.google.com",
   "https://www.google.co.jp",
   ...adConsent,
+  ...adTrafficQuality,
 ];
 
 function isExecutableScript(attributes) {
@@ -108,10 +111,15 @@ export function securityHeaders(hashes, styleHashes = [], options = {}) {
   const compact = (origins) =>
     origins.map((origin) => origin.replace(/^https:\/\//, "")).join(" ");
   const adScriptOrigins = adsense
-    ? " " + compact([...adScripts, ...adConsent])
+    ? " " + compact([...adScripts, ...adConsent, ...adTrafficQuality])
     : "";
   const adImgOrigins = adsense
-    ? " " + compact([...adScripts, "https://googleads.g.doubleclick.net"])
+    ? " " +
+      compact([
+        ...adScripts,
+        "https://googleads.g.doubleclick.net",
+        ...adTrafficQuality,
+      ])
     : "";
   const adConnectOrigins = adsense
     ? " " +
@@ -119,19 +127,29 @@ export function securityHeaders(hashes, styleHashes = [], options = {}) {
         ...adScripts,
         "https://googleads.g.doubleclick.net",
         ...adConsent,
+        ...adTrafficQuality,
       ])
     : "";
   const adFrameOrigins = adsense ? " " + compact(adFrames) : "";
   // style属性はShikiの出力のみで、値ごとのハッシュで許可リスト化する。
   const styleAttrHashes = [...new Set(options.styleAttrHashes ?? [])];
-  const styleSrcAttr = styleAttrHashes.length
-    ? "'unsafe-hashes' " + styleAttrHashes.join(" ")
-    : "'none'";
+  // AdSenseは広告の描画時にstyle属性・style要素を動的に注入するため、
+  // 広告有効ビルドではstyleに限りinlineを許可する（scriptは許可しない）。
+  // ハッシュを併記するとCSP3ではunsafe-inlineが無視されるため、広告有効時は
+  // ハッシュを外してinlineのみにし、ヘッダー長も抑える。
+  const styleSrc = adsense
+    ? "style-src 'self' 'unsafe-inline'"
+    : `style-src 'self' ${[...new Set(styleHashes)].join(" ")}`;
+  const styleSrcAttr = adsense
+    ? "'unsafe-inline'"
+    : styleAttrHashes.length
+      ? "'unsafe-hashes' " + styleAttrHashes.join(" ")
+      : "'none'";
   const csp = [
     "default-src 'self'",
     `script-src 'self' ${[...new Set(hashes)].join(" ")}${adScriptOrigins} https://static.cloudflareinsights.com${turnstileOrigins}`,
     "script-src-attr 'none'",
-    `style-src 'self' ${[...new Set(styleHashes)].join(" ")}`,
+    styleSrc,
     `style-src-attr ${styleSrcAttr}`,
     `img-src 'self' data:${adImgOrigins} https://github.com https://avatars.githubusercontent.com`,
     "font-src 'self'",

@@ -135,6 +135,7 @@ describe("conditional origins", () => {
     expect(disabled).not.toContain("googlesyndication");
     expect(disabled).not.toContain("doubleclick");
     expect(disabled).not.toContain("fundingchoicesmessages.google.com");
+    expect(disabled).not.toContain("unsafe-inline");
     const enabled = securityHeaders([], [], {
       adsense: true,
     })["Content-Security-Policy"];
@@ -142,10 +143,24 @@ describe("conditional origins", () => {
     expect(enabled).toContain("doubleclick");
     // 欧州向けの同意取得（Google認定CMP）をブロックしない
     expect(enabled).toContain("fundingchoicesmessages.google.com");
+    // 無効トラフィック検知（SODAR）の複数オリジンを許可する
+    expect(enabled).toContain("*.adtrafficquality.google");
+    const scriptDirective = enabled
+      .split("; ")
+      .find((directive) => directive.startsWith("script-src "));
+    expect(scriptDirective).toContain("*.adtrafficquality.google");
     const frameDirective = enabled
       .split("; ")
       .find((directive) => directive.startsWith("frame-src"));
     expect(frameDirective).toContain("fundingchoicesmessages.google.com");
+    expect(frameDirective).toContain("*.adtrafficquality.google");
+    const connectDirective = enabled
+      .split("; ")
+      .find((directive) => directive.startsWith("connect-src"));
+    expect(connectDirective).toContain("*.adtrafficquality.google");
+    // AdSenseは広告描画時にstyleを動的に注入するため、広告有効時のみinlineを許可する
+    expect(enabled).toContain("style-src 'self' 'unsafe-inline'");
+    expect(enabled).toContain("style-src-attr 'unsafe-inline'");
   });
 
   it("keeps the CSP under the Cloudflare Pages 2,000-character line limit", () => {

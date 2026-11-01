@@ -63,16 +63,27 @@ for (const width of [320, 375, 414, 768, 1280])
 test("privacy matches actual storage and advertising behaviour", async ({
   page,
 }) => {
+  const homeHtml = await (await page.request.get("/")).text();
+  const adsEnabled = homeHtml.includes("googlesyndication");
   await page.goto("/privacy");
   await expect(page.getByText(/他の利用者には公開しません/)).toBeVisible();
   await expect(
     page.getByText(/CookieやlocalStorageを用いた利用者の追跡を行いません/),
   ).toBeVisible();
-  await expect(
-    page.getByText(
-      "現在、本サイトでは広告配信スクリプトを読み込んでいません。",
-    ),
-  ).toBeVisible();
+  if (adsEnabled) {
+    await expect(
+      page.getByText(/Google\s*AdSenseを利用しており/),
+    ).toBeVisible();
+    await expect(
+      page.getByText(/Googleの認定した同意管理ソリューション/),
+    ).toBeVisible();
+  } else {
+    await expect(
+      page.getByText(
+        "現在、本サイトでは広告配信スクリプトを読み込んでいません。",
+      ),
+    ).toBeVisible();
+  }
   expect(await page.locator('script[src*="googlesyndication"]').count()).toBe(
     0,
   );

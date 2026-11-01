@@ -112,10 +112,15 @@ test("static response rejects write requests, serves 404 and keeps security rule
   request,
 }) => {
   const home = await request.get("/");
-  expect(home.headers()["content-security-policy"]).not.toMatch(
-    /unsafe-inline|unsafe-eval/,
-  );
-  expect(home.headers()["content-security-policy"]).toContain("sha256-");
+  const csp = home.headers()["content-security-policy"] ?? "";
+  // 広告有効ビルドではstyleに限りinlineを許可するため、script側の厳格さを検証する
+  const scriptDirectives = csp
+    .split("; ")
+    .filter((directive) => directive.startsWith("script-src"));
+  for (const directive of scriptDirectives)
+    expect(directive).not.toMatch(/unsafe-inline|unsafe-eval/);
+  expect(csp).toContain("script-src-attr 'none'");
+  expect(csp).toContain("sha256-");
   expect((await request.post("/")).status()).toBe(405);
   const missing = await request.get("/not-a-real-page");
   expect(missing.status()).toBe(404);

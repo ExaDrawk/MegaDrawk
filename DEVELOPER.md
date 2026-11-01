@@ -40,7 +40,9 @@ Cloudflareが本番で追加するWeb Analyticsには、公式のCSP要件に従
 
 Turnstile（お問い合わせフォーム）のオリジン（challenges.cloudflare.comのscript-srcとframe-src）は、ビルド時にPUBLIC_TURNSTILE_SITE_KEYが設定されている場合にのみCSPへ追加されます（scripts/security.mjsの正本とscripts/prepare-static.mjs）。フォームを無効化したビルドではCSPは広がりません。
 
-AdSenseの広告コードは、`src/config/ads.ts`の`isAdEligiblePath`が許可したページ（トップ・About・ブログ一覧・記事・タグ）にのみ出力します。プライバシーポリシー・利用規約・お問い合わせ・404・管理画面には出力しません（コンテンツのないページへの広告掲載を避けるため）。CSPの広告オリジンは、ビルド時に`PUBLIC_ADSENSE_CLIENT`が設定されている場合だけ追加します。欧州経済領域・英国・スイス向けの同意取得に使うGoogle認定CMP（Funding Choices）の`fundingchoicesmessages.google.com`も許可対象です。旧GPT用の`googletagservices.com`と`partner.googleadservices.com`はCSPの行長を抑えるため除外しています。広告配信は外部サービスの応答・同意設定にも依存し、広告コード未設定の検証を実広告配信成功とは扱いません。承認後に実際のCSP違反（securitypolicyviolation）を確認し、必要なオリジンだけを追加してください。全ページのCSPを安易に緩めないでください。
+AdSenseの広告コードは、`src/config/ads.ts`の`isAdEligiblePath`が許可したページ（トップ・About・ブログ一覧・記事・タグ）にのみ出力します。プライバシーポリシー・利用規約・お問い合わせ・404・管理画面には出力しません（コンテンツのないページへの広告掲載を避けるため）。CSPの広告オリジンは、ビルド時に`PUBLIC_ADSENSE_CLIENT`が設定されている場合だけ追加します。欧州経済領域・英国・スイス向けの同意取得に使うGoogle認定CMP（Funding Choices）の`fundingchoicesmessages.google.com`と、無効トラフィック検知（SODAR）の`*.adtrafficquality.google`も許可対象です。旧GPT用の`googletagservices.com`と`partner.googleadservices.com`はCSPの行長を抑えるため除外しています。
+
+AdSenseは広告の描画時にstyle属性・style要素を動的に注入するため、広告有効ビルドに限り`style-src`と`style-src-attr`で`'unsafe-inline'`を許可しています（スクリプトは従来どおりハッシュ許可のみで、`script-src-attr 'none'`も維持）。CSP3ではハッシュ併記時に`'unsafe-inline'`が無視されるため、広告有効時はstyleのハッシュを外しています。広告無効ビルドでは従来の厳格なハッシュ許可のままです。広告配信は外部サービスの応答・同意設定にも依存し、広告コード未設定の検証を実広告配信成功とは扱いません。承認後に実際のCSP違反（securitypolicyviolation）を確認し、必要なオリジンだけを追加してください。全ページのCSPを安易に緩めないでください。
 
 記事内の手動広告枠は`PUBLIC_ADSENSE_ARTICLE_SLOT`（数字のスロットID）を設定したビルドだけ出力します。サイト承認前に空の広告枠が見えないよう、承認前は未設定のままにします。スロットIDは`src/components/ads/AdSlot.astro`が読み、記事本文の直後に1枠だけ表示します。
 
