@@ -3,7 +3,7 @@ title: "AstroとCloudflare Pagesで個人サイトを作った構成"
 description: "公開ページを静的HTMLにし、コメントや記事管理だけをFunctionsとD1で動かす個人サイトの構成をまとめました。AstroのContent Collections、OG画像生成、CSP、Cloudflare Pagesの使いどころを紹介します。"
 date: "2026-11-01"
 tags: ["サイト運営", "個人開発"]
-draft: false
+draft: true
 ---
 
 こんにちは、Drawkです。
