@@ -3,7 +3,7 @@ title: "YouTubeで2言語の字幕を同時に表示する方法｜Multi-Subtitl
 description: "YouTubeの字幕を複数言語で同時に表示するChrome拡張機能「Multi-Subtitles for YouTube」の使い方を紹介します。言語の選び方、字幕の位置調整、見た目の設定、語学学習での使いどころをまとめました。"
 date: "2026-10-31"
 tags: ["Chrome拡張機能", "使い方"]
-draft: false
+draft: true
 ---
 
 こんにちは、Drawkです。
