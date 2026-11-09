@@ -16,15 +16,15 @@
   {
     "id": "syopita",
     "packageId": "com.drawk.syopita",
-    "name": "証ぴた 証明写真作成・印刷",
-    "description": "証明写真をL判・A4などの印刷シートやPDFに。用紙サイズ・枚数・間隔を指定。JPEG・PNG保存にも対応。",
+    "name": "証ぴた - 証明写真・履歴書・パスポート",
+    "description": "スマホで撮ってL判4枚。履歴書・パスポート・マイナンバーに。アプリ無料、印刷代のみ。",
     "href": "https://play.google.com/store/apps/details?id=com.drawk.syopita",
-    "imageSrc": "/images/projects/syopita-1d0a7c2b994d.png",
-    "iconUrl": "https://play-lh.googleusercontent.com/FEbC0gf8Ir2elIqKUxe21uH-14NrR959COfixEWa-kfT6puz6AWfE9GauG2ILbwVNOjlE0EhwBbHSyQqcm7pvg=s256",
+    "imageSrc": "/images/projects/syopita-f667488c9629.png",
+    "iconUrl": "https://play-lh.googleusercontent.com/4NsvCemimWPNx8N-IZfc1-zeUBcmjgt-8FkbH_qR-bdENXVmxHt9BJq8ct0CihnMTskOS9A6k68VnVy8CXqwoEY=s256",
     "screenshotUrls": [
-      "https://play-lh.googleusercontent.com/Qb9DeCETcX98yOJQYu5haBToZOw9OeGbtp-l8wZVYKNdWUEqdUu_m-ionqYZ-gsBD-TZtoDD4X91oqqqMVJaCko=w1052-h592",
-      "https://play-lh.googleusercontent.com/7XuHvlXYKjpPFn4lPuPxeKUlXi-QNxoxVMS_Q7m5zarJ5kx6HeYUTwbq_aF3QZcCnhbyT7pIrn18DtPo2FE=w1052-h592",
-      "https://play-lh.googleusercontent.com/GIa257oitjQ3T40fQmyBPpS2kdtUCw0Md-JQItAmp4cKdzsMvuK4teHnbJauVzjKgi0QwuC3MSH3LQ4-5LC6ww=w1052-h592"
+      "https://play-lh.googleusercontent.com/nL_DjHI191x5QAJ92UPWsze0vp6rG4_4OU8Sk3tk6pQ5x3XeM7xTSN6UKAl9nUu05FiEVp3knrbf6x2r079Ncw=w1052-h592",
+      "https://play-lh.googleusercontent.com/hU8CF2oKgJy0kRA6N8eHdIJoYqA6rX8L0047uY3RF8HYGszASKHsH7fzSyPyqXWDgvNBqeoFZf8DQvVY1S-7=w1052-h592",
+      "https://play-lh.googleusercontent.com/5GlyvE4KMdBWDfQB6FavudMU87lfD5Z94VMGAiB_mDMSmxkRv1hMx8-XQjuAWxC5Paler_M33uNBciT8VFNMwA=w1052-h592"
     ]
   },
   {
