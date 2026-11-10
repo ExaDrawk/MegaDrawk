@@ -7,7 +7,7 @@ export default defineConfig({
   output: "static",
   trailingSlash: "never",
   integrations: [react()],
-  build: { inlineStylesheets: "never" },
+  build: { inlineStylesheets: "never", format: "file" },
   markdown: {
     // ダークテーマ切替に追従させるため二重テーマで生成し、CSS側で切り替える
     shikiConfig: {
